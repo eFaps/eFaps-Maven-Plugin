@@ -18,16 +18,14 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.maven.plugin.goal.efaps;
+package org.efaps.maven.plugin;
 
 import java.util.UUID;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-
 
 /**
  * A new universally unique identifier (UUID) is created and printed out.<br>
@@ -36,33 +34,31 @@ import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
  * e.g.<br>
  * <code>mvn efaps:generateUUID -DUUID.count=3</code>
  *
- * @author tmo
+ * @author The eFaps Team
  * @version $Id$
  */
 @Goal(name = "generateUUID")
-public final class GenerateUUIDMojo extends AbstractMojo  {
+public final class GenerateUUIDMojo
+    extends AbstractMojo
+{
+    /**
+     * Number of UUID's to generate.
+     */
+    @Parameter(expression = "${UUID.count}", defaultValue = "1")
+    private int count;
 
-  /////////////////////////////////////////////////////////////////////////////
-  // constructors / desctructors
-
-  /**
-   * Number of UUID's to generate.
-   */
-  @Parameter(expression = "${UUID.count}", defaultValue = "1")
-  private int count;
-
-  /////////////////////////////////////////////////////////////////////////////
-  // instance methods
-
-  /**
-   * The new universally unique identifier is created and printed out with a
-   * normal call to the mojo log info.
-   * @throws MojoExecutionException on error
-   */
-  public void execute() throws MojoExecutionException {
-    for (int i = 0; i < this.count; i++)  {
-      final UUID uuid = UUID.randomUUID();
-      getLog().info("UUID[" + (i + 1) + "] = " + uuid.toString());
+    /**
+     * The new universally unique identifier is created and printed out with a
+     * normal call to the mojo log info.
+     *
+     * @throws MojoExecutionException on error
+     */
+    public void execute()
+        throws MojoExecutionException
+    {
+        for (int i = 0; i < this.count; i++)  {
+            final UUID uuid = UUID.randomUUID();
+            getLog().info("UUID[" + (i + 1) + "] = " + uuid.toString());
+        }
     }
-  }
 }
