@@ -21,6 +21,7 @@
 package org.efaps.maven.plugin.install;
 
 import org.apache.maven.plugin.MojoExecutionException;
+
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.update.version.Application;
 
@@ -41,15 +42,14 @@ public final class InstallMojo
      * @throws MojoExecutionException if a defined application could not be
      *                                found or the installation scripts could
      *                                not be executed
-     * @todo descriptionâ
      */
     public void execute()
         throws MojoExecutionException
     {
-        this.init();
+        init();
         try {
-            final Application appl = Application.getApplicationFromClassPath(this.getApplications(),
-                                                                             this.getClasspathElements());
+            final Application appl = Application.getApplicationFromClassPath(getApplications(),
+                                                                             getClasspathElements());
             // install application
             appl.install(getUserName(), getPassWord());
         } catch (final Exception e) {
