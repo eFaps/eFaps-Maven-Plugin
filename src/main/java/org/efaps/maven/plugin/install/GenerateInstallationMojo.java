@@ -42,20 +42,22 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-
 /**
  * @author The eFaps Team
  */
 @Goal(name = "generate-installation",
-      requiresDependencyResolutionScope = "compile")
+      requiresDependencyResolutionScope = "compile",
+      defaultPhase = Phase.GENERATE_SOURCES)
 public class GenerateInstallationMojo
     extends AbstractEFapsInstallMojo
 {
@@ -98,6 +100,14 @@ public class GenerateInstallationMojo
     }
 
     /**
+     * The current Maven project.
+    */
+    @Parameter(defaultValue = "${project}",
+               required = true,
+               readonly = true)
+    private MavenProject project;
+
+    /**
      * List of includes used to copy files.
      *
      * @see #getCopyFiles()
@@ -118,7 +128,7 @@ public class GenerateInstallationMojo
      * is the classes directory so that the Maven standard jar goal could pack
      * the eFaps installation files.
      */
-    @Parameter(expression = "${basedir}/target/classes")
+    @Parameter(expression = "${project.build.outputDirectory}")
     private File targetDirectory;
 
     /**
@@ -152,6 +162,10 @@ public class GenerateInstallationMojo
         throws MojoExecutionException, MojoFailureException
     {
         copyFiles(generateInstallFile());
+        final File esjpDir = new File(this.getEFapsDir(), "ESJP");
+        if (esjpDir.exists() && esjpDir.isDirectory())  {
+            this.project.addCompileSourceRoot(new File(this.getEFapsDir(), "ESJP").getAbsolutePath());
+        }
     }
 
     /**

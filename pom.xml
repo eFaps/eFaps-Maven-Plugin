@@ -35,7 +35,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps.maven</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-${jettyVersion}-SNAPSHOT</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -60,7 +60,7 @@
             <properties />
         </developer>
         <developer>
-            <id>jmox, jmo, jan.moxter, jan.moxter(ad)moxter.net</id>
+            <id>jan.moxter</id>
             <name>Jan Moxter</name>
             <email>jan.moxter(ad)efaps.org</email>
             <url>www.efaps.org</url>
@@ -70,13 +70,13 @@
             <properties />
         </developer>
     </developers>
-    <inceptionYear>2009</inceptionYear>
+    <inceptionYear>2002</inceptionYear>
     <organization>
         <name>The eFaps Team</name>
         <url>http://www.efaps.org</url>
     </organization>
 
-    <!-- Environment Settings -->
+    <!-- Issues -->
     <issueManagement>
         <system>eFaps Issues on Google Code</system>
         <url>http://issues.efaps.org</url>
@@ -110,12 +110,16 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <!-- correct encoding -->
     <properties>
+        <!-- Jetty Version, used also to build the plug-in version number -->
+        <jettyVersion>7.0.0.v20091005</jettyVersion>
+        <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- Reporting -->
+    <!-- ************************************************************************
+    * Reporting
+    ************************************************************************* -->
     <reporting>
         <plugins>
             <plugin>
@@ -196,8 +200,9 @@
             </plugin>
 
             <!--
-                Compiler Settings"/Users/tim/Daten/eFaps/maven-2.0.7/bin/mvn":
-                - Java 1.5 is needed!
+                Compiler Settings:
+                - Java 1.6 is needed!
+                - encoding UTF8
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -273,9 +278,11 @@
             <version>1.4</version>
         </dependency>
 
-        <!-- For Java6 xalan and xerces must be defined
-             (otherwise Java uses the new DOM Api which currently does not work
-             together with used and required maven version) -->
+        <!--
+            For Java6 xalan and xerces must be defined
+            (otherwise Java uses the new DOM Api which currently does not work
+            together with used and required maven version)
+        -->
         <dependency>
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
@@ -284,24 +291,27 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.4.0</version>
+            <version>2.9.1</version>
         </dependency>
 
-        <!-- jetty is used for JNDI binding -->
+        <!--
+            used as javax.naming.* implementation
+            (needed to connect to eFaps database)
+        -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jndi</artifactId>
-            <version>7.0.0.v20091005</version>
+            <version>${jettyVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>7.0.0.v20091005</version>
+            <version>${jettyVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>7.0.0.v20091005</version>
+            <version>${jettyVersion}</version>
         </dependency>
         <!-- java transaction manager -->
         <dependency>
@@ -325,7 +335,7 @@
             <artifactId>ow2-connector-1.5-spec</artifactId>
             <version>1.0-M1</version>
         </dependency>
-        <!-- Needed indirectly for the transaction manager -->
+        <!-- needed indirectly for the transaction manager -->
         <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
@@ -335,6 +345,6 @@
             <groupId>javax.resource</groupId>
             <artifactId>connector</artifactId>
             <version>1.0</version>
-    </dependency>
+        </dependency>
     </dependencies>
 </project>
