@@ -150,6 +150,12 @@ public class GenerateInstallationMojo
     private String rootPackage;
 
     /**
+     * Must the ESJP's compiled and included in the generated jar file?
+     */
+    @Parameter(defaultValue = "true")
+    private boolean compile;
+
+    /**
      * Generates the installation XML file and copies all eFaps definition
      * installation files.
      *
@@ -163,7 +169,7 @@ public class GenerateInstallationMojo
     {
         copyFiles(generateInstallFile());
         final File esjpDir = new File(this.getEFapsDir(), "ESJP");
-        if (esjpDir.exists() && esjpDir.isDirectory())  {
+        if (this.compile && esjpDir.exists() && esjpDir.isDirectory())  {
             this.project.addCompileSourceRoot(new File(this.getEFapsDir(), "ESJP").getAbsolutePath());
         }
     }
