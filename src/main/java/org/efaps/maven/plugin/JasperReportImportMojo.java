@@ -25,10 +25,10 @@ import java.net.MalformedURLException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import org.efaps.admin.program.jasperreport.JasperReportImporter;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.efaps.update.schema.program.jasperreport.JasperReportImporter;
+import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
 
 /**
@@ -59,10 +59,12 @@ public class JasperReportImportMojo extends EFapsAbstractMojo
         try {
             reloadCache();
             startTransaction();
-            final JasperReportImporter importer = new JasperReportImporter(this.file.toURL());
+            final JasperReportImporter importer = new JasperReportImporter(this.file.toURI().toURL());
             importer.execute();
             commitTransaction();
         } catch (final EFapsException e) {
+            throw new MojoFailureException("JasperReport import failed " + e.toString());
+        } catch (final InstallationException e) {
             throw new MojoFailureException("JasperReport import failed " + e.toString());
         } catch (final MalformedURLException e) {
             throw new MojoFailureException("File not found " + e.toString());

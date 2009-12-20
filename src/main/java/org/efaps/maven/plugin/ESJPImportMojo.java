@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.update.schema.program.esjp.ESJPImporter;
+import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
 
 /**
@@ -58,11 +59,13 @@ public class ESJPImportMojo
         try {
             reloadCache();
             startTransaction();
-            final ESJPImporter esjpImport = new ESJPImporter(this.file.toURL());
+            final ESJPImporter esjpImport = new ESJPImporter(this.file.toURI().toURL());
             esjpImport.execute();
             getLog().info("ESJP '" + this.file.toString() + "' inserted.");
             commitTransaction();
         } catch (final EFapsException e) {
+            throw new MojoFailureException("ESJP import failed " + e.toString());
+        } catch (final InstallationException e) {
             throw new MojoFailureException("ESJP import failed " + e.toString());
         } catch (final MalformedURLException e) {
             throw new MojoFailureException("File not found " + e.toString());
