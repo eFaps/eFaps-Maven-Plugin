@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.tools.ant.DirectoryScanner;
+
 import org.efaps.maven.plugin.EFapsAbstractMojo;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.update.FileType;
@@ -47,6 +48,7 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("java", FileType.JAVA.type);
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("js", FileType.JS.type);
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("jrxml", FileType.JRXML.type);
+        AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("wiki", FileType.WIKI.type);
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("xml", FileType.XML.type);
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("xsl", FileType.XSL.type);
     }
@@ -62,6 +64,7 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.java");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.js");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.jrxml");
+        AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.wiki");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xml");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xsl");
     }

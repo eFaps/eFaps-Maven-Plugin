@@ -44,13 +44,14 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
 
 /**
  * @author The eFaps Team
@@ -85,6 +86,7 @@ public class GenerateInstallationMojo
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.jrxml");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.png");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.properties");
+        GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.wiki");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xml");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xsl");
     }
@@ -168,9 +170,9 @@ public class GenerateInstallationMojo
         throws MojoExecutionException, MojoFailureException
     {
         copyFiles(generateInstallFile());
-        final File esjpDir = new File(this.getEFapsDir(), "ESJP");
+        final File esjpDir = new File(getEFapsDir(), "ESJP");
         if (this.compile && esjpDir.exists() && esjpDir.isDirectory())  {
-            this.project.addCompileSourceRoot(new File(this.getEFapsDir(), "ESJP").getAbsolutePath());
+            this.project.addCompileSourceRoot(new File(getEFapsDir(), "ESJP").getAbsolutePath());
         }
     }
 
