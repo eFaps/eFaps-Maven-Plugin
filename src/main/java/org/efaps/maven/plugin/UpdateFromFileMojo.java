@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2009 The eFaps Team
+ * Copyright 2003 - 2010 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,26 @@ package org.efaps.maven.plugin;
 import java.io.File;
 import java.net.MalformedURLException;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-import org.efaps.update.schema.program.esjp.ESJPImporter;
+import org.efaps.update.FileType;
+import org.efaps.update.Install;
 import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
 
 /**
- * Mojo used to import ESJP's.
+ * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
+ * @version $Id: $
  */
-@Goal(name = "esjp-import")
-public class ESJPImportMojo
+@Goal(name = "updateFromFile")
+public class UpdateFromFileMojo
     extends EFapsAbstractMojo
 {
+
     /**
      * URL of the ESJP to import.
      */
@@ -47,28 +50,33 @@ public class ESJPImportMojo
     private File file;
 
     /**
-     * Executes the import of one ESJP file.
-     *
-     * @throws MojoFailureException if insert of the ESJP failed
+     * {@inheritDoc}
      */
+    @Override
     public void execute()
-        throws MojoFailureException
+        throws MojoExecutionException, MojoFailureException
     {
-        init();
-
         try {
+            init();
             reloadCache();
             startTransaction();
-            final ESJPImporter esjpImport = new ESJPImporter(this.file.toURI().toURL());
-            esjpImport.execute();
-            getLog().info("ESJP '" + this.file.toString() + "' inserted.");
+
+            final String ending = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+
+            final FileType filetype = FileType.getFileTypeByExensione(ending);
+
+            final Install install = new Install();
+            install.addFile(file.toURI().toURL(), filetype.type);
+
+            install.addFile(file.toURI().toURL(), filetype.type);
+            install.updateLatest();
             commitTransaction();
         } catch (final EFapsException e) {
-            throw new MojoFailureException("ESJP import failed " + e.toString());
-        } catch (final InstallationException e) {
-            throw new MojoFailureException("ESJP import failed " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
         } catch (final MalformedURLException e) {
-            throw new MojoFailureException("File not found " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
+        } catch (final InstallationException e) {
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
         }
     }
 }
