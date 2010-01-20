@@ -61,22 +61,20 @@ public class UpdateFromFileMojo
             reloadCache();
             startTransaction();
 
-            final String ending = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            final String ending = this.file.getName().substring(this.file.getName().lastIndexOf(".") + 1);
 
             final FileType filetype = FileType.getFileTypeByExensione(ending);
 
             final Install install = new Install();
-            install.addFile(file.toURI().toURL(), filetype.type);
-
-            install.addFile(file.toURI().toURL(), filetype.type);
+            install.addFile(this.file.toURI().toURL(), filetype.getType());
             install.updateLatest();
             commitTransaction();
         } catch (final EFapsException e) {
-            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
         } catch (final MalformedURLException e) {
-            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
         } catch (final InstallationException e) {
-            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
         }
     }
 }
