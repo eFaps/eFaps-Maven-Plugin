@@ -29,13 +29,20 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <!-- Jetty Version, used also to build the plug-in version number -->
+        <jettyVersion>7.0.1.v20091125</jettyVersion>
+        <!-- correct encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <!-- ************************************************************************
     * Module Definition
     ************************************************************************* -->
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps.maven</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0-${jettyVersion}-SNAPSHOT</version>
+    <version>1.0-${jettyVersion}</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -107,13 +114,6 @@
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-    <properties>
-        <!-- Jetty Version, used also to build the plug-in version number -->
-        <jettyVersion>7.0.0.v20091005</jettyVersion>
-        <!-- correct encoding -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <!-- ************************************************************************
     * Reporting
