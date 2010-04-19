@@ -40,7 +40,7 @@
     * Module Definition
     ************************************************************************* -->
     <packaging>maven-plugin</packaging>
-    <groupId>org.efaps.maven</groupId>
+    <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
     <version>1.0-${jettyVersion}-SNAPSHOT</version>
     <name>Maven eFaps Plug-In</name>
