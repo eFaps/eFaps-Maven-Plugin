@@ -42,7 +42,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0-${jettyVersion}-SNAPSHOT</version>
+    <version>1.0.1-${jettyVersion}</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -327,7 +327,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
