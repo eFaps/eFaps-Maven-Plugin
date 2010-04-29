@@ -20,6 +20,8 @@
 package org.efaps.maven.plugin.install;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -114,6 +116,27 @@ public abstract class AbstractEFapsInstallMojo
     private String applications;
 
     /**
+     * The directory where the generated Class will be stored. The directory
+     * will be registered as a compile source root of the project such that the
+     * generated files will participate in later build phases like compiling and
+     * packaging.
+     */
+    @Parameter(defaultValue = "${project.build.directory}/generated-sources/ci")
+    private File outputDirectory;
+
+
+
+    /**
+     * Getter method for the instance variable {@link #outputDirectory}.
+     *
+     * @return value of instance variable {@link #outputDirectory}
+     */
+    protected File getOutputDirectory()
+    {
+        return this.outputDirectory;
+    }
+
+    /**
      * Uses the {@link #includes} and {@link #excludes} together with the root
      * directory {@link #eFapsDir} to get all related and matched files.
      *
@@ -126,8 +149,9 @@ public abstract class AbstractEFapsInstallMojo
      * @return Array of filename
      *
      */
-    protected String[] getFiles()
+    protected List<String> getFiles()
     {
+        final List<String> ret = new ArrayList<String>();
         final DirectoryScanner ds = new DirectoryScanner();
         final String[] included = (this.includes == null)
             ? AbstractEFapsInstallMojo.DEFAULT_INCLUDES
@@ -143,7 +167,12 @@ public abstract class AbstractEFapsInstallMojo
         ds.setCaseSensitive(true);
         ds.scan();
 
-        return ds.getIncludedFiles();
+        ret.addAll(Arrays.asList(ds.getIncludedFiles()));
+        ds.setBasedir(this.outputDirectory);
+        ds.scan();
+        ret.addAll(Arrays.asList(ds.getIncludedFiles()));
+
+        return ret;
     }
 
     /**
