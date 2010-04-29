@@ -147,7 +147,8 @@ public class GenerateCIClassMojo
             this.project.addCompileSourceRoot(this.outputDirectory.getAbsolutePath());
 
         } catch (final SAXException e) {
-
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } catch (final FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -159,7 +160,7 @@ public class GenerateCIClassMojo
 
     private void closeJavaFile()
     {
-        this.java.append("}");
+        this.java.append("}\n");
     }
 
     /**
