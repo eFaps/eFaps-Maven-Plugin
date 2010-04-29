@@ -294,7 +294,9 @@ public class GenerateCIClassMojo
             throws SAXException
         {
             if (this.isCiType) {
-                this.typeName = this.typeName.substring(this.typeName.indexOf("_") + 1);
+                if (this.typeName.startsWith(GenerateCIClassMojo.this.ciName)) {
+                    this.typeName = this.typeName.substring(this.typeName.indexOf("_") + 1);
+                }
                 String parentClass = "";
                 if (this.parent != null) {
                     parentClass = this.parent.substring(0, this.parent.indexOf("_"));
