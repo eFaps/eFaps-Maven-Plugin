@@ -316,10 +316,12 @@ public class GenerateInstallationMojo
                 final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
                 FileUtils.copyFile(srcFile, dstFile, true);
             }
-            for (final String fileName : getCopyFiles(getOutputDirectory())) {
-                final File srcFile = new File(getOutputDirectory(), fileName);
-                final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
-                FileUtils.copyFile(srcFile, dstFile, true);
+            if (getOutputDirectory().exists()) {
+                for (final String fileName : getCopyFiles(getOutputDirectory())) {
+                    final File srcFile = new File(getOutputDirectory(), fileName);
+                    final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
+                    FileUtils.copyFile(srcFile, dstFile, true);
+                }
             }
         } catch (final IOException e) {
             throw new MojoExecutionException("could not copy files", e);

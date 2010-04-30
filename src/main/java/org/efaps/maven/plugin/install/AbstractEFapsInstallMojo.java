@@ -167,9 +167,11 @@ public abstract class AbstractEFapsInstallMojo
         ds.setCaseSensitive(true);
         ds.scan();
 
-        ret.addAll(Arrays.asList(ds.getIncludedFiles()));
-        ds.setBasedir(this.outputDirectory);
-        ds.scan();
+        if (this.outputDirectory.exists()) {
+            ret.addAll(Arrays.asList(ds.getIncludedFiles()));
+            ds.setBasedir(this.outputDirectory);
+            ds.scan();
+        }
         ret.addAll(Arrays.asList(ds.getIncludedFiles()));
 
         return ret;

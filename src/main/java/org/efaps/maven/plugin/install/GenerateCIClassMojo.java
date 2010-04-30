@@ -244,7 +244,7 @@ public class GenerateCIClassMojo
                                  final String _qName,
                                  final Attributes _atts)
         {
-            if ("datamodel-type".equals(_qName)) {
+            if ("datamodel-type".equals(_qName) || "datamodel-statusgroup".equals(_qName) ) {
                 this.isCiType = true;
             }
             this.called = false;
