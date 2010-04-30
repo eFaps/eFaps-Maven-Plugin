@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,14 +43,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
 
 /**
  * @author The eFaps Team
@@ -247,7 +245,7 @@ public class GenerateInstallationMojo
 
             // append all file name and the type to files node (sorted
             // alphabetical)
-            final Set<String> filesSet = new TreeSet<String>(Arrays.asList(getFiles()));
+            final Set<String> filesSet = new TreeSet<String>(getFiles());
             for (final String fileName : filesSet) {
                 final Node file = doc.createElement("file");
 
@@ -313,10 +311,17 @@ public class GenerateInstallationMojo
         throws MojoExecutionException
     {
         try {
-            for (final String fileName : getCopyFiles()) {
+            for (final String fileName : getCopyFiles(getEFapsDir())) {
                 final File srcFile = new File(getEFapsDir(), fileName);
                 final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
                 FileUtils.copyFile(srcFile, dstFile, true);
+            }
+            if (getOutputDirectory().exists()) {
+                for (final String fileName : getCopyFiles(getOutputDirectory())) {
+                    final File srcFile = new File(getOutputDirectory(), fileName);
+                    final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
+                    FileUtils.copyFile(srcFile, dstFile, true);
+                }
             }
         } catch (final IOException e) {
             throw new MojoExecutionException("could not copy files", e);
@@ -339,6 +344,7 @@ public class GenerateInstallationMojo
      * The instance variable {@link#copyExcludes} defines excludes; if not
      * specified by maven , the default value is: <li>
      * <code>**&#x002f;version.xml</code></li>
+     * @param _rootFile
      *
      * @return String array of files to copy
      * @see #copyIncludes
@@ -346,7 +352,7 @@ public class GenerateInstallationMojo
      * @see #DEFAULT_COPYINCLUDES definition of the default includes
      * @see #DEFAULT_COPYEXCLUDES definition of the default excludes
      */
-    protected String[] getCopyFiles()
+    protected String[] getCopyFiles(final File _rootFile)
     {
         // scan
         final DirectoryScanner ds = new DirectoryScanner();
@@ -360,9 +366,10 @@ public class GenerateInstallationMojo
             : this.copyExcludes.toArray(new String[this.copyExcludes.size()]);
         ds.setIncludes(includes);
         ds.setExcludes(excludes);
-        ds.setBasedir(getEFapsDir().toString());
+        ds.setBasedir(_rootFile);
         ds.setCaseSensitive(true);
         ds.scan();
+
         return ds.getIncludedFiles();
     }
 }
