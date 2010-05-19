@@ -320,7 +320,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-java5</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -334,7 +334,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-slf4jlogger</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
 
         <!--
@@ -395,13 +395,17 @@
                     <groupId>javax.resource</groupId>
                     <artifactId>connector-api</artifactId>
                 </exclusion>
+                <exclusion>
+                	<artifactId>commons-logging</artifactId>
+                	<groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- replacement for the javax.resource.connector-api-1.5 needed by jotm-->
         <dependency>
             <groupId>org.ow2.spec.ee</groupId>
             <artifactId>ow2-connector-1.5-spec</artifactId>
-            <version>1.0-M1</version>
+            <version>1.0.3</version>
         </dependency>
         <!-- needed indirectly for the transaction manager -->
         <dependency>
