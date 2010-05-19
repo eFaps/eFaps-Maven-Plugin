@@ -42,7 +42,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0.4-${jettyVersion}-SNAPSHOT</version>
+    <version>1.0.5-${jettyVersion}-SNAPSHOT</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -320,21 +320,21 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-java5</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
 
         <!-- eFaps kernel -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>1.0.4-SNAPSHOT</version>
+            <version>1.0.5-SNAPSHOT</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-slf4jlogger</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
 
         <!--
