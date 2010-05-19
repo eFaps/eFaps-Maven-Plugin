@@ -55,20 +55,21 @@ public final class SourceInstallMojo
     public void execute()
         throws MojoExecutionException
     {
-        this.init();
+        init();
 
         try {
             final Application appl = Application.getApplicationFromSource(
-                    this.getVersionFile(),
-                    this.getClasspathElements(),
-                    this.getEFapsDir(),
+                    getVersionFile(),
+                    getClasspathElements(),
+                    getEFapsDir(),
+                    getOutputDirectory(),
                     this.includes,
                     this.excludes,
-                    this.getTypeMapping());
+                    getTypeMapping());
 
             // install applications
             if (appl != null) {
-                appl.install(this.getUserName(), this.getPassWord());
+                appl.install(getUserName(), getPassWord());
             }
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);

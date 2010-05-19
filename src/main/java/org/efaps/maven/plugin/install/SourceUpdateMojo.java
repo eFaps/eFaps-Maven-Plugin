@@ -55,20 +55,21 @@ public final class SourceUpdateMojo
     public void execute()
         throws MojoExecutionException
     {
-        this.init();
+        init();
 
         try {
             final Application appl = Application.getApplicationFromSource(
-                    this.getVersionFile(),
-                    this.getClasspathElements(),
-                    this.getEFapsDir(),
+                    getVersionFile(),
+                    getClasspathElements(),
+                    getEFapsDir(),
+                    getOutputDirectory(),
                     this.includes,
                     this.excludes,
-                    this.getTypeMapping());
+                    getTypeMapping());
 
             // install applications
             if (appl != null) {
-                appl.updateLastVersion(this.getUserName(), this.getPassWord());
+                appl.updateLastVersion(getUserName(), getPassWord());
             }
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
