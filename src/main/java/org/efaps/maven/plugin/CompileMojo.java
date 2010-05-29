@@ -40,12 +40,12 @@ public final class CompileMojo
      */
     public void execute()
     {
-        this.init();
+        init();
 
         try {
-            Application.compileAll(this.getUserName(), this.getClasspathElements());
+            Application.compileAll(getUserName(), getClasspathElements(), false);
         } catch (final InstallationException e) {
-            this.getLog().error(e);
+            getLog().error(e);
         }
     }
 }

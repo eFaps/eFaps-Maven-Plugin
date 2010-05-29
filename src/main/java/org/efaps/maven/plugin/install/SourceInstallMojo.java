@@ -33,7 +33,7 @@ import org.efaps.update.version.Application;
  * @version $Id$
  */
 @Goal(name = "source-install",
-      requiresDependencyResolutionScope = "compile")
+      requiresDependencyResolutionScope = "runtime")
 public final class SourceInstallMojo
     extends AbstractEFapsInstallMojo
 {
