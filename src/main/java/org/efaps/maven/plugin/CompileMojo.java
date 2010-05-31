@@ -21,8 +21,15 @@
 package org.efaps.maven.plugin;
 
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
+import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.efaps.update.schema.program.esjp.ESJPCompiler;
+import org.efaps.update.schema.program.jasperreport.JasperReportCompiler;
+import org.efaps.update.schema.program.staticsource.CSSCompiler;
+import org.efaps.update.schema.program.staticsource.JavaScriptCompiler;
+import org.efaps.update.schema.program.staticsource.WikiCompiler;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
+import org.efaps.util.EFapsException;
 
 /**
  * Compiles all ESPJ's and Cascade Style Sheets within eFaps.
@@ -30,22 +37,64 @@ import org.efaps.update.version.Application;
  * @author The eFaps Team
  * @version $Id$
  */
-@Goal(name = "compile",
-      requiresDependencyResolutionScope = "compile")
+@Goal(name = "compile", requiresDependencyResolutionScope = "compile")
 public final class CompileMojo
     extends EFapsAbstractMojo
 {
+
+    /**
+     * Number of UUID's to generate.
+     */
+    @Parameter(expression = "${target}", defaultValue = "all")
+    private String target;
+
     /**
      * Executes the compile goal.
      */
     public void execute()
     {
         init();
-
+        boolean abort = true;
         try {
-            Application.compileAll(getUserName(), getClasspathElements(), false);
+            if ("all".equalsIgnoreCase(this.target)) {
+                getLog().info("==Compiling all Elements==");
+                Application.compileAll(getUserName(), getClasspathElements(), true);
+            } else {
+                reloadCache();
+                startTransaction();
+                if ("java".equalsIgnoreCase(this.target)) {
+                    getLog().info("==Compiling Java==");
+                    (new ESJPCompiler(getClasspathElements())).compile(null, true);
+                } else if ("css".equalsIgnoreCase(this.target)) {
+                    getLog().info("==Compiling CSS==");
+                    new CSSCompiler().compile();
+                } else if ("js".equalsIgnoreCase(this.target)) {
+                    getLog().info("==Compiling Javascript==");
+                    new JavaScriptCompiler().compile();
+                } else if ("wiki".equalsIgnoreCase(this.target)) {
+                    getLog().info("==Compiling Wiki==");
+                    new WikiCompiler().compile();
+                } else if ("jasper".equalsIgnoreCase(this.target)) {
+                    getLog().info("==Compiling JasperReports==");
+                    new JasperReportCompiler(getClasspathElements()).compile();
+                } else {
+                    getLog().error("target: " + this.target + "' not found");
+                }
+                commitTransaction();
+            }
+            abort = false;
         } catch (final InstallationException e) {
             getLog().error(e);
+        } catch (final EFapsException e) {
+            getLog().error(e);
+        } finally {
+            try {
+                if (abort) {
+                    abortTransaction();
+                }
+            } catch (final EFapsException e) {
+                getLog().error(e);
+            }
         }
     }
 }

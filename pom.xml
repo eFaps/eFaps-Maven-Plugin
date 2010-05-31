@@ -240,7 +240,7 @@
                 </executions>
             </plugin>
         </plugins>
-        
+
     </build>
 
         <!--
@@ -317,28 +317,28 @@
     * Dependencies
     ************************************************************************* -->
     <dependencies>
-        <!-- 
-  	    Only for the dependencies in eFaps itself "LATEST" is used.	
-	    annotations used to identify maven plugin syntax 
-	-->
+        <!--
+          Only for the dependencies in eFaps itself "LATEST" is used.
+        annotations used to identify maven plugin syntax
+    -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-java5</artifactId>
-            <version>LATEST</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
 
         <!-- eFaps kernel -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>LATEST</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-slf4jlogger</artifactId>
-            <version>LATEST</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
 
         <!--
