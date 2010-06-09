@@ -23,9 +23,7 @@
 
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,7 +40,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0.6-${jettyVersion}-SNAPSHOT</version>
+    <version>1.0.6-7.0.1.v20091125</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -91,9 +89,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</url>
     </scm>
 
     <!-- Distribution Repository -->
@@ -177,7 +175,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration/>
+                <configuration />
             </plugin>
         </plugins>
     </reporting>
@@ -324,21 +322,21 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-java5</artifactId>
-            <version>LATEST</version>
+            <version>1.0.2</version>
         </dependency>
 
         <!-- eFaps kernel -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>LATEST</version>
+            <version>1.2.0</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-slf4jlogger</artifactId>
-            <version>LATEST</version>
+            <version>1.0.1</version>
         </dependency>
 
         <!--
