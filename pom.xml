@@ -40,7 +40,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0.6-7.0.1.v20091125</version>
+    <version>1.0.7-7.0.1.v20091125</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -89,9 +89,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.6-7.0.1.v20091125</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
     </scm>
 
     <!-- Distribution Repository -->
