@@ -245,15 +245,6 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>apt-maven-plugin</artifactId>
-          <configuration>
-            <factory>com.acme.Factory</factory>
-          </configuration>
-        </plugin>
-
-
         </plugins>
         <!-- Needed for the upload of the site -->
         <extensions>
