@@ -30,6 +30,7 @@
     <properties>
         <!-- Jetty Version, used also to build the plug-in version number -->
         <jettyVersion>7.0.1.v20091125</jettyVersion>
+        <java5PluginVersion>1.0.2</java5PluginVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -40,7 +41,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0.7-7.0.1.v20091125</version>
+    <version>1.0.6-{jettyVersion}-SNAPSHOT</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -218,7 +219,7 @@
                     <dependency>
                         <groupId>org.efaps</groupId>
                         <artifactId>maven-java5</artifactId>
-                        <version>1.0.0</version>
+                        <version>${java5PluginVersion}</version>
                         <scope>runtime</scope>
                     </dependency>
                 </dependencies>
@@ -237,8 +238,31 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+             <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                </configuration>
+            </plugin>
 
+            <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>apt-maven-plugin</artifactId>
+          <configuration>
+            <factory>com.acme.Factory</factory>
+          </configuration>
+        </plugin>
+
+
+        </plugins>
+        <!-- Needed for the upload of the site -->
+        <extensions>
+            <extension>
+                <groupId>org.jvnet.wagon-svn</groupId>
+                <artifactId>wagon-svn</artifactId>
+                <version>1.9</version>
+            </extension>
+        </extensions>
     </build>
 
         <!--
@@ -315,14 +339,10 @@
     * Dependencies
     ************************************************************************* -->
     <dependencies>
-        <!--
-          Only for the dependencies in eFaps itself "LATEST" is used.
-        annotations used to identify maven plugin syntax
-    -->
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-java5</artifactId>
-            <version>1.0.2</version>
+            <version>${java5PluginVersion}</version>
         </dependency>
 
         <!-- eFaps kernel -->
