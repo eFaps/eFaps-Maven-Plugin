@@ -41,7 +41,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.0.6-{jettyVersion}-SNAPSHOT</version>
+    <version>1.0.7-7.0.1.v20091125</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -90,9 +90,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.7-7.0.1.v20091125</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.7-7.0.1.v20091125</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V1.0.7-7.0.1.v20091125</url>
     </scm>
 
     <!-- Distribution Repository -->
@@ -214,6 +214,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
+                <version>2.6</version>
                 <dependencies>
                     <!-- used to get annotations within Java source code -->
                     <dependency>
@@ -224,21 +225,40 @@
                     </dependency>
                 </dependencies>
                 <executions>
+                    <!--
+                        by using the id "default-descriptor" the original goal can be deactivate
+                        beacuse only the java5 extractort is needed
+                     -->
                     <execution>
+                        <id>default-descriptor</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>descriptor</goal>
+                        </goals>
+                        <configuration>
+                            <skipDescriptor>true</skipDescriptor>
+                        </configuration>
+                </execution>
+                <execution>
                         <!--
                             due to Java5 annotations, which can only be read
                             after compilation, the maven-plugin-plugin must be
-                            executed a second time after compilation
+                            executed after compilation
                         -->
                         <id>extract-after-compile</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>descriptor</goal>
                         </goals>
+                        <configuration>
+                            <extractors>
+                                <extractor>java5</extractor>
+                            </extractors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-             <plugin>
+            <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
