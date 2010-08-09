@@ -97,6 +97,7 @@ public class GenerateInstallationMojo
     private static final Set<String> DEFAULT_COPYEXCLUDES = new HashSet<String>();
     static {
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/versions.xml");
+        GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/package-info.java");
     }
 
     /**
