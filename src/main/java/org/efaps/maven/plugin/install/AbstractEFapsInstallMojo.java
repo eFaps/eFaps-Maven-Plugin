@@ -78,6 +78,7 @@ public abstract class AbstractEFapsInstallMojo
     private static final Set<String> DEFAULT_EXCLUDES = new HashSet<String>();
     static {
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/versions.xml");
+        AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/package-info.java");
     }
 
     /**

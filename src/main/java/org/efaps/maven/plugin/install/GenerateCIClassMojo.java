@@ -38,6 +38,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
+import org.efaps.maven.logger.SLF4JOverMavenLog;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
@@ -59,6 +60,18 @@ public class GenerateCIClassMojo
     implements Mojo
 {
 
+    /**
+     * The apache maven logger is stored in this instance variable.
+     *
+     * @see #getLog
+     * @see #setLog
+     */
+    private Log log = null;
+
+
+    /**
+     * The code is in this variable.
+     */
     private final StringBuilder java = new StringBuilder();
 
     /**
@@ -102,7 +115,6 @@ public class GenerateCIClassMojo
      */
     private static final Set<String> DEFAULT_INCLUDES = new HashSet<String>();
     static {
-
         GenerateCIClassMojo.DEFAULT_INCLUDES.add("**/*.xml");
     }
 
@@ -119,6 +131,7 @@ public class GenerateCIClassMojo
         throws MojoExecutionException, MojoFailureException
     {
         try {
+            init();
             initJavaFile();
             for (final String fileName : getCopyFiles()) {
                 final File srcFile = new File(this.sourceDirectory, fileName);
@@ -147,14 +160,26 @@ public class GenerateCIClassMojo
             this.project.addCompileSourceRoot(this.outputDirectory.getAbsolutePath());
 
         } catch (final SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error("MojoExecutionException", e);
+            throw new MojoExecutionException("SAXException");
         } catch (final FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error("FileNotFoundException", e);
+            throw new MojoExecutionException("SAXException");
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error("IOException", e);
+            throw new MojoExecutionException("SAXException");
+        }
+    }
+
+    /**
+     *
+     */
+    private void init()
+    {
+        try {
+            Class.forName("org.efaps.maven.logger.SLF4JOverMavenLog");
+            SLF4JOverMavenLog.LOGGER = getLog();
+        } catch (final ClassNotFoundException e) {
         }
     }
 
@@ -168,7 +193,8 @@ public class GenerateCIClassMojo
      */
     private void initJavaFile()
     {
-        this.java.append("package ").append(this.ciPackage).append(";\n")
+        this.java.append("//CHECKSTYLE:OFF\n")
+            .append("package ").append(this.ciPackage).append(";\n")
             .append("import org.efaps.ci.CIAttribute;\n")
             .append("import org.efaps.ci.CIType;\n")
             .append("public final class CI").append(this.ciName).append("\n{\n");
@@ -196,8 +222,7 @@ public class GenerateCIClassMojo
     @Override
     public Log getLog()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.log;
     }
 
     /*
@@ -206,10 +231,9 @@ public class GenerateCIClassMojo
      * org.apache.maven.plugin.Mojo#setLog(org.apache.maven.plugin.logging.Log)
      */
     @Override
-    public void setLog(final Log arg0)
+    public void setLog(final Log _log)
     {
-        // TODO Auto-generated method stub
-
+        this.log = _log;
     }
 
     public class TypeHandler
@@ -308,9 +332,9 @@ public class GenerateCIClassMojo
                     .append(this.uuid).append("\");\n")
                     .append("public static class _").append(this.typeName).append(" extends ")
                     .append(this.parent == null ? "CIType" : "org.efaps.esjp.ci.CI" + parentClass + "._" + this.parent)
-                    .append("\n  {\n")
-                    .append("  protected _").append(this.typeName).append("(final String _uuid)\n{\n")
-                    .append("    super(_uuid);").append("\n}\n");
+                    .append("\n{\n")
+                    .append("    protected _").append(this.typeName).append("(final String _uuid)\n    {\n")
+                    .append("        super(_uuid);").append("\n    }\n");
 
                 for (final String attribute : this.attributes) {
                     if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
@@ -318,7 +342,7 @@ public class GenerateCIClassMojo
                             .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
                     }
                 }
-                GenerateCIClassMojo.this.java.append("\n}\n");
+                GenerateCIClassMojo.this.java.append("}\n\n");
             }
         }
 
