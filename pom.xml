@@ -100,7 +100,7 @@
         <site>
             <id>efaps.googlecode.com</id>
             <name>Maven eFaps Plug-In Site</name>
-            <url>svn:https://efaps.googlecode.com/svn/site/maven-eFaps-PlugIn</url>
+            <url>scm:svn:https://efaps.googlecode.com/svn/site/maven-eFaps-PlugIn</url>
         </site>
         <snapshotRepository>
             <id>sonatype-nexus-snapshots</id>
@@ -122,6 +122,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.1</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -129,8 +130,6 @@
                             <report>summary</report>
                             <report>dependencies</report>
                             <report>project-team</report>
-                            <!--   <report>mailing-list</report>-->
-                            <!-- <report>cim</report> -->
                             <report>issue-tracking</report>
                             <report>license</report>
                             <report>scm</report>
@@ -142,7 +141,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration />
+                <configuration>
+                    <minmemory>128m</minmemory>
+                    <maxmemory>1g</maxmemory>
+                    <level>private</level>
+                    <detectLinks />
+                </configuration>
             </plugin>
             <!-- source code -->
             <plugin>
@@ -157,7 +161,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.3</version>
                 <configuration>
                     <configLocation>${basedir}/src/checkstyle/efaps_checks.xml</configLocation>
                 </configuration>
@@ -169,7 +172,7 @@
                 <configuration>
                     <linkXref>true</linkXref>
                     <sourceEncoding>utf-8</sourceEncoding>
-                    <targetJdk>1.5</targetJdk>
+                    <targetJdk>1.6</targetJdk>
                 </configuration>
             </plugin>
             <!--  findbugs report -->
