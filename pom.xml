@@ -98,7 +98,7 @@
     <!-- Distribution Repository -->
     <distributionManagement>
         <site>
-            <id>efaps</id>
+            <id>efaps.googlecode.com</id>
             <name>Maven eFaps Plug-In Site</name>
             <url>svn:https://efaps.googlecode.com/svn/site/maven-eFaps-PlugIn</url>
         </site>
@@ -185,7 +185,6 @@
     * Project itself
     ************************************************************************* -->
     <build>
-
         <plugins>
             <!--
                 Must defined here to use checkstyle version 5
@@ -195,7 +194,6 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.5</version>
             </plugin>
-
             <!--
                 Compiler Settings:
                 - Java 1.6 is needed!
@@ -269,9 +267,24 @@
         <!-- Needed for the upload of the site -->
         <extensions>
             <extension>
-                <groupId>org.jvnet.wagon-svn</groupId>
-                <artifactId>wagon-svn</artifactId>
-                <version>1.9</version>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-manager-plexus</artifactId>
+                <version>1.4</version>
+            </extension>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-scm</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+            <extension>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>2.0.5</version>
+            </extension>
+            <extension>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-provider-svnexe</artifactId>
+                <version>1.4</version>
             </extension>
         </extensions>
     </build>
