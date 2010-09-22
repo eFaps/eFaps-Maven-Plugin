@@ -21,6 +21,7 @@
 package org.efaps.maven.plugin;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -135,6 +136,7 @@ public abstract class EFapsAbstractMojo
         }
 
         try {
+            AppAccessHandler.init(null, new HashSet<String>());
             StartupDatabaseConnection.startup(this.type, this.factory, convertToMap(this.connection),
                                               this.transactionManager, this.transactionTimeout == null
                                                                         ? null
