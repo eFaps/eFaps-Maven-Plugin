@@ -35,8 +35,8 @@ import org.efaps.init.StartupDatabaseConnection;
 import org.efaps.init.StartupException;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.maven.logger.SLF4JOverMavenLog;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.util.EFapsException;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  *
@@ -61,14 +61,14 @@ public abstract class EFapsAbstractMojo
      * @see javax.sql.DataSource
      * @see #initDatabase
      */
-    @Parameter(required = true, expression = "${org.efaps.db.factory}")
+    @MojoParameter(required = true, expression = "${org.efaps.db.factory}")
     private String factory;
 
     /**
      * Holds all properties of the connection to the database. The properties
      * are separated by a comma.
      */
-    @Parameter(expression = "${org.efaps.db.connection}", required = true)
+    @MojoParameter(expression = "${org.efaps.db.connection}", required = true)
     private String connection;
 
     /**
@@ -76,7 +76,7 @@ public abstract class EFapsAbstractMojo
      *
      * @see #login
      */
-    @Parameter(required = true)
+    @MojoParameter(required = true)
     private String userName;
 
     /**
@@ -84,26 +84,26 @@ public abstract class EFapsAbstractMojo
      *
      * @see #login
      */
-    @Parameter(required = true)
+    @MojoParameter(required = true)
     private String passWord;
 
     /**
      * Defines the database type (used to define database specific
      * implementations).
      */
-    @Parameter(expression = "${org.efaps.db.type}", required = true)
+    @MojoParameter(expression = "${org.efaps.db.type}", required = true)
     private String type;
 
     /**
      * Value for the timeout of the transaction.
      */
-    @Parameter(expression = "${org.efaps.transaction.timeout}", required = false)
+    @MojoParameter(expression = "${org.efaps.transaction.timeout}", required = false)
     private String transactionTimeout;
 
     /**
      *Name of the class for the transaction manager..
      */
-    @Parameter(expression = "${org.efaps.transaction.manager}",
+    @MojoParameter(expression = "${org.efaps.transaction.manager}",
                required = true,
                defaultValue = "org.objectweb.jotm.Current")
     private String transactionManager;
@@ -111,7 +111,7 @@ public abstract class EFapsAbstractMojo
     /**
      * Project classpath.
      */
-    @Parameter(expression = "${project.compileClasspathElements}", required = true, readonly = true)
+    @MojoParameter(expression = "${project.compileClasspathElements}", required = true, readonly = true)
     private List<String> classpathElements;
 
     protected EFapsAbstractMojo()

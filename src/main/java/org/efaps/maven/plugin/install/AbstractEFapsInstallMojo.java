@@ -30,8 +30,8 @@ import java.util.Set;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.efaps.maven.plugin.EFapsAbstractMojo;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.update.FileType;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  * @author The eFaps Team
@@ -84,13 +84,13 @@ public abstract class AbstractEFapsInstallMojo
     /**
      * Location of the version file (defining all versions to install).
      */
-    @Parameter(expression = "${basedir}/src/main/efaps/versions.xml")
+    @MojoParameter(expression = "${basedir}/src/main/efaps/versions.xml")
     private File versionFile;
 
     /**
      * Root Directory with the XML installation files.
      */
-    @Parameter(expression = "${basedir}/src/main/efaps")
+    @MojoParameter(expression = "${basedir}/src/main/efaps")
     private File eFapsDir;
 
     /**
@@ -113,7 +113,7 @@ public abstract class AbstractEFapsInstallMojo
      * kernel application. The value is used to define the applications to
      * install or update.
      */
-    @Parameter(defaultValue = "eFaps-Kernel")
+    @MojoParameter(defaultValue = "eFaps-Kernel")
     private String applications;
 
     /**
@@ -122,7 +122,7 @@ public abstract class AbstractEFapsInstallMojo
      * generated files will participate in later build phases like compiling and
      * packaging.
      */
-    @Parameter(defaultValue = "${project.build.directory}/generated-sources/ci")
+    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/ci")
     private File outputDirectory;
 
 

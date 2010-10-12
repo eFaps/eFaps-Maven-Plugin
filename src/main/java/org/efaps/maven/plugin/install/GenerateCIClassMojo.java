@@ -39,9 +39,10 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
 import org.efaps.maven.logger.SLF4JOverMavenLog;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
+import org.jfrog.maven.annomojo.annotations.MojoPhase;
+import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,7 +56,9 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * @author The eFaps Team
  * @version $Id$
  */
-@Goal(name = "generate-ciclass", requiresDependencyResolutionScope = "compile", defaultPhase = Phase.GENERATE_SOURCES)
+@MojoGoal(value = "generate-ciclass")
+@MojoRequiresDependencyResolution(value = "compile")
+@MojoPhase(value = "generate-sources")
 public class GenerateCIClassMojo
     implements Mojo
 {
@@ -77,13 +80,13 @@ public class GenerateCIClassMojo
     /**
      * The current Maven project.
      */
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     /**
      * The directory where the DataMOdel Configuration Item files are located.
      */
-    @Parameter(defaultValue = "${basedir}/src/main/efaps/DataModels")
+    @MojoParameter(defaultValue = "${basedir}/src/main/efaps/DataModels")
     private File sourceDirectory;
 
     /**
@@ -92,14 +95,14 @@ public class GenerateCIClassMojo
      * generated files will participate in later build phases like compiling and
      * packaging.
      */
-    @Parameter(defaultValue = "${project.build.directory}/generated-sources/ci")
+    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/ci")
     private File outputDirectory;
 
-    @Parameter(required = true)
+    @MojoParameter(required = true)
     private String ciName;
 
 
-    @Parameter(required = true, defaultValue = "org.efaps.esjp.ci")
+    @MojoParameter(required = true, defaultValue = "org.efaps.esjp.ci")
     private String ciPackage;
 
 

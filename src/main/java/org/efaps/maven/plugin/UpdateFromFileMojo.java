@@ -25,12 +25,12 @@ import java.net.MalformedURLException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.update.FileType;
 import org.efaps.update.Install;
 import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  * TODO comment!
@@ -38,7 +38,7 @@ import org.efaps.util.EFapsException;
  * @author The eFaps Team
  * @version $Id: $
  */
-@Goal(name = "updateFromFile")
+@MojoGoal(value = "updateFromFile")
 public class UpdateFromFileMojo
     extends EFapsAbstractMojo
 {
@@ -46,7 +46,7 @@ public class UpdateFromFileMojo
     /**
      * URL of the ESJP to import.
      */
-    @Parameter(required = true)
+    @MojoParameter(required = true)
     private File file;
 
     /**

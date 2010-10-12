@@ -24,8 +24,8 @@ import java.util.UUID;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  * A new universally unique identifier (UUID) is created and printed out.<br>
@@ -37,14 +37,14 @@ import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
  * @author The eFaps Team
  * @version $Id$
  */
-@Goal(name = "generateUUID")
+@MojoGoal(value = "generateUUID")
 public final class GenerateUUIDMojo
     extends AbstractMojo
 {
     /**
      * Number of UUID's to generate.
      */
-    @Parameter(expression = "${UUID.count}", defaultValue = "1")
+    @MojoParameter(expression = "${UUID.count}", defaultValue = "1")
     private int count;
 
     /**

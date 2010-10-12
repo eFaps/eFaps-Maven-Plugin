@@ -21,8 +21,9 @@
 package org.efaps.maven.plugin.install;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
 import org.efaps.update.version.Application;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 
 /**
  * Makes an update of an eFaps application for the last version of the
@@ -31,8 +32,8 @@ import org.efaps.update.version.Application;
  * @author The eFaps Team
  * @version $Id$
  */
-@Goal(name = "update",
-      requiresDependencyResolutionScope = "compile")
+@MojoGoal(value = "update")
+@MojoRequiresDependencyResolution(value = "compile")
 public final class UpdateMojo
     extends AbstractEFapsInstallMojo
 {
@@ -44,13 +45,13 @@ public final class UpdateMojo
     public void execute()
         throws MojoExecutionException
     {
-        this.init();
+        init();
         try  {
-            final Application appl = Application.getApplicationFromClassPath(this.getApplications(),
-                                                                             this.getClasspathElements());
+            final Application appl = Application.getApplicationFromClassPath(getApplications(),
+                                                                             getClasspathElements());
 
             // update applications
-            appl.updateLastVersion(this.getUserName(), this.getPassWord());
+            appl.updateLastVersion(getUserName(), getPassWord());
         } catch (final Exception e)  {
             throw new MojoExecutionException("Could not execute Installation script", e);
         }

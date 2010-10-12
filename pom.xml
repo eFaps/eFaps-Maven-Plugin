@@ -29,8 +29,7 @@
 
     <properties>
         <!-- Jetty Version, used also to build the plug-in version number -->
-        <jettyVersion>7.0.1.v20091125</jettyVersion>
-        <java5PluginVersion>1.0.2</java5PluginVersion>
+        <jettyVersion>7.1.6.v20100715</jettyVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -41,7 +40,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>maven-efaps-plugin</artifactId>
-    <version>1.1.4-7.0.1.v20091125</version>
+    <version>2.0.0-7.1.6.v20100715</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.
@@ -117,8 +116,30 @@
     <!-- ************************************************************************
     * Project itself
     ************************************************************************* -->
+
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>2.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.sun</groupId>
+                        <artifactId>tools</artifactId>
+                        <version>1.5.0</version>
+                        <scope>system</scope>
+                        <systemPath>/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar</systemPath>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jfrog.maven.annomojo</groupId>
+                        <artifactId>maven-plugin-tools-anno</artifactId>
+                        <version>1.4.0</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <!--
                 Must defined here to use checkstyle version 5
             -->
@@ -135,6 +156,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -142,53 +164,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>2.6</version>
-                <dependencies>
-                    <!-- used to get annotations within Java source code -->
-                    <dependency>
-                        <groupId>org.efaps</groupId>
-                        <artifactId>maven-java5</artifactId>
-                        <version>${java5PluginVersion}</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <!--
-                        by using the id "default-descriptor" the original goal can be deactivate
-                        beacuse only the java5 extractort is needed
-                     -->
-                    <execution>
-                        <id>default-descriptor</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>descriptor</goal>
-                        </goals>
-                        <configuration>
-                            <skipDescriptor>true</skipDescriptor>
-                        </configuration>
-                </execution>
-                <execution>
-                        <!--
-                            due to Java5 annotations, which can only be read
-                            after compilation, the maven-plugin-plugin must be
-                            executed after compilation
-                        -->
-                        <id>extract-after-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>descriptor</goal>
-                        </goals>
-                        <configuration>
-                            <extractors>
-                                <extractor>java5</extractor>
-                            </extractors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
@@ -363,9 +339,9 @@
     ************************************************************************* -->
     <dependencies>
         <dependency>
-            <groupId>org.efaps</groupId>
-            <artifactId>maven-java5</artifactId>
-            <version>${java5PluginVersion}</version>
+            <groupId>org.jfrog.maven.annomojo</groupId>
+            <artifactId>maven-plugin-anno</artifactId>
+            <version>1.4.0</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -463,5 +439,6 @@
             <artifactId>connector</artifactId>
             <version>1.0</version>
         </dependency>
+
     </dependencies>
 </project>

@@ -20,8 +20,6 @@
 
 package org.efaps.maven.plugin;
 
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
 import org.efaps.update.schema.program.esjp.ESJPCompiler;
 import org.efaps.update.schema.program.jasperreport.JasperReportCompiler;
 import org.efaps.update.schema.program.staticsource.CSSCompiler;
@@ -30,6 +28,9 @@ import org.efaps.update.schema.program.staticsource.WikiCompiler;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.util.EFapsException;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
+import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 
 /**
  * Compiles all ESPJ's and Cascade Style Sheets within eFaps.
@@ -37,7 +38,8 @@ import org.efaps.util.EFapsException;
  * @author The eFaps Team
  * @version $Id$
  */
-@Goal(name = "compile", requiresDependencyResolutionScope = "compile")
+@MojoGoal(value = "compile")
+@MojoRequiresDependencyResolution
 public final class CompileMojo
     extends EFapsAbstractMojo
 {
@@ -45,7 +47,7 @@ public final class CompileMojo
     /**
      * Number of UUID's to generate.
      */
-    @Parameter(expression = "${target}", defaultValue = "all")
+    @MojoParameter(expression = "${target}", defaultValue = "all")
     private String target;
 
     /**

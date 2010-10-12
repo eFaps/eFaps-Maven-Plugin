@@ -43,9 +43,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Parameter;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.lifecycle.Phase;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+import org.jfrog.maven.annomojo.annotations.MojoParameter;
+import org.jfrog.maven.annomojo.annotations.MojoPhase;
+import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -54,9 +55,9 @@ import org.w3c.dom.NodeList;
 /**
  * @author The eFaps Team
  */
-@Goal(name = "generate-installation",
-      requiresDependencyResolutionScope = "compile",
-      defaultPhase = Phase.GENERATE_SOURCES)
+@MojoGoal(value = "generate-installation")
+@MojoRequiresDependencyResolution(value = "compile")
+@MojoPhase(value = "generate-sources")
 public class GenerateInstallationMojo
     extends AbstractEFapsInstallMojo
 {
@@ -103,7 +104,7 @@ public class GenerateInstallationMojo
     /**
      * The current Maven project.
     */
-    @Parameter(defaultValue = "${project}",
+    @MojoParameter(defaultValue = "${project}",
                required = true,
                readonly = true)
     private MavenProject project;
@@ -113,7 +114,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles()
      */
-    @Parameter
+    @MojoParameter
     private final List<String> copyIncludes = null;
 
     /**
@@ -121,7 +122,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles()
      */
-    @Parameter
+    @MojoParameter
     private final List<String> copyExcludes = null;
 
     /**
@@ -129,31 +130,31 @@ public class GenerateInstallationMojo
      * is the classes directory so that the Maven standard jar goal could pack
      * the eFaps installation files.
      */
-    @Parameter(expression = "${project.build.outputDirectory}")
+    @MojoParameter(expression = "${project.build.outputDirectory}")
     private File targetDirectory;
 
     /**
      * Name of the XML installation file (within the target directory).
      */
-    @Parameter(defaultValue = "META-INF/efaps/install.xml")
+    @MojoParameter(defaultValue = "META-INF/efaps/install.xml")
     private String targetInstallFile;
 
     /**
      * Encoding of the target XML installation file.
      */
-    @Parameter(defaultValue = "UTF-8")
+    @MojoParameter(defaultValue = "UTF-8")
     private String targetEncoding;
 
     /**
      * Name of the root package where the installation is copied.
      */
-    @Parameter(defaultValue = "org/efaps/installations/applications")
+    @MojoParameter(defaultValue = "org/efaps/installations/applications")
     private String rootPackage;
 
     /**
      * Must the ESJP's compiled and included in the generated jar file?
      */
-    @Parameter(defaultValue = "true")
+    @MojoParameter(defaultValue = "true")
     private boolean compile;
 
     /**

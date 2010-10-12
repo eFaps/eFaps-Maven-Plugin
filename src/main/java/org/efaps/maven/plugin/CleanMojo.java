@@ -21,9 +21,9 @@
 package org.efaps.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
-
 import org.efaps.db.Context;
-import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
+import org.jfrog.maven.annomojo.annotations.MojoGoal;
+
 
 /**
  * Delete Old Data and Data Model within eFaps of current logged in SQL
@@ -32,7 +32,7 @@ import org.efaps.maven_java5.org.apache.maven.tools.plugin.Goal;
  * @author tmo
  * @version $Id$
  */
-@Goal(name = "clean")
+@MojoGoal(value = "clean")
 public class CleanMojo extends EFapsAbstractMojo  {
 
   /**
