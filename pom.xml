@@ -89,8 +89,8 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn</developerConnection>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tunk</developerConnection>
         <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
     </scm>
 
