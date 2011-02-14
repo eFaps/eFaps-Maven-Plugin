@@ -374,7 +374,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>1.9.0</version>
+            <version>1.11.0</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
