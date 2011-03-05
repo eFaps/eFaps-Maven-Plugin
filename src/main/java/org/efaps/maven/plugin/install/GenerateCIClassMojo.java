@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2010 The eFaps Team
+ * Copyright 2003 - 2011 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,12 +138,8 @@ public class GenerateCIClassMojo
             initJavaFile();
             for (final String fileName : getCopyFiles()) {
                 final File srcFile = new File(this.sourceDirectory, fileName);
-
-                // einen XML Reader erzeugen
                 final XMLReader reader = XMLReaderFactory.createXMLReader();
-                // den eigenen Sax Content Handler registrieren
                 reader.setContentHandler(new TypeHandler());
-                // unsere Beispiel XML Datei parsen
 
                 final InputStream stream = new FileInputStream(srcFile);
                 reader.parse(new InputSource(stream));
@@ -175,7 +171,7 @@ public class GenerateCIClassMojo
     }
 
     /**
-     *
+     * inti the logger.
      */
     private void init()
     {
@@ -186,13 +182,16 @@ public class GenerateCIClassMojo
         }
     }
 
+    /**
+     * Close the java file.
+     */
     private void closeJavaFile()
     {
         this.java.append("}\n");
     }
 
     /**
-     *
+     * Initiate the java file.
      */
     private void initJavaFile()
     {
@@ -203,6 +202,9 @@ public class GenerateCIClassMojo
             .append("public final class CI").append(this.ciName).append("\n{\n");
     }
 
+    /**
+     * @return array of file to be copied
+     */
     protected String[] getCopyFiles()
     {
         // scan
@@ -248,21 +250,39 @@ public class GenerateCIClassMojo
          */
         private boolean called = false;
 
+        /**
+         * List of attributes.
+         */
         private final List<String> attributes = new ArrayList<String>();
+
         /**
          * StringtbUIlder used to hold the content.
          */
         private StringBuilder content = null;
 
+        /**
+         * Is the currently analyzed xml a citype.
+         */
         private boolean isCiType = false;
 
         /**
          * Tags used in this Handler.
          */
         private final Stack<String> tag = new Stack<String>();
+
+        /**
+         * Name of the type.
+         */
         private String typeName;
+
+        /**
+         * UUID of the type.
+         */
         private String uuid;
 
+        /**
+         * Parent of the type.
+         */
         private String parent;
 
         @Override
@@ -271,7 +291,7 @@ public class GenerateCIClassMojo
                                  final String _qName,
                                  final Attributes _atts)
         {
-            if ("datamodel-type".equals(_qName) || "datamodel-statusgroup".equals(_qName) ) {
+            if ("datamodel-type".equals(_qName) || "datamodel-statusgroup".equals(_qName)) {
                 this.isCiType = true;
             }
             this.called = false;
@@ -296,9 +316,9 @@ public class GenerateCIClassMojo
                 } else {
                     this.attributes.add(this.content.toString().trim());
                 }
-            } else if ("uuid".equals(qName)) {
+            } else if ("uuid".equals(qName) && this.tag.size() == 2) {
                 this.uuid = this.content.toString().trim();
-            } else if ("parent".equals(qName)) {
+            } else if ("parent".equals(qName) && this.tag.size() == 3) {
                 this.parent = this.content.toString().trim();
             }
 
