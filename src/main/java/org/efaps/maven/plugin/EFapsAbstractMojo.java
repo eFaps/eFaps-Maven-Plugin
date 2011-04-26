@@ -154,7 +154,7 @@ public abstract class EFapsAbstractMojo
     protected void reloadCache()
         throws EFapsException
     {
-        startTransaction();
+        Context.begin();
         RunLevel.init("shell");
         RunLevel.execute();
         abortTransaction();
