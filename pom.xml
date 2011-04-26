@@ -123,7 +123,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.7</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.jfrog.maven.annomojo</groupId>
@@ -144,14 +144,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <!--
-                Must defined here to use checkstyle version 5
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.5</version>
-            </plugin>
+
             <!--
                 Compiler Settings:
                 - Java 1.6 is needed!
@@ -167,18 +160,17 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
-
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
+                <version>2.1</version>
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
                 </configuration>
             </plugin>
-                        <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.0-beta-2</version>
+                <version>3.0-beta-3</version>
                 <configuration>
                     <reportPlugins>
                         <plugin>
@@ -309,6 +301,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
+                        <version>2.1.2</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -323,6 +316,7 @@
                         <inherited>true</inherited>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.7</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -337,6 +331,7 @@
                         <inherited>true</inherited>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-deploy-plugin</artifactId>
+                        <version>2.5</version>
                         <configuration>
                             <updateReleaseInfo>true</updateReleaseInfo>
                         </configuration>
@@ -345,6 +340,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.2</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -374,7 +370,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
-            <version>1.11.3</version>
+            <version>1.14.0</version>
         </dependency>
 
         <!-- eFaps Maven Logger -->
@@ -390,7 +386,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.4</version>
+            <version>2.0.1</version>
         </dependency>
 
         <!--
@@ -452,7 +448,7 @@
         <dependency>
             <groupId>org.ow2.spec.ee</groupId>
             <artifactId>ow2-connector-1.5-spec</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.7</version>
         </dependency>
         <!-- needed indirectly for the transaction manager -->
         <dependency>
