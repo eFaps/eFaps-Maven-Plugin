@@ -122,7 +122,7 @@ public abstract class AbstractEFapsInstallMojo
      * generated files will participate in later build phases like compiling and
      * packaging.
      */
-    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/ci")
+    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/efaps")
     private File outputDirectory;
 
 
@@ -154,14 +154,14 @@ public abstract class AbstractEFapsInstallMojo
     {
         final List<String> ret = new ArrayList<String>();
         final DirectoryScanner ds = new DirectoryScanner();
-        final String[] included = (this.includes == null)
+        final String[] included = (getIncludes() == null)
             ? AbstractEFapsInstallMojo.DEFAULT_INCLUDES
                             .toArray(new String[AbstractEFapsInstallMojo.DEFAULT_INCLUDES.size()])
-            : this.includes.toArray(new String[this.includes.size()]);
-        final String[] excluded = (this.excludes == null)
+            : getIncludes().toArray(new String[getIncludes().size()]);
+        final String[] excluded = (getExcludes() == null)
             ? AbstractEFapsInstallMojo.DEFAULT_EXCLUDES
                             .toArray(new String[AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.size()])
-            : this.excludes.toArray(new String[this.excludes.size()]);
+            : getExcludes().toArray(new String[getExcludes().size()]);
         ds.setIncludes(included);
         ds.setExcludes(excluded);
         ds.setBasedir(getEFapsDir().toString());
@@ -224,5 +224,25 @@ public abstract class AbstractEFapsInstallMojo
     protected File getVersionFile()
     {
         return this.versionFile;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #includes}.
+     *
+     * @return value of instance variable {@link #includes}
+     */
+    public List<String> getIncludes()
+    {
+        return this.includes;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #excludes}.
+     *
+     * @return value of instance variable {@link #excludes}
+     */
+    public List<String> getExcludes()
+    {
+        return this.excludes;
     }
 }

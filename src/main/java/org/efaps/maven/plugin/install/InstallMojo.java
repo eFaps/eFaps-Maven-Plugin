@@ -46,7 +46,7 @@ public final class InstallMojo
     public void execute()
         throws MojoExecutionException
     {
-        init();
+        init(true);
         try {
             final Application appl = Application.getApplicationFromClassPath(getApplications(),
                                                                              getClasspathElements());

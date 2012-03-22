@@ -57,7 +57,7 @@ public class UpdateFromFileMojo
         throws MojoExecutionException, MojoFailureException
     {
         try {
-            init();
+            init(true);
             reloadCache();
             startTransaction();
 

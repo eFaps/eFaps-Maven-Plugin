@@ -55,7 +55,7 @@ public final class CompileMojo
      */
     public void execute()
     {
-        init();
+        init(true);
         boolean abort = true;
         try {
             if ("all".equalsIgnoreCase(this.target)) {

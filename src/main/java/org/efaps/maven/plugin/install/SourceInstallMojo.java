@@ -56,7 +56,7 @@ public final class SourceInstallMojo
     public void execute()
         throws MojoExecutionException
     {
-        init();
+        init(true);
 
         try {
             final Application appl = Application.getApplicationFromSource(

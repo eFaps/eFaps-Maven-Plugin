@@ -21,24 +21,22 @@
 package org.efaps.maven.plugin.install;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.tools.ant.DirectoryScanner;
-import org.efaps.maven.logger.SLF4JOverMavenLog;
+import org.efaps.update.FileType;
+import org.efaps.update.Install.InstallFile;
+import org.efaps.update.util.InstallationException;
+import org.efaps.update.version.Application;
 import org.jfrog.maven.annomojo.annotations.MojoGoal;
 import org.jfrog.maven.annomojo.annotations.MojoParameter;
 import org.jfrog.maven.annomojo.annotations.MojoPhase;
@@ -60,22 +58,25 @@ import org.xml.sax.helpers.XMLReaderFactory;
 @MojoRequiresDependencyResolution(value = "compile")
 @MojoPhase(value = "generate-sources")
 public class GenerateCIClassMojo
-    implements Mojo
+    extends AbstractEFapsInstallMojo
 {
-
-    /**
-     * The apache maven logger is stored in this instance variable.
-     *
-     * @see #getLog
-     * @see #setLog
-     */
-    private Log log = null;
-
 
     /**
      * The code is in this variable.
      */
     private final StringBuilder java = new StringBuilder();
+
+    /**
+     * The CiName.
+     */
+    @MojoParameter(required = true)
+    private String ciName;
+
+    /**
+     * The package name.
+     */
+    @MojoParameter(required = true, defaultValue = "org.efaps.esjp.ci")
+    private String ciPackage;
 
     /**
      * The current Maven project.
@@ -84,46 +85,7 @@ public class GenerateCIClassMojo
     private MavenProject project;
 
     /**
-     * The directory where the DataMOdel Configuration Item files are located.
-     */
-    @MojoParameter(defaultValue = "${basedir}/src/main/efaps/DataModels")
-    private File sourceDirectory;
-
-    /**
-     * The directory where the generated Class will be stored. The directory
-     * will be registered as a compile source root of the project such that the
-     * generated files will participate in later build phases like compiling and
-     * packaging.
-     */
-    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/ci")
-    private File outputDirectory;
-
-    @MojoParameter(required = true)
-    private String ciName;
-
-
-    @MojoParameter(required = true, defaultValue = "org.efaps.esjp.ci")
-    private String ciPackage;
-
-
-    /**
-     * List of includes.
-     */
-    private final List<String> includes = null;
-
-    /**
-     * Default list of includes used to evaluate the files to copy.
-     *
-     * @see #getFiles
-     */
-    private static final Set<String> DEFAULT_INCLUDES = new HashSet<String>();
-    static {
-        GenerateCIClassMojo.DEFAULT_INCLUDES.add("**/*.xml");
-    }
-
-    /**
-     * Generates the installation XML file and copies all eFaps definition
-     * installation files.
+     * Generates the installation XML file and copies all eFaps definition installation files.
      *
      * @see #generateInstallFile()
      * @see #copyFiles(String)
@@ -134,29 +96,43 @@ public class GenerateCIClassMojo
         throws MojoExecutionException, MojoFailureException
     {
         try {
-            init();
+            init(false);
             initJavaFile();
-            for (final String fileName : getCopyFiles()) {
-                final File srcFile = new File(this.sourceDirectory, fileName);
-                final XMLReader reader = XMLReaderFactory.createXMLReader();
-                reader.setContentHandler(new TypeHandler());
 
-                final InputStream stream = new FileInputStream(srcFile);
-                reader.parse(new InputSource(stream));
-                stream.close();
+            final Application appl = Application.getApplicationFromSource(
+                            getVersionFile(),
+                            getClasspathElements(),
+                            getEFapsDir(),
+                            getOutputDirectory(),
+                            getIncludes(),
+                            getExcludes(),
+                            getTypeMapping());
+
+            final List<InstallFile> files = appl.getInstall().getFiles();
+            for (final InstallFile file : files) {
+                if (file.getType().equals(FileType.XML)) {
+                    final XMLReader reader = XMLReaderFactory.createXMLReader();
+                    reader.setContentHandler(new TypeHandler());
+                    final URLConnection connection = file.getUrl().openConnection();
+                    connection.setUseCaches(false);
+                    final InputStream stream = connection.getInputStream();
+                    final InputSource source = new InputSource(stream);
+                    reader.parse(source);
+                    stream.close();
+                }
             }
             closeJavaFile();
-            this.outputDirectory.mkdir();
+            getOutputDirectory().mkdir();
 
             final String folders = this.ciPackage.replace(".", File.separator);
-            final File srcFolder = new File(this.outputDirectory, folders);
+            final File srcFolder = new File(getOutputDirectory(), folders);
             srcFolder.mkdirs();
 
-            final File javaFile =  new File(srcFolder, "CI" + this.ciName + ".java");
+            final File javaFile = new File(srcFolder, "CI" + this.ciName + ".java");
 
             FileUtils.writeStringToFile(javaFile, this.java.toString());
 
-            this.project.addCompileSourceRoot(this.outputDirectory.getAbsolutePath());
+            this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
 
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
@@ -167,18 +143,9 @@ public class GenerateCIClassMojo
         } catch (final IOException e) {
             getLog().error("IOException", e);
             throw new MojoExecutionException("SAXException");
-        }
-    }
-
-    /**
-     * inti the logger.
-     */
-    private void init()
-    {
-        try {
-            Class.forName("org.efaps.maven.logger.SLF4JOverMavenLog");
-            SLF4JOverMavenLog.LOGGER = getLog();
-        } catch (final ClassNotFoundException e) {
+        } catch (final InstallationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -196,49 +163,10 @@ public class GenerateCIClassMojo
     private void initJavaFile()
     {
         this.java.append("//CHECKSTYLE:OFF\n")
-            .append("package ").append(this.ciPackage).append(";\n")
-            .append("import org.efaps.ci.CIAttribute;\n")
-            .append("import org.efaps.ci.CIType;\n")
-            .append("public final class CI").append(this.ciName).append("\n{\n");
-    }
-
-    /**
-     * @return array of file to be copied
-     */
-    protected String[] getCopyFiles()
-    {
-        // scan
-        final DirectoryScanner ds = new DirectoryScanner();
-        ds.setBasedir(this.sourceDirectory.toString());
-        final String[] included = (this.includes == null)
-                        ? GenerateCIClassMojo.DEFAULT_INCLUDES
-                                        .toArray(new String[GenerateCIClassMojo.DEFAULT_INCLUDES.size()])
-                        : this.includes.toArray(new String[this.includes.size()]);
-        ds.setIncludes(included);
-        ds.setCaseSensitive(true);
-        ds.scan();
-        return ds.getIncludedFiles();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.maven.plugin.Mojo#getLog()
-     */
-    @Override
-    public Log getLog()
-    {
-        return this.log;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * org.apache.maven.plugin.Mojo#setLog(org.apache.maven.plugin.logging.Log)
-     */
-    @Override
-    public void setLog(final Log _log)
-    {
-        this.log = _log;
+                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.ci.CIAttribute;\n")
+                        .append("import org.efaps.ci.CIType;\n")
+                        .append("public final class CI").append(this.ciName).append("\n{\n");
     }
 
     public class TypeHandler
@@ -301,8 +229,7 @@ public class GenerateCIClassMojo
 
         /*
          * (non-Javadoc)
-         * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
-         * java.lang.String, java.lang.String)
+         * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
          */
         @Override
         public void endElement(final String uri,
@@ -350,19 +277,30 @@ public class GenerateCIClassMojo
                     this.parent = this.parent.substring(this.parent.indexOf("_") + 1);
                 }
 
-                GenerateCIClassMojo.this.java.append("public static final _").append(this.typeName).append(" ")
-                    .append(this.typeName).append(" = new _").append(this.typeName).append("(\"")
-                    .append(this.uuid).append("\");\n")
-                    .append("public static class _").append(this.typeName).append(" extends ")
-                    .append(this.parent == null ? "CIType" : "org.efaps.esjp.ci.CI" + parentClass + "._" + this.parent)
-                    .append("\n{\n")
-                    .append("    protected _").append(this.typeName).append("(final String _uuid)\n    {\n")
-                    .append("        super(_uuid);").append("\n    }\n");
+                GenerateCIClassMojo.this.java
+                                .append("public static final _")
+                                .append(this.typeName)
+                                .append(" ")
+                                .append(this.typeName)
+                                .append(" = new _")
+                                .append(this.typeName)
+                                .append("(\"")
+                                .append(this.uuid)
+                                .append("\");\n")
+                                .append("public static class _")
+                                .append(this.typeName)
+                                .append(" extends ")
+                                .append(this.parent == null ? "CIType" : "org.efaps.esjp.ci.CI" + parentClass + "._"
+                                                + this.parent)
+                                .append("\n{\n")
+                                .append("    protected _").append(this.typeName)
+                                .append("(final String _uuid)\n    {\n")
+                                .append("        super(_uuid);").append("\n    }\n");
 
                 for (final String attribute : this.attributes) {
                     if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
                         GenerateCIClassMojo.this.java.append("    public final CIAttribute ").append(attribute)
-                            .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
+                                        .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
                     }
                 }
                 GenerateCIClassMojo.this.java.append("}\n\n");

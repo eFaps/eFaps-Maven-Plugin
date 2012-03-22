@@ -92,7 +92,7 @@ public abstract class EFapsAbstractMojo
      * implementations).
      */
     @MojoParameter(expression = "${org.efaps.db.type}", required = true)
-    private String type;
+    protected String type;
 
     /**
      * Value for the timeout of the transaction.
@@ -121,6 +121,7 @@ public abstract class EFapsAbstractMojo
      /**
      * @todo better way instead of catching class not found exception (needed
      *       for the shell!)
+     * @param _startupDB start up the Database
      * @see #initStores
      * @see #convertToMap used to convert the connection string to a property
      *      map
@@ -128,7 +129,7 @@ public abstract class EFapsAbstractMojo
      * @see #factory factory class name
      * @see #connection connection properties
      */
-    protected void init()
+    protected void init(final boolean _startupDB)
     {
         try {
             Class.forName("org.efaps.maven.logger.SLF4JOverMavenLog");
@@ -137,11 +138,13 @@ public abstract class EFapsAbstractMojo
         }
 
         try {
-            AppAccessHandler.init(null, new HashSet<String>());
-            StartupDatabaseConnection.startup(this.type, this.factory, convertToMap(this.connection),
+            if (_startupDB) {
+                AppAccessHandler.init(null, new HashSet<String>());
+                StartupDatabaseConnection.startup(this.type, this.factory, convertToMap(this.connection),
                                               this.transactionManager, this.transactionTimeout == null
                                                                         ? null
                                                                         : Integer.parseInt(this.transactionTimeout));
+            }
         } catch (final StartupException e) {
             getLog().error("Initialize Database Connection failed: " + e.toString());
         }

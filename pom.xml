@@ -39,8 +39,8 @@
     ************************************************************************* -->
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
-    <artifactId>maven-efaps-plugin</artifactId>
-    <version>2.19.1-7.5.4.v20111024-SNAPSHOT</version>
+    <artifactId>efaps-maven-plugin</artifactId>
+    <version>3.0.0-7.5.4.v20111024-SNAPSHOT</version>
     <name>Maven eFaps Plug-In</name>
     <description>
         Maven eFaps Plug-In to install / deploy eFaps applications.

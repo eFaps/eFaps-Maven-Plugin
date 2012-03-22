@@ -43,7 +43,7 @@ public class CleanMojo extends EFapsAbstractMojo  {
    * @throws MojoExecutionException if delete of old data and data model failed
    */
   public void execute() throws MojoExecutionException  {
-    init();
+    init(true);
     try {
       getLog().info("Delete Old Data and Data Model");
       Context.begin();
