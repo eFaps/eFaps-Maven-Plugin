@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.io.FileUtils;
@@ -75,7 +77,7 @@ public class GenerateJmsClassMojo
     /**
      * This Regex will be used to replace the regex result with with empty string .
      */
-    @MojoParameter(required = true, defaultValue = "[A-Za-z]+_")
+    @MojoParameter(required = true, defaultValue = "^[A-Za-z]+_")
     private String jmsClassNameRegex;
 
     /**
@@ -83,6 +85,11 @@ public class GenerateJmsClassMojo
      */
     @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
+
+    /**
+     * Mapping between the Types of eFaps and the package the responding class is in.
+     */
+    private final Map<String, String> type2package = new HashMap<String, String>();
 
     /**
      * Executes the install goal.
@@ -138,6 +145,7 @@ public class GenerateJmsClassMojo
     private void readFile(final String _applicationName,
                           final File _srcFolder,
                           final InstallFile _file)
+        throws MojoExecutionException
     {
         try {
 
@@ -157,15 +165,14 @@ public class GenerateJmsClassMojo
             stream.close();
 
             if (handler.isDmType() && !handler.isDeactivated()) {
+                this.type2package.put(handler.getTypeName(), _applicationName);
                 final File javaFile = new File(folder, handler.getClassName() + ".java");
                 FileUtils.writeStringToFile(javaFile, handler.getJava().toString());
             }
         } catch (final SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("Could not execute SourceInstall script", e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
 
     }
@@ -215,19 +222,35 @@ public class GenerateJmsClassMojo
          */
         private String parent;
 
+        /**
+         * Is this the handler for a eFaps Datamodel Type.
+         */
         private boolean dmType;
 
+        /**
+         * The java code created.
+         */
         private final StringBuilder java = new StringBuilder();
 
+        /**
+         * Name of the application = package name.
+         */
         private final String applicationName;
 
+        /**
+         * Name of the class.
+         */
         private String className;
 
+        /**
+         * Is the jsm generation deactivated.
+         */
         private boolean deactivated;
 
+        /**
+         * Execute it or not.
+         */
         private boolean exec;
-
-
 
         /**
          * @param _applicationName
@@ -295,7 +318,7 @@ public class GenerateJmsClassMojo
         public void startDocument()
             throws SAXException
         {
-            this.java.append("package org.efaps.esjp.jms.").append(this.applicationName).append(";\n")
+            this.java.append("package org.efaps.esjp.jms.").append(this.applicationName).append(";\n\n")
                 .append("import java.util.ArrayList;\n")
                 .append("import javax.xml.bind.annotation.XmlAccessType;\n")
                 .append("import javax.xml.bind.annotation.XmlAccessorType;\n")
@@ -377,14 +400,26 @@ public class GenerateJmsClassMojo
         public void endDocument()
             throws SAXException
         {
-            if (this.dmType && this.exec) {
+            if (this.dmType) {
                 this.java.append("@XmlAccessorType(XmlAccessType.NONE)\n")
                     .append("@XmlRootElement(name = \"").append(this.typeName).append("\")\n")
                     .append("@XmlType(name = \"").append(this.applicationName).append(".")
                         .append(getTypeName()).append("\")\n")
                     .append("@Type(uuid = \"").append(this.uuid).append("\")\n")
-                    .append("public class ").append(this.className).append("\n")
-                    .append("   extends AbstractObject\n")
+                    .append("public class ").append(this.className).append("\n");
+
+                final String extendStr;
+                if (this.parent == null || this.parent.equals("Admin_Abstract")) {
+                    extendStr = "AbstractObject";
+                } else if (GenerateJmsClassMojo.this.type2package.containsKey(this.parent)
+                            && !this.applicationName.equals(GenerateJmsClassMojo.this.type2package.get(this.parent))) {
+                    extendStr = GenerateJmsClassMojo.this.jmsPackage + "."
+                                    + GenerateJmsClassMojo.this.type2package.get(this.parent) + "."
+                                    + this.parent.replaceAll(GenerateJmsClassMojo.this.jmsClassNameRegex, "");
+                } else {
+                    extendStr = this.parent.replaceAll(GenerateJmsClassMojo.this.jmsClassNameRegex, "");
+                }
+                this.java.append("   extends ").append(extendStr).append("\n")
                     .append("{\n");
 
                 final StringBuilder getter = new StringBuilder();
