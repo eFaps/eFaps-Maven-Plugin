@@ -319,7 +319,6 @@ public class GenerateJmsClassMojo
             throws SAXException
         {
             this.java.append("package org.efaps.esjp.jms.").append(this.applicationName).append(";\n\n")
-                .append("import java.util.ArrayList;\n")
                 .append("import javax.xml.bind.annotation.XmlAccessType;\n")
                 .append("import javax.xml.bind.annotation.XmlAccessorType;\n")
                 .append("import javax.xml.bind.annotation.XmlElement;\n")
@@ -328,9 +327,8 @@ public class GenerateJmsClassMojo
                 .append("import javax.xml.bind.annotation.XmlRootElement;\n")
                 .append("import javax.xml.bind.annotation.XmlType;\n")
                 .append("import org.efaps.esjp.jms.AbstractObject;\n")
-                .append("import org.efaps.esjp.jms.annotation.Attribute;\n")
-                .append("import org.efaps.esjp.jms.annotation.Type;\n")
-                .append("import org.efaps.esjp.jms.attributes.*;\n");
+                .append("import org.efaps.esjp.jms.annotation.*;\n")
+                .append("import org.efaps.esjp.jms.attributes.*;\n\n");
         }
 
         @Override
@@ -427,12 +425,20 @@ public class GenerateJmsClassMojo
                 for (final String attribute : this.attributes) {
                     final String attrType = typeiter.next();
                     if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
+                        final StringBuilder setter = new StringBuilder();
                         this.java
                             .append("    @XmlElement(name = \"").append(attribute.toLowerCase()).append("\")\n")
                             .append("    private ");
                         getter
-                            .append("    @Attribute(name = \"").append(attribute).append("\")\n")
-                            .append("    public ");
+                            .append("    @Attribute(name = \"").append(attribute)
+                                .append("\", method = MethodType.GETTER)\n")
+                             .append("    public ");
+
+                        setter
+                            .append("    @Attribute(name = \"").append(attribute)
+                                .append("\", method = MethodType.SETTER)\n")
+                            .append("    public void ");
+
                         final String attrTypeTmp;
                         if ("String".equals(attrType)) {
                             attrTypeTmp = "StringAttribute ";
@@ -455,6 +461,15 @@ public class GenerateJmsClassMojo
                             .append("    {\n")
                             .append("        return this.").append(instanceVariable.toLowerCase()).append(";\n")
                             .append("    }\n\n");
+                        setter
+                            .append("set").append(instanceVariable).append("(final ").append(attrTypeTmp).append("_")
+                                .append(instanceVariable.toLowerCase()).append(")\n")
+                            .append("    {\n")
+                            .append("        this.").append(instanceVariable.toLowerCase()).append(" = _")
+                                .append(instanceVariable.toLowerCase()).append(";\n")
+                            .append("    }\n\n");
+
+                        getter.append(setter);
                     }
                 }
                 this.java.append(getter).append("}\n");
