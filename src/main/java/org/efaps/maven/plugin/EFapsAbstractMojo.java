@@ -97,8 +97,8 @@ public abstract class EFapsAbstractMojo
     /**
      * Value for the timeout of the transaction.
      */
-    @MojoParameter(expression = "${org.efaps.transaction.timeout}", required = false)
-    private String transactionTimeout;
+    @MojoParameter(expression = "${org.efaps.configuration.properties}", required = false)
+    private String configProps;
 
     /**
      *Name of the class for the transaction manager..
@@ -141,9 +141,7 @@ public abstract class EFapsAbstractMojo
             if (_startupDB) {
                 AppAccessHandler.init(null, new HashSet<String>());
                 StartupDatabaseConnection.startup(this.type, this.factory, convertToMap(this.connection),
-                                              this.transactionManager, this.transactionTimeout == null
-                                                                        ? null
-                                                                        : Integer.parseInt(this.transactionTimeout));
+                                              this.transactionManager, convertToMap(this.configProps));
             }
         } catch (final StartupException e) {
             getLog().error("Initialize Database Connection failed: " + e.toString());
@@ -221,7 +219,6 @@ public abstract class EFapsAbstractMojo
                 properties.put(key, value);
             }
         }
-
         return properties;
     }
 
