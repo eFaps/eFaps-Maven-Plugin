@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.TreeMap;
 
@@ -140,61 +139,11 @@ public class GenerateJmsClassMojo
                     readFile(applicationName, srcFolder, file);
                 }
             }
-            writeActionFile();
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
     }
-
-    private void writeActionFile()
-    {
-        final StringBuilder java = new StringBuilder();
-        java.append("package org.efaps.esjp.jms.actions;\n\n")
-            .append("import java.util.ArrayList;\n")
-            .append("import javax.xml.bind.annotation.XmlElementWrapper;\n")
-            .append("import javax.xml.bind.annotation.XmlElements;\n")
-            .append("import javax.xml.bind.annotation.XmlElement;\n")
-            .append("import javax.xml.bind.annotation.XmlType;\n")
-            .append("import org.efaps.esjp.jms.AbstractObject;\n\n")
-            .append("@XmlType(name = \"action.abstract\")\n")
-            .append("public abstract class AbstractAction\n")
-            .append("    implements IAction\n\n")
-            .append("    {\n")
-            .append("    @XmlElements({\n");
-
-        boolean first = true;
-        for (final Entry<String, String> entry : this.type2ClassName.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                java.append(",\n");
-            }
-            java.append("        @XmlElement(name=\"").append(entry.getKey())
-                .append("\", type = ").append(entry.getValue()).append(".class)");
-        }
-
-        java.append("\n    })\n\n")
-            .append("    @XmlElementWrapper\n")
-            .append("    private final ArrayList<AbstractObject> objects = new ArrayList<AbstractObject>();\n")
-            .append("    public ArrayList<AbstractObject> getObjects()\n")
-            .append("    {\n")
-            .append("        return this.objects;\n")
-            .append("    }\n")
-            .append("}\n");
-
-        final File folder = new File(getOutputDirectory(), "org.efaps.esjp.jms.actions".replace(".", File.separator));
-        folder.mkdirs();
-        final File javaFile = new File(folder, "AbstractAction.java");
-        try {
-            FileUtils.writeStringToFile(javaFile, java.toString());
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
 
     private void readFile(final String _applicationName,
                           final File _srcFolder,
@@ -309,6 +258,16 @@ public class GenerateJmsClassMojo
         private boolean exec;
 
         /**
+         * Is this type abstract.
+         */
+        private boolean abstractType = false;
+
+        /**
+         * Is this a classification.
+         */
+        private boolean classification = false;
+
+        /**
          * @param _applicationName
          */
         public TypeHandler(final String _applicationName)
@@ -383,6 +342,7 @@ public class GenerateJmsClassMojo
                 .append("import javax.xml.bind.annotation.XmlRootElement;\n")
                 .append("import javax.xml.bind.annotation.XmlType;\n")
                 .append("import org.efaps.esjp.jms.AbstractObject;\n")
+                .append("import org.efaps.esjp.jms.AbstractClassificationObject;\n")
                 .append("import org.efaps.esjp.jms.annotation.*;\n")
                 .append("import org.efaps.esjp.jms.attributes.*;\n\n");
         }
@@ -396,8 +356,10 @@ public class GenerateJmsClassMojo
             if ("datamodel-type".equals(_qName) || "datamodel-statusgroup".equals(_qName)) {
                 this.dmType = true;
             }
-            if ("purpose".equals(_qName) && "false".equalsIgnoreCase(_atts.getValue("GeneralInstance"))) {
-                this.deactivated = true;
+            if ("purpose".equals(_qName)) {
+                this.deactivated = "false".equalsIgnoreCase(_atts.getValue("GeneralInstance"));
+                this.abstractType = "true".equalsIgnoreCase(_atts.getValue("abstract"));
+                this.classification = "true".equalsIgnoreCase(_atts.getValue("classification"));
             }
             this.called = false;
             this.content = null;
@@ -460,11 +422,16 @@ public class GenerateJmsClassMojo
                     .append("@XmlType(name = \"").append(this.applicationName).append(".")
                         .append(getTypeName()).append("\")\n")
                     .append("@Type(uuid = \"").append(this.uuid).append("\")\n")
-                    .append("public class ").append(this.className).append("\n");
+                    .append("public ").append(this.abstractType ? "abstract " : "").append("class ")
+                        .append(this.className).append("\n");
 
                 final String extendStr;
                 if (this.parent == null || this.parent.equals("Admin_Abstract")) {
-                    extendStr = "AbstractObject";
+                    if (this.classification) {
+                        extendStr = "AbstractClassificationObject";
+                    } else {
+                        extendStr = "AbstractObject";
+                    }
                 } else if (GenerateJmsClassMojo.this.type2package.containsKey(this.parent)
                             && !this.applicationName.equals(GenerateJmsClassMojo.this.type2package.get(this.parent))) {
                     extendStr = GenerateJmsClassMojo.this.jmsPackage + "."
