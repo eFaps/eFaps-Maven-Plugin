@@ -465,6 +465,8 @@ public class GenerateJmsClassMojo
                         final String attrTypeTmp;
                         if ("String".equals(attrType)) {
                             attrTypeTmp = "StringAttribute ";
+                        } else if ("Long".equals(attrType)){
+                            attrTypeTmp = "LongAttribute ";
                         } else {
                             attrTypeTmp = "StringAttribute ";
                         }
