@@ -467,6 +467,14 @@ public class GenerateJmsClassMojo
                             attrTypeTmp = "StringAttribute ";
                         } else if ("Long".equals(attrType)){
                             attrTypeTmp = "LongAttribute ";
+                        } else if ("Integer".equals(attrType)){
+                            attrTypeTmp = "IntegerAttribute ";
+                        } else if ("Link".equals(attrType)){
+                            attrTypeTmp = "LinkAttribute ";
+                        } else if ("LinkWithRanges".equals(attrType)){
+                            attrTypeTmp = "LinkAttribute ";
+                        } else if ("Decimal".equals(attrType)){
+                            attrTypeTmp = "DecimalAttribute ";
                         } else {
                             attrTypeTmp = "StringAttribute ";
                         }
