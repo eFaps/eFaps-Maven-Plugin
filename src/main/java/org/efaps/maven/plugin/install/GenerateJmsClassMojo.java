@@ -475,6 +475,14 @@ public class GenerateJmsClassMojo
                             attrTypeTmp = "LinkAttribute ";
                         } else if ("Decimal".equals(attrType)){
                             attrTypeTmp = "DecimalAttribute ";
+                        } else if ("Date".equals(attrType)){
+                            attrTypeTmp = "DateAttribute ";
+                        } else if ("DateTime".equals(attrType)){
+                            attrTypeTmp = "DateTimeAttribute ";
+                        } else if ("Status".equals(attrType)){
+                            attrTypeTmp = "StatusAttribute ";
+                        } else if ("Rate".equals(attrType)){
+                            attrTypeTmp = "RateAttribute ";
                         } else {
                             attrTypeTmp = "StringAttribute ";
                         }
