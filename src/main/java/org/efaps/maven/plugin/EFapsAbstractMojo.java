@@ -205,18 +205,20 @@ public abstract class EFapsAbstractMojo
     {
         final Map<String, String> properties = new HashMap<String, String>();
 
-        // separated all key / value pairs
-        final Pattern pattern = Pattern.compile("(([^\\\\,])|(\\\\,)|(\\\\))*");
-        final Matcher matcher = pattern.matcher(_text);
+        if (_text != null) {
+            // separated all key / value pairs
+            final Pattern pattern = Pattern.compile("(([^\\\\,])|(\\\\,)|(\\\\))*");
+            final Matcher matcher = pattern.matcher(_text);
 
-        while (matcher.find()) {
-            final String group = matcher.group().trim();
-            if (group.length() > 0) {
-                // separated key from value
-                final int index = group.indexOf('=');
-                final String key = (index > 0) ? group.substring(0, index).trim() : group.trim();
-                final String value = (index > 0) ? group.substring(index + 1).trim() : "";
-                properties.put(key, value);
+            while (matcher.find()) {
+                final String group = matcher.group().trim();
+                if (group.length() > 0) {
+                    // separated key from value
+                    final int index = group.indexOf('=');
+                    final String key = (index > 0) ? group.substring(0, index).trim() : group.trim();
+                    final String value = (index > 0) ? group.substring(index + 1).trim() : "";
+                    properties.put(key, value);
+                }
             }
         }
         return properties;
