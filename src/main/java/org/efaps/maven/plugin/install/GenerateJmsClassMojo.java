@@ -62,24 +62,40 @@ import org.xml.sax.helpers.XMLReaderFactory;
 public class GenerateJmsClassMojo
     extends AbstractEFapsInstallMojo
 {
-
     /**
-     * The package name.
+     * The base package name.
      */
     @MojoParameter(required = true, defaultValue = "org.efaps.esjp.jms")
     private String jmsPackage;
 
     /**
-     * This Regex will be used to replace the regex with empty string .
+     * This Regex will be used to replace the application name
+     * with {@link #jmsPackageReplacement}.
      */
-    @MojoParameter(required = true, defaultValue = "eFaps-|eFapsApp-")
+    @MojoParameter(required = true, defaultValue = "eFaps-|eFapsApp-",
+                   description = "This Regex will be used to replace the application name with jmsPackageReplacement")
     private String jmsPackageRegex;
 
     /**
-     * This Regex will be used to replace the regex result with with empty string .
+     * The replacement String used in conjunction with {@link #jmsPackageRegex}.
+     */
+    @MojoParameter(defaultValue = "",
+                   description = "The replacement String used in conjunction with jmsPackageRegex")
+    private final String jmsPackageReplacement;
+
+    /**
+     * This Regex will be used to replace the Classname result
+     * with {@link #jmsClassNameReplacement}.
      */
     @MojoParameter(required = true, defaultValue = "^[A-Za-z]+_")
     private String jmsClassNameRegex;
+
+    /**
+     * The replacement String used in conjunction with {@link #jmsClassNameRegex}.
+     */
+    @MojoParameter(defaultValue = "",
+                   description = "The replacement String used in conjunction with jmsClassNameRegex")
+    private final String jmsClassNameReplacement;
 
     /**
      * The current Maven project.
@@ -92,7 +108,20 @@ public class GenerateJmsClassMojo
      */
     private final Map<String, String> type2package = new HashMap<String, String>();
 
+    /**
+     * Mapping between the Types of eFaps and the responding class.
+     */
     private final Map<String, String> type2ClassName = new TreeMap<String, String>();
+
+
+    /**
+     * Constructor setting empty string defautl values.
+     */
+    public GenerateJmsClassMojo()
+    {
+        this.jmsClassNameReplacement = "";
+        this.jmsPackageReplacement = "";
+    }
 
     /**
      * Executes the install goal.
@@ -151,10 +180,7 @@ public class GenerateJmsClassMojo
         throws MojoExecutionException
     {
         try {
-
-            final File folder = new File(_srcFolder, _applicationName);
-            folder.mkdirs();
-            final TypeHandler handler = new TypeHandler(_applicationName);
+            final TypeHandler handler = new TypeHandler();
             XMLReader reader;
 
             reader = XMLReaderFactory.createXMLReader();
@@ -168,9 +194,11 @@ public class GenerateJmsClassMojo
             stream.close();
 
             if (handler.isDmType() && !handler.isDeactivated()) {
-                this.type2package.put(handler.getTypeName(), _applicationName);
+                this.type2package.put(handler.getTypeName(), handler.getPackageName());
                 this.type2ClassName.put(handler.getTypeName(), "org.efaps.esjp.jms."
-                                + _applicationName + "." + handler.getClassName());
+                                + handler.getPackageName() + "." + handler.getClassName());
+                final File folder = new File(_srcFolder, handler.getPackageName());
+                folder.mkdirs();
                 final File javaFile = new File(folder, handler.getClassName() + ".java");
                 FileUtils.writeStringToFile(javaFile, handler.getJava().toString());
             }
@@ -240,7 +268,8 @@ public class GenerateJmsClassMojo
         /**
          * Name of the application = package name.
          */
-        private final String applicationName;
+        private String packageName;
+
 
         /**
          * Name of the class.
@@ -268,11 +297,13 @@ public class GenerateJmsClassMojo
         private boolean classification = false;
 
         /**
-         * @param _applicationName
+         * Getter method for the instance variable {@link #packageName}.
+         *
+         * @return value of instance variable {@link #packageName}
          */
-        public TypeHandler(final String _applicationName)
+        public String getPackageName()
         {
-            this.applicationName = _applicationName;
+            return this.packageName;
         }
 
         /**
@@ -325,28 +356,6 @@ public class GenerateJmsClassMojo
             return this.deactivated;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see org.xml.sax.helpers.DefaultHandler#startDocument()
-         */
-        @Override
-        public void startDocument()
-            throws SAXException
-        {
-            this.java.append("package org.efaps.esjp.jms.").append(this.applicationName).append(";\n\n")
-                .append("import javax.xml.bind.annotation.XmlAccessType;\n")
-                .append("import javax.xml.bind.annotation.XmlAccessorType;\n")
-                .append("import javax.xml.bind.annotation.XmlElement;\n")
-                .append("import javax.xml.bind.annotation.XmlElementWrapper;\n")
-                .append("import javax.xml.bind.annotation.XmlElements;\n")
-                .append("import javax.xml.bind.annotation.XmlRootElement;\n")
-                .append("import javax.xml.bind.annotation.XmlType;\n")
-                .append("import org.efaps.esjp.jms.AbstractObject;\n")
-                .append("import org.efaps.esjp.jms.AbstractClassificationObject;\n")
-                .append("import org.efaps.esjp.jms.annotation.*;\n")
-                .append("import org.efaps.esjp.jms.attributes.*;\n\n");
-        }
-
         @Override
         public void startElement(final String _namespaceURI,
                                  final String _localName,
@@ -380,6 +389,11 @@ public class GenerateJmsClassMojo
                 this.uuid = this.content.toString().trim();
             }
 
+            if ("file-application".equals(_qName)) {
+                this.packageName = this.content.toString().trim().replaceAll(GenerateJmsClassMojo.this.jmsPackageRegex,
+                                GenerateJmsClassMojo.this.jmsPackageReplacement).toLowerCase();
+            }
+
             if ("version-expression".equals(_qName)) {
                 //TODO change for a real validation of the version expression
                 this.exec = this.content.toString().contains("latest");
@@ -388,7 +402,8 @@ public class GenerateJmsClassMojo
                 if ("name".equals(_qName)) {
                     if (this.tag.size() == 3) {
                         this.typeName = this.content.toString().trim();
-                        this.className = this.typeName.replaceAll(GenerateJmsClassMojo.this.jmsClassNameRegex, "");
+                        this.className = this.typeName.replaceAll(GenerateJmsClassMojo.this.jmsClassNameRegex,
+                                        GenerateJmsClassMojo.this.jmsClassNameReplacement);
                     } else {
                         this.attributes.add(this.content.toString().trim());
                     }
@@ -417,9 +432,21 @@ public class GenerateJmsClassMojo
             throws SAXException
         {
             if (this.dmType) {
-                this.java.append("@XmlAccessorType(XmlAccessType.NONE)\n")
+                this.java.append("package org.efaps.esjp.jms.").append(this.packageName).append(";\n\n")
+                    .append("import javax.xml.bind.annotation.XmlAccessType;\n")
+                    .append("import javax.xml.bind.annotation.XmlAccessorType;\n")
+                    .append("import javax.xml.bind.annotation.XmlElement;\n")
+                    .append("import javax.xml.bind.annotation.XmlElementWrapper;\n")
+                    .append("import javax.xml.bind.annotation.XmlElements;\n")
+                    .append("import javax.xml.bind.annotation.XmlRootElement;\n")
+                    .append("import javax.xml.bind.annotation.XmlType;\n")
+                    .append("import org.efaps.esjp.jms.AbstractObject;\n")
+                    .append("import org.efaps.esjp.jms.AbstractClassificationObject;\n")
+                    .append("import org.efaps.esjp.jms.annotation.*;\n")
+                    .append("import org.efaps.esjp.jms.attributes.*;\n\n")
+                    .append("@XmlAccessorType(XmlAccessType.NONE)\n")
                     .append("@XmlRootElement(name = \"").append(this.typeName).append("\")\n")
-                    .append("@XmlType(name = \"").append(this.applicationName).append(".")
+                    .append("@XmlType(name = \"").append(this.packageName).append(".")
                         .append(getTypeName()).append("\")\n")
                     .append("@Type(uuid = \"").append(this.uuid).append("\")\n")
                     .append("public ").append(this.abstractType ? "abstract " : "").append("class ")
@@ -433,7 +460,7 @@ public class GenerateJmsClassMojo
                         extendStr = "AbstractObject";
                     }
                 } else if (GenerateJmsClassMojo.this.type2package.containsKey(this.parent)
-                            && !this.applicationName.equals(GenerateJmsClassMojo.this.type2package.get(this.parent))) {
+                            && !this.packageName.equals(GenerateJmsClassMojo.this.type2package.get(this.parent))) {
                     extendStr = GenerateJmsClassMojo.this.jmsPackage + "."
                                     + GenerateJmsClassMojo.this.type2package.get(this.parent) + "."
                                     + this.parent.replaceAll(GenerateJmsClassMojo.this.jmsClassNameRegex, "");
