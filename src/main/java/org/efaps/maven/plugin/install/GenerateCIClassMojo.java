@@ -26,7 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.io.FileUtils;
@@ -52,7 +57,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
+ * @version $Id: GenerateCIClassMojo.java 7384 2012-03-22 15:57:32Z
+ *          jan@moxter.net $
  */
 @MojoGoal(value = "generate-ciclass")
 @MojoRequiresDependencyResolution(value = "compile")
@@ -60,11 +66,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 public class GenerateCIClassMojo
     extends AbstractEFapsInstallMojo
 {
-
-    /**
-     * The code is in this variable.
-     */
-    private final StringBuilder java = new StringBuilder();
 
     /**
      * The CiName.
@@ -79,13 +80,72 @@ public class GenerateCIClassMojo
     private String ciPackage;
 
     /**
+     * This Regex will be used to replace the ciName with
+     * {@link #ciNameReplacement}.
+     */
+    @MojoParameter(defaultValue = "^([A-Za-z]*)_",
+                    description = "This Regex will be used to replace the application name with ciNameReplacement")
+    private String ciTypeRegex;
+
+    /**
+     * The replacement String used in conjunction with {@link #ciNameRegex}.
+     */
+    @MojoParameter(defaultValue = "",
+                    description = "The replacement String used in conjunction with ciNameRegex")
+    private final String ciTypeReplacement;
+
+    /**
+     * This Regex will be used to replace the unallowed Characters with
+     * {@link #ciUnallowedReplacement}.
+     */
+    @MojoParameter(defaultValue = "-",
+                    description = "This Regex will be used to replace the unallowed Characters in Type names")
+    private final String ciUnallowedRegex;
+
+    /**
+     * The replacement String used in conjunction with {@link #ciUnallowedRegex}
+     * .
+     */
+    @MojoParameter(defaultValue = "",
+                    description = "The replacement String used in conjunction with ciNameRegex")
+    private final String ciUnallowedReplacement;
+
+    /**
+     * String to be used for String.indexof.
+     */
+    @MojoParameter(defaultValue = "_.+",
+                    description = "The replacement String used in conjunction with ciNameRegex")
+    private String ciParentRegex;
+
+    /**
+     * The replacement String used in conjunction with {@link #ciParentRegex}.
+     */
+    @MojoParameter(defaultValue = "",
+                    description = "The replacement String used in conjunction with ciParentRegex")
+    private final String ciParentReplacment;
+
+    private final Map<String, TypeHandler> types = new HashMap<String, TypeHandler>();
+
+    /**
      * The current Maven project.
      */
     @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     /**
-     * Generates the installation XML file and copies all eFaps definition installation files.
+     * Constructor.
+     */
+    public GenerateCIClassMojo()
+    {
+        this.ciTypeReplacement = "";
+        this.ciParentReplacment = "";
+        this.ciUnallowedReplacement = "";
+        this.ciUnallowedRegex = "-";
+    }
+
+    /**
+     * Generates the installation XML file and copies all eFaps definition
+     * installation files.
      *
      * @see #generateInstallFile()
      * @see #copyFiles(String)
@@ -97,8 +157,6 @@ public class GenerateCIClassMojo
     {
         try {
             init(false);
-            initJavaFile();
-
             final Application appl = Application.getApplicationFromSource(
                             getVersionFile(),
                             getClasspathElements(),
@@ -121,7 +179,72 @@ public class GenerateCIClassMojo
                     stream.close();
                 }
             }
-            closeJavaFile();
+            // there is a not unlikely chance to produce a duplicated Type, therefore it is checked here
+            final Map<String, String> typeTmp = new HashMap<String, String>();
+            final Set<String> duplicated = new HashSet<String>();
+            for (final Entry<String, TypeHandler> entry : this.types.entrySet()) {
+                String typeName = entry.getValue().typeName.replaceAll(this.ciUnallowedRegex,
+                                this.ciUnallowedReplacement);
+                typeName = typeName.replaceAll(this.ciTypeRegex == null ? (this.ciName + "_") : this.ciTypeRegex,
+                                this.ciTypeReplacement);
+                if (typeTmp.containsKey(typeName)) {
+                    duplicated.add(entry.getValue().typeName);
+                    duplicated.add(typeTmp.get(typeName));
+                } else {
+                    typeTmp.put(typeName, entry.getValue().typeName);
+                }
+            }
+
+            final StringBuilder java = new StringBuilder()
+                            .append("//CHECKSTYLE:OFF\n")
+                            .append("package ").append(this.ciPackage).append(";\n")
+                            .append("import org.efaps.ci.CIAttribute;\n")
+                            .append("import org.efaps.ci.CIType;\n\n")
+                            .append("public final class CI").append(this.ciName).append("\n{\n");
+
+            for (final Entry<String, TypeHandler> entry : this.types.entrySet()) {
+                String typeName = entry.getValue().typeName.replaceAll(this.ciUnallowedRegex,
+                                this.ciUnallowedReplacement);
+                if (!duplicated.contains(entry.getValue().typeName)) {
+                    typeName = typeName.replaceAll(this.ciTypeRegex == null ? (this.ciName + "_") : this.ciTypeRegex,
+                                this.ciTypeReplacement);
+                }
+
+                String parentType = null;
+                if (entry.getValue().parent != null) {
+                    parentType = entry.getValue().parent.replaceAll(this.ciUnallowedRegex,
+                                    this.ciUnallowedReplacement);
+                    if (!duplicated.contains(entry.getValue().parent)) {
+                        parentType = parentType.replaceAll(this.ciTypeRegex == null
+                                        ? (this.ciName + "_") : this.ciTypeRegex, this.ciTypeReplacement);
+                    }
+                    parentType = "_" + parentType;
+                    if (!this.types.containsKey(entry.getValue().parent)) {
+                        final String parentClass = entry.getValue().parent.replaceAll(this.ciParentRegex,
+                                        this.ciParentReplacment);
+                        parentType = "org.efaps.esjp.ci.CI" + parentClass + "." + parentType;
+                    }
+                }
+
+                java.append("    public static final _").append(typeName).append(" ").append(typeName)
+                    .append(" = new _").append(typeName).append("(\"").append(entry.getValue().uuid).append("\");\n")
+                    .append("    public static class _").append(typeName).append(" extends ")
+                    .append(parentType == null ? "CIType" : parentType)
+                    .append("\n    {\n")
+                    .append("        protected _").append(typeName).append("(final String _uuid)\n        {\n")
+                    .append("            super(_uuid);")
+                    .append("\n        }\n");
+
+                for (final String attribute : entry.getValue().attributes) {
+                    if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
+                        java.append("        public final CIAttribute ").append(attribute)
+                                        .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
+                    }
+                }
+                java.append("    }\n\n");
+            }
+            java.append("}\n");
+
             getOutputDirectory().mkdir();
 
             final String folders = this.ciPackage.replace(".", File.separator);
@@ -130,7 +253,7 @@ public class GenerateCIClassMojo
 
             final File javaFile = new File(srcFolder, "CI" + this.ciName + ".java");
 
-            FileUtils.writeStringToFile(javaFile, this.java.toString());
+            FileUtils.writeStringToFile(javaFile, java.toString());
 
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
 
@@ -144,29 +267,9 @@ public class GenerateCIClassMojo
             getLog().error("IOException", e);
             throw new MojoExecutionException("SAXException");
         } catch (final InstallationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error("InstallationException", e);
+            throw new MojoExecutionException("InstallationException");
         }
-    }
-
-    /**
-     * Close the java file.
-     */
-    private void closeJavaFile()
-    {
-        this.java.append("}\n");
-    }
-
-    /**
-     * Initiate the java file.
-     */
-    private void initJavaFile()
-    {
-        this.java.append("//CHECKSTYLE:OFF\n")
-                        .append("package ").append(this.ciPackage).append(";\n")
-                        .append("import org.efaps.ci.CIAttribute;\n")
-                        .append("import org.efaps.ci.CIType;\n")
-                        .append("public final class CI").append(this.ciName).append("\n{\n");
     }
 
     public class TypeHandler
@@ -229,7 +332,8 @@ public class GenerateCIClassMojo
 
         /*
          * (non-Javadoc)
-         * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+         * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
+         * java.lang.String, java.lang.String)
          */
         @Override
         public void endElement(final String uri,
@@ -268,42 +372,7 @@ public class GenerateCIClassMojo
             throws SAXException
         {
             if (this.isCiType) {
-                if (this.typeName.startsWith(GenerateCIClassMojo.this.ciName)) {
-                    this.typeName = this.typeName.substring(this.typeName.indexOf("_") + 1);
-                }
-                String parentClass = "";
-                if (this.parent != null) {
-                    parentClass = this.parent.substring(0, this.parent.indexOf("_"));
-                    this.parent = this.parent.substring(this.parent.indexOf("_") + 1);
-                }
-
-                GenerateCIClassMojo.this.java
-                                .append("public static final _")
-                                .append(this.typeName)
-                                .append(" ")
-                                .append(this.typeName)
-                                .append(" = new _")
-                                .append(this.typeName)
-                                .append("(\"")
-                                .append(this.uuid)
-                                .append("\");\n")
-                                .append("public static class _")
-                                .append(this.typeName)
-                                .append(" extends ")
-                                .append(this.parent == null ? "CIType" : "org.efaps.esjp.ci.CI" + parentClass + "._"
-                                                + this.parent)
-                                .append("\n{\n")
-                                .append("    protected _").append(this.typeName)
-                                .append("(final String _uuid)\n    {\n")
-                                .append("        super(_uuid);").append("\n    }\n");
-
-                for (final String attribute : this.attributes) {
-                    if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
-                        GenerateCIClassMojo.this.java.append("    public final CIAttribute ").append(attribute)
-                                        .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
-                    }
-                }
-                GenerateCIClassMojo.this.java.append("}\n\n");
+                GenerateCIClassMojo.this.types.put(this.typeName, this);
             }
         }
 
