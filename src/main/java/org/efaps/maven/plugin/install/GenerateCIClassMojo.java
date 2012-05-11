@@ -44,6 +44,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
+import org.apache.xmlbeans.impl.common.NameUtil;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.util.InstallationException;
@@ -105,6 +106,9 @@ public class GenerateCIClassMojo
             this.classNamePrefix = _classNamePrefix;
         }
     }
+
+
+
 
     /**
      * The CiName.
@@ -298,9 +302,11 @@ public class GenerateCIClassMojo
                     .append("            super(_uuid);")
                     .append("\n        }\n");
 
-                for (final String attribute : uihandler.fields) {
-                    java.append("        public final CIField ").append(attribute)
-                        .append(" = new CIField(this, \"").append(attribute).append("\");\n");
+                for (final String field : uihandler.fields) {
+                 // check if the attribute name can be used in java, if not extend the name
+                    final String identifier = NameUtil.isValidJavaIdentifier(field) ? field : field + "_field";
+                    java.append("        public final CIField ").append(identifier)
+                        .append(" = new CIField(this, \"").append(field).append("\");\n");
                 }
                 java.append("    }\n\n");
             }
@@ -388,7 +394,10 @@ public class GenerateCIClassMojo
 
             for (final String attribute : entry.getValue().attributes) {
                 if (!"Type".equals(attribute) && !"OID".equals(attribute) && !"ID".equals(attribute)) {
-                    java.append("        public final CIAttribute ").append(attribute)
+                    // check if the attribute name can be used in java, if not extend the name
+                    final String identifier = NameUtil.isValidJavaIdentifier(attribute)
+                                    ? attribute : attribute + "_attr";
+                    java.append("        public final CIAttribute ").append(identifier)
                                     .append(" = new CIAttribute(this, \"").append(attribute).append("\");\n");
                 }
             }
