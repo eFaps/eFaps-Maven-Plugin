@@ -43,6 +43,7 @@ import org.apache.maven.plugin.ContextEnabled;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.project.MavenProject;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.util.InstallationException;
@@ -172,6 +173,12 @@ public class GenerateCIClassMojo
      */
     private final Set<CIHandler> uiHandlers = new HashSet<CIHandler>();
 
+    /**
+     * The current Maven project.
+     */
+    @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
+    private MavenProject project;
+
     /** Plugin container context */
     @SuppressWarnings("rawtypes")
     private Map pluginContext;
@@ -226,6 +233,7 @@ public class GenerateCIClassMojo
             buildCIType();
             buildCI4UI(CIDef4UI.FORM);
             buildCI4UI(CIDef4UI.TABLE);
+            this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
             throw new MojoExecutionException("SAXException");
