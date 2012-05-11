@@ -30,7 +30,7 @@
     <properties>
         <!-- Jetty Version, used also to build the plug-in version number -->
         <jettyVersion>8.1.2.v20120308</jettyVersion>
-        <kernelVersion>[2.0.0-SNAPSHOT,2.1.0)</kernelVersion>
+        <kernelVersion>[2.0.0,2.1.0)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
