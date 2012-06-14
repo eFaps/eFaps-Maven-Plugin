@@ -22,11 +22,14 @@ package org.efaps.maven.plugin;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.efaps.update.FileType;
 import org.efaps.update.Install;
+import org.efaps.update.Profile;
 import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
 import org.jfrog.maven.annomojo.annotations.MojoGoal;
@@ -67,7 +70,9 @@ public class UpdateFromFileMojo
 
             final Install install = new Install();
             install.addFile(this.file.toURI().toURL(), filetype.getType());
-            install.updateLatest();
+            final Set<Profile> profiles = new HashSet<Profile>();
+            profiles.add(Profile.getDefaultProfile());
+            install.updateLatest(profiles);
             commitTransaction();
         } catch (final EFapsException e) {
             throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());

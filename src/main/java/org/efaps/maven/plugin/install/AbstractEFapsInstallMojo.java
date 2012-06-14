@@ -125,7 +125,8 @@ public abstract class AbstractEFapsInstallMojo
     @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/efaps")
     private File outputDirectory;
 
-
+    @MojoParameter()
+    private String profile;
 
     /**
      * Getter method for the instance variable {@link #outputDirectory}.
@@ -224,6 +225,16 @@ public abstract class AbstractEFapsInstallMojo
     protected File getVersionFile()
     {
         return this.versionFile;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #profile}.
+     *
+     * @return value of instance variable {@link #profile}
+     */
+    protected String getProfile()
+    {
+        return this.profile;
     }
 
     /**

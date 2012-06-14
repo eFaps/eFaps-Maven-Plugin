@@ -20,7 +20,11 @@
 
 package org.efaps.maven.plugin.install;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.maven.plugin.MojoExecutionException;
+import org.efaps.update.Profile;
 import org.efaps.update.version.Application;
 import org.jfrog.maven.annomojo.annotations.MojoGoal;
 import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
@@ -50,8 +54,14 @@ public final class InstallMojo
         try {
             final Application appl = Application.getApplicationFromClassPath(getApplications(),
                                                                              getClasspathElements());
+            final Set<Profile> profiles = new HashSet<Profile>();
+            if (getProfile() != null) {
+                profiles.add(Profile.getProfile(getProfile()));
+            } else {
+                profiles.add(Profile.getDefaultProfile());
+            }
             // install application
-            appl.install(getUserName(), getPassWord());
+            appl.install(getUserName(), getPassWord(), profiles);
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute Installation script", e);
         }

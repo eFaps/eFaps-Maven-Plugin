@@ -147,7 +147,7 @@ public class GenerateJmsClassMojo
                             getExcludes(),
                             getTypeMapping());
 
-            for (final Dependency dependency : appl.getDependencies().values()) {
+            for (final Dependency dependency : appl.getDependencies()) {
                 dependency.resolve();
                 final Application dependApp = Application.getApplicationFromJarFile(
                                 dependency.getJarFile(), getClasspathElements());
