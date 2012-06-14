@@ -171,7 +171,7 @@ public class GenerateCIClassMojo
     /**
      * Set of types.
      */
-    private final Map<String, TypeCI> types = new TreeMap<String, TypeCI>();
+    private final Map<String, ITypeCI> types = new TreeMap<String, ITypeCI>();
 
     /**
      * Set of Tables.
@@ -221,6 +221,7 @@ public class GenerateCIClassMojo
                 protected void configureRules()
                 {
                     bindRulesFrom(TypeCI.class);
+                    bindRulesFrom(StatusCI.class);
                     bindRulesFrom(FormCI.class);
                     bindRulesFrom(TableCI.class);
                 }
@@ -246,8 +247,8 @@ public class GenerateCIClassMojo
                     final Object item = digester.parse(source);
                     stream.close();
                     if (item != null) {
-                        if (item instanceof TypeCI) {
-                            this.types.put(((TypeCI) item).definitions.iterator().next().getName(), (TypeCI) item);
+                        if (item instanceof ITypeCI) {
+                            this.types.put(((ITypeCI) item).getDefinitions().get(0).getName(), (ITypeCI) item);
                         } else {
                             this.uiCIs.add((UserInterfaceCI) item);
                         }
@@ -381,7 +382,7 @@ public class GenerateCIClassMojo
         // therefore it is checked here
         final Map<String, String> typeTmp = new HashMap<String, String>();
         final Set<String> duplicated = new HashSet<String>();
-        for (final Entry<String, TypeCI> entry : this.types.entrySet()) {
+        for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
             final String name = entry.getValue().getDefinitions().get(0).getName();
             String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
             typeName = typeName.replaceAll(this.ciTypeRegex == null ? (this.ciName + "_") : this.ciTypeRegex,
@@ -402,8 +403,8 @@ public class GenerateCIClassMojo
                 .append(getClassComment())
                 .append("public final class CI").append(this.ciName).append("\n{\n");
 
-        for (final Entry<String, TypeCI> entry : this.types.entrySet()) {
-            final TypeCIDefinition def = entry.getValue().getDefinitions().get(0);
+        for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
+            final ITypeDefintion def = entry.getValue().getDefinitions().get(0);
             final String name = def.getName();
             String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
             if (!duplicated.contains(name)) {
@@ -426,7 +427,7 @@ public class GenerateCIClassMojo
             }
 
             java.append("    public static final _").append(typeName).append(" ").append(typeName)
-                .append(" = new _").append(typeName).append("(\"").append(entry.getValue().uuid)
+                .append(" = new _").append(typeName).append("(\"").append(entry.getValue().getUuid())
                 .append("\");\n")
                 .append("    public static class _").append(typeName).append(" extends ")
                 .append(parentType == null ? "CIType" : parentType)
@@ -436,7 +437,7 @@ public class GenerateCIClassMojo
                 .append("\n        }\n");
 
             final Map<String, List<String>> attributes = new TreeMap<String, List<String>>();
-            for (final TypeCIDefinition typeDef : entry.getValue().getDefinitions()) {
+            for (final ITypeDefintion typeDef : entry.getValue().getDefinitions()) {
                 for (final String attribute : typeDef.getAttributes()) {
                     List<String> profiles;
                     if (attributes.containsKey(attribute)) {
@@ -501,7 +502,7 @@ public class GenerateCIClassMojo
         /**
          * @return
          */
-        List<? extends UIDefintion> getDefinitions();
+        Collection<? extends UIDefintion> getDefinitions();
 
         /**
          * @return
@@ -520,16 +521,29 @@ public class GenerateCIClassMojo
         /**
          * @return
          */
-        List<String> getFields();
+        Collection<? extends String> getFields();
 
         /**
          * @return
          */
         Collection<? extends String> getProfiles();
-
     }
+
+    public interface ITypeCI {
+        List<? extends ITypeDefintion> getDefinitions();
+        public String getUuid();
+    }
+    public interface ITypeDefintion
+    {
+        public String getName();
+        public String getParent();
+        Collection<? extends String> getAttributes();
+        Collection<? extends String> getProfiles();
+    }
+
     @ObjectCreate(pattern = "datamodel-type/definition")
     public static class TypeCIDefinition
+        implements ITypeDefintion
     {
 
         @BeanPropertySetter(pattern = "datamodel-type/definition/version-expression")
@@ -637,6 +651,119 @@ public class GenerateCIClassMojo
             return this.profiles;
         }
     }
+
+    @ObjectCreate(pattern = "datamodel-statusgroup/definition")
+    public static class StatusCIDefinition
+        implements ITypeDefintion
+    {
+
+        @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/version-expression")
+        private String expression;
+        @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/name")
+        private String name;
+        @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/parent")
+        private String parent;
+
+        private final List<String> attributes = new ArrayList<String>();
+        private final List<String> profiles = new ArrayList<String>();
+
+        /**
+         * Getter method for the instance variable {@link #expression}.
+         *
+         * @return value of instance variable {@link #expression}
+         */
+        public String getExpression()
+        {
+            return this.expression;
+        }
+
+        /**
+         * Setter method for instance variable {@link #expression}.
+         *
+         * @param _expression value for instance variable {@link #expression}
+         */
+        public void setExpression(final String _expression)
+        {
+            this.expression = _expression;
+        }
+
+        @CallMethod(pattern = "datamodel-statusgroup/definition/attribute")
+        public void addAttribute(@CallParam(pattern = "datamodel-statusgroup/definition/attribute/name") final String _name)
+        {
+            this.attributes.add(_name);
+        }
+
+        @CallMethod(pattern = "datamodel-statusgroup/definition/profiles")
+        public void addProfile(@CallParam(pattern = "datamodel-statusgroup/definition/profiles/profile",
+                        attributeName = "name") final String _name)
+        {
+            this.profiles.add(_name);
+        }
+
+        /**
+         * Getter method for the instance variable {@link #name}.
+         *
+         * @return value of instance variable {@link #name}
+         */
+        public String getName()
+        {
+            return this.name;
+        }
+
+        /**
+         * Setter method for instance variable {@link #name}.
+         *
+         * @param _name value for instance variable {@link #name}
+         */
+
+        public void setName(final String _name)
+        {
+            this.name = _name;
+        }
+
+        /**
+         * Getter method for the instance variable {@link #parent}.
+         *
+         * @return value of instance variable {@link #parent}
+         */
+        public String getParent()
+        {
+            return this.parent;
+        }
+
+        /**
+         * Setter method for instance variable {@link #parent}.
+         *
+         * @param _parent value for instance variable {@link #parent}
+         */
+
+        public void setParent(final String _parent)
+        {
+            this.parent = _parent;
+        }
+
+        /**
+         * Getter method for the instance variable {@link #attributes}.
+         *
+         * @return value of instance variable {@link #attributes}
+         */
+        public List<String> getAttributes()
+        {
+            return this.attributes;
+        }
+
+        /**
+         * Getter method for the instance variable {@link #profiles}.
+         *
+         * @return value of instance variable {@link #profiles}
+         */
+        public List<String> getProfiles()
+        {
+            return this.profiles;
+        }
+    }
+
+
 
     @ObjectCreate(pattern = "ui-form/definition")
     public static class FormCIDefinition
@@ -839,7 +966,7 @@ public class GenerateCIClassMojo
 
     @ObjectCreate(pattern = "datamodel-type")
     public static class TypeCI
-
+        implements ITypeCI
     {
 
         private final List<TypeCIDefinition> definitions = new ArrayList<TypeCIDefinition>();
@@ -880,6 +1007,54 @@ public class GenerateCIClassMojo
 
         @SetNext
         public void addDefinition(final TypeCIDefinition definition)
+        {
+            this.definitions.add(definition);
+        }
+    }
+
+    @ObjectCreate(pattern = "datamodel-statusgroup")
+    public static class StatusCI
+        implements ITypeCI
+    {
+
+        private final List<StatusCIDefinition> definitions = new ArrayList<StatusCIDefinition>();
+
+        @BeanPropertySetter(pattern = "datamodel-statusgroup/uuid")
+        private String uuid;
+
+        /**
+         * Getter method for the instance variable {@link #uuid}.
+         *
+         * @return value of instance variable {@link #uuid}
+         */
+        public String getUuid()
+        {
+            return this.uuid;
+        }
+
+        /**
+         * Setter method for instance variable {@link #uuid}.
+         *
+         * @param _uuid value for instance variable {@link #uuid}
+         */
+
+        public void setUuid(final String _uuid)
+        {
+            this.uuid = _uuid;
+        }
+
+        /**
+         * Getter method for the instance variable {@link #definitions}.
+         *
+         * @return value of instance variable {@link #definitions}
+         */
+        public List<StatusCIDefinition> getDefinitions()
+        {
+            return this.definitions;
+        }
+
+        @SetNext
+        public void addDefinition(final StatusCIDefinition definition)
         {
             this.definitions.add(definition);
         }
