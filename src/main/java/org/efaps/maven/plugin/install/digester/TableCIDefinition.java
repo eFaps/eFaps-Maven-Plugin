@@ -72,10 +72,12 @@ public class TableCIDefinition
     }
 
     @CallMethod(pattern = "ui-table/definition/field")
-    public void addField(@CallParam(pattern = "ui-table/definition/field/name") final String _name)
+    public void addField(@CallParam(pattern = "ui-table/definition/field",
+                                                    attributeName = "name") final String _name)
     {
         this.fields.add(_name);
     }
+
 
     @CallMethod(pattern = "ui-table/definition/profiles")
     public void addProfile(@CallParam(pattern = "ui-table/definition/profiles/profile",
