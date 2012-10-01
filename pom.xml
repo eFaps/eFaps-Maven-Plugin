@@ -41,7 +41,7 @@
     <packaging>maven-plugin</packaging>
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>3.0.3-8.1.4.v20120524</version>
+    <version>3.0.4-8.1.4.v20120524-SNAPSHOT</version>
     <name>eFaps Maven Plug-In</name>
     <description>
         eFaps Maven Plug-In to install / deploy eFaps applications and create CI/Jms Classes.
@@ -93,9 +93,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V.3.0.3-8.1.4.v20120524</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V.3.0.3-8.1.4.v20120524</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/V.3.0.3-8.1.4.v20120524</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
     </scm>
 
     <!-- Distribution Repository -->
