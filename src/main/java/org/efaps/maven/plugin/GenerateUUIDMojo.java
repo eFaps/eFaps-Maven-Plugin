@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.util.UUID;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * A new universally unique identifier (UUID) is created and printed out.<br>
@@ -37,14 +37,14 @@ import org.jfrog.maven.annomojo.annotations.MojoParameter;
  * @author The eFaps Team
  * @version $Id$
  */
-@MojoGoal(value = "generateUUID")
+@Mojo(name = "generateUUID")
 public final class GenerateUUIDMojo
     extends AbstractMojo
 {
     /**
      * Number of UUID's to generate.
      */
-    @MojoParameter(expression = "${UUID.count}", defaultValue = "1")
+    @Parameter(property = "UUID.count", defaultValue = "1")
     private int count;
 
     /**

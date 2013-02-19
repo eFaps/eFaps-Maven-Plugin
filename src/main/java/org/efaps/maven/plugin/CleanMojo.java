@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,42 @@
 package org.efaps.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.efaps.db.Context;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
 
 
 /**
  * Delete Old Data and Data Model within eFaps of current logged in SQL
  * database user (via dropping of all tables, views, constraints etc.)..
  *
- * @author tmo
+ * @author The eFaps Team
  * @version $Id$
  */
-@MojoGoal(value = "clean")
-public class CleanMojo extends EFapsAbstractMojo  {
+@Mojo(name = "clean")
+public class CleanMojo
+    extends EFapsAbstractMojo
+{
 
-  /**
-   * Initializes the database connection, starts a connection, deletes all
-   * tables, views etc. from current logged in database user and commits
-   * transaction.
-   *
-   * @throws MojoExecutionException if delete of old data and data model failed
-   */
-  public void execute() throws MojoExecutionException  {
-    init(true);
-    try {
-      getLog().info("Delete Old Data and Data Model");
-      Context.begin();
-      Context.getDbType().deleteAll(Context.getThreadContext().getConnection());
-      Context.commit();
-    } catch (final Exception e) {
-      throw new MojoExecutionException("Delete of Old Data and Data Model "
-                                       + "failed", e);
+    /**
+     * Initializes the database connection, starts a connection, deletes all
+     * tables, views etc. from current logged in database user and commits
+     * transaction.
+     *
+     * @throws MojoExecutionException if delete of old data and data model
+     *             failed
+     */
+    public void execute()
+        throws MojoExecutionException
+    {
+        init(true);
+        try {
+            getLog().info("Delete Old Data and Data Model");
+            Context.begin();
+            Context.getDbType().deleteAll(Context.getThreadContext().getConnection());
+            Context.commit();
+        } catch (final Exception e) {
+            throw new MojoExecutionException("Delete of Old Data and Data Model "
+                            + "failed", e);
+        }
     }
-  }
-
 }

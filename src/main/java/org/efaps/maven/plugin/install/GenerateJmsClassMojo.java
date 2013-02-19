@@ -1,5 +1,5 @@
 /*
-z * Copyright 2003 - 2012 The eFaps Team
+z * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,10 @@ import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.efaps.maven.plugin.install.digester.AttributeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
@@ -45,10 +49,6 @@ import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.version.Application;
 import org.efaps.update.version.Dependency;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
-import org.jfrog.maven.annomojo.annotations.MojoPhase;
-import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -58,51 +58,47 @@ import org.xml.sax.SAXException;
  * @author The eFaps Team
  * @version $Id$
  */
-@MojoGoal(value = "generate-jmsclass")
-@MojoRequiresDependencyResolution(value = "compile")
-@MojoPhase(value = "generate-sources")
+@Mojo(name = "generate-jmsclass", requiresDependencyResolution = ResolutionScope.COMPILE,
+            defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GenerateJmsClassMojo
     extends AbstractEFapsInstallMojo
 {
     /**
      * The base package name.
      */
-    @MojoParameter(required = true, defaultValue = "org.efaps.esjp.jms")
+    @Parameter(required = true, defaultValue = "org.efaps.esjp.jms")
     private String jmsPackage;
 
     /**
      * This Regex will be used to replace the application name
      * with {@link #jmsPackageReplacement}.
      */
-    @MojoParameter(required = true, defaultValue = "eFaps-|eFapsApp-",
-                   description = "This Regex will be used to replace the application name with jmsPackageReplacement")
+    @Parameter(required = true, defaultValue = "eFaps-|eFapsApp-")
     private String jmsPackageRegex;
 
     /**
      * The replacement String used in conjunction with {@link #jmsPackageRegex}.
      */
-    @MojoParameter(defaultValue = "",
-                   description = "The replacement String used in conjunction with jmsPackageRegex")
+    @Parameter(defaultValue = "")
     private final String jmsPackageReplacement;
 
     /**
      * This Regex will be used to replace the Classname result
      * with {@link #jmsClassNameReplacement}.
      */
-    @MojoParameter(required = true, defaultValue = "^[A-Za-z]+_")
+    @Parameter(required = true, defaultValue = "^[A-Za-z]+_")
     private String jmsClassNameRegex;
 
     /**
      * The replacement String used in conjunction with {@link #jmsClassNameRegex}.
      */
-    @MojoParameter(defaultValue = "",
-                   description = "The replacement String used in conjunction with jmsClassNameRegex")
+    @Parameter(defaultValue = "")
     private final String jmsClassNameReplacement;
 
     /**
      * The current Maven project.
      */
-    @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     /**

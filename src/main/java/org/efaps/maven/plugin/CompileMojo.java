@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
 
 package org.efaps.maven.plugin;
 
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.efaps.update.schema.program.esjp.ESJPCompiler;
 import org.efaps.update.schema.program.jasperreport.JasperReportCompiler;
 import org.efaps.update.schema.program.staticsource.CSSCompiler;
@@ -28,9 +31,6 @@ import org.efaps.update.schema.program.staticsource.WikiCompiler;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.util.EFapsException;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
-import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 
 /**
  * Compiles all ESPJ's and Cascade Style Sheets within eFaps.
@@ -38,8 +38,7 @@ import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
  * @author The eFaps Team
  * @version $Id$
  */
-@MojoGoal(value = "compile")
-@MojoRequiresDependencyResolution
+@Mojo(name = "compile", requiresDependencyResolution = ResolutionScope.COMPILE)
 public final class CompileMojo
     extends EFapsAbstractMojo
 {
@@ -47,7 +46,7 @@ public final class CompileMojo
     /**
      * Number of UUID's to generate.
      */
-    @MojoParameter(expression = "${target}", defaultValue = "all")
+    @Parameter(property = "target", defaultValue = "all")
     private String target;
 
     /**

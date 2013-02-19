@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.efaps.update.Profile;
 import org.efaps.update.version.Application;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 
 /**
  * Makes an update of an eFaps application for the last version of the
@@ -36,8 +36,7 @@ import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
  * @author The eFaps Team
  * @version $Id$
  */
-@MojoGoal(value = "update")
-@MojoRequiresDependencyResolution(value = "compile")
+@Mojo(name = "update", requiresDependencyResolution = ResolutionScope.COMPILE)
 public final class UpdateMojo
     extends AbstractEFapsInstallMojo
 {

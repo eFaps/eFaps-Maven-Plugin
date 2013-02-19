@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
+<!-- Copyright 2003 - 2012 The eFaps Team Licensed under the Apache License,
+    Version 2.0 (the "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software distributed
+    under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+    OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+    the specific language governing permissions and limitations under the License.
+    Author: The eFaps Team Revision: $Rev$ Last Changed: $Date: 2013-02-19
+    11:43:54 -0500 (Tue, 19 Feb 2013) $ Last Changed By: $Author: jan@moxter.net
+    $ -->
 
- Copyright 2003 - 2012 The eFaps Team
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
- Author:          The eFaps Team
- Revision:        $Rev$
- Last Changed:    $Date$
- Last Changed By: $Author$
-
--->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -35,20 +24,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- ************************************************************************
-    * Module Definition
-    ************************************************************************* -->
-    <packaging>maven-plugin</packaging>
+
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
     <version>4.0.0-8.1.9.v20130131-SNAPSHOT</version>
+    <packaging>maven-plugin</packaging>
+
     <name>eFaps Maven Plug-In</name>
+
     <description>
         eFaps Maven Plug-In to install / deploy eFaps applications and create CI/Jms Classes.
     </description>
+
     <prerequisites>
         <maven>3.0.0</maven>
     </prerequisites>
+
     <url>http://maven-efaps-plugin.efaps.org</url>
     <licenses>
         <license>
@@ -117,47 +108,40 @@
         </repository>
     </distributionManagement>
 
-    <!-- ************************************************************************
-    * Project itself
-    ************************************************************************* -->
-
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>2.9</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jfrog.maven.annomojo</groupId>
-                        <artifactId>maven-plugin-tools-anno</artifactId>
-                        <version>1.4.0</version>
-                        <scope>runtime</scope>
-                        <!-- The com.sun:tools dependency is a system scope dependency, which does not work
-                            on Mac OS due to a wrong system path. (it is already included in the standart JVM path).
-                            Therefor it is excluded. If necessary it can be included by using the profile
-                            "default-tools.jar".
-                        -->
-                        <exclusions>
-                            <exclusion>
-                            <groupId>com.sun</groupId>
-                            <artifactId>tools</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
+                <version>3.2</version>
+                <configuration>
+                    <goalPrefix>efaps</goalPrefix>
+                    <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>mojo-descriptor</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>descriptor</goal>
+                        </goals>
+                    </execution>
+                    <!-- if you want to generate help goal -->
+                    <execution>
+                        <id>help-goal</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>helpmojo</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
-            <!--
-                Compiler Settings:
-                - Java 1.6 is needed!
-                - encoding UTF8
-            -->
+            <!-- Compiler Settings: - Java 1.6 is needed! - encoding UTF8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.0</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -166,7 +150,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.2.2</version>
+                <version>2.4</version>
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
                 </configuration>
@@ -187,7 +171,7 @@
                                         <report>summary</report>
                                         <report>dependencies</report>
                                         <report>project-team</report>
-                                        <!--   <report>mailing-list</report>-->
+                                        <!-- <report>mailing-list</report> -->
                                         <!-- <report>cim</report> -->
                                         <report>issue-tracking</report>
                                         <report>license</report>
@@ -243,7 +227,7 @@
                                 <targetJdk>1.5</targetJdk>
                             </configuration>
                         </plugin>
-                        <!--  findbugs report -->
+                        <!-- findbugs report -->
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>findbugs-maven-plugin</artifactId>
@@ -255,7 +239,7 @@
             </plugin>
         </plugins>
         <!-- Needed for the upload of the site -->
-         <extensions>
+        <extensions>
             <extension>
                 <groupId>org.jvnet.wagon-svn</groupId>
                 <artifactId>wagon-svn</artifactId>
@@ -265,9 +249,7 @@
     </build>
 
     <profiles>
-        <!--
-            Profile to include the com.sun:tools from the system.
-        -->
+        <!-- Profile to include the com.sun:tools from the system. -->
         <profile>
             <id>default-tools.jar</id>
             <activation>
@@ -280,17 +262,15 @@
                 <dependency>
                     <groupId>com.sun</groupId>
                     <artifactId>tools</artifactId>
-                    <version>1.5.0</version>
+                    <version>1.6.0</version>
                     <scope>system</scope>
                     <systemPath>${java.home}/../lib/tools.jar</systemPath>
                 </dependency>
             </dependencies>
         </profile>
 
-        <!--
-            Profile for a release: Only in this case the source and JavaDoc will
-            be attached
-        -->
+        <!-- Profile for a release: Only in this case the source and JavaDoc
+            will be attached -->
         <profile>
             <id>release-profile</id>
             <activation>
@@ -340,7 +320,7 @@
                             <updateReleaseInfo>true</updateReleaseInfo>
                         </configuration>
                     </plugin>
-                     <!-- signing the artefact with gpg -->
+                    <!-- signing the artefact with gpg -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -361,13 +341,21 @@
     </profiles>
 
     <!-- ************************************************************************
-    * Dependencies
-    ************************************************************************* -->
+        * Dependencies ************************************************************************* -->
     <dependencies>
         <dependency>
-            <groupId>org.jfrog.maven.annomojo</groupId>
-            <artifactId>maven-plugin-anno</artifactId>
-            <version>1.4.1</version>
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>3.2</version>
+            <!-- annotations are not needed for plugin execution so you can
+                remove this dependency for execution with using provided scope -->
+            <scope>provided</scope>
+        </dependency>
+        <!-- generated help mojo has a dependency to plexus-utils -->
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.0.10</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -384,20 +372,16 @@
             <version>1.0.1</version>
         </dependency>
 
-        <!--
-            Apache commons-io needed for the generate installation mojo.
-        -->
+        <!-- Apache commons-io needed for the generate installation mojo. -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.1</version>
         </dependency>
 
-        <!--
-            For Java6 xalan and xerces must be defined
-            (otherwise Java uses the new DOM Api which currently does not work
-            together with used and required maven version)
-        -->
+        <!-- For Java6 xalan and xerces must be defined (otherwise Java uses
+            the new DOM Api which currently does not work together with used and required
+            maven version) -->
         <dependency>
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
@@ -409,10 +393,8 @@
             <version>2.10.0</version>
         </dependency>
 
-        <!--
-            used as javax.naming.* implementation
-            (needed to connect to eFaps database)
-        -->
+        <!-- used as javax.naming.* implementation (needed to connect to
+            eFaps database) -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jndi</artifactId>
@@ -448,11 +430,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- replacement for the javax.resource.connector-api-1.5 needed by jotm-->
+        <!-- replacement for the javax.resource.connector-api-1.5 needed
+            by jotm -->
         <dependency>
             <groupId>org.ow2.spec.ee</groupId>
             <artifactId>ow2-connector-1.5-spec</artifactId>
-            <version>1.0.11</version>
+            <version>1.0.12</version>
         </dependency>
         <!-- needed indirectly for the transaction manager -->
         <dependency>
@@ -468,7 +451,7 @@
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans</artifactId>
-            <version>2.3.0</version>
+            <version>2.5.0</version>
         </dependency>
     </dependencies>
 </project>

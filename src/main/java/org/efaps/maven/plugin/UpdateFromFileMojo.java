@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2010 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.efaps.update.FileType;
 import org.efaps.update.Install;
 import org.efaps.update.Profile;
 import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  * TODO comment!
@@ -41,7 +41,7 @@ import org.jfrog.maven.annomojo.annotations.MojoParameter;
  * @author The eFaps Team
  * @version $Id: $
  */
-@MojoGoal(value = "updateFromFile")
+@Mojo(name = "updateFromFile")
 public class UpdateFromFileMojo
     extends EFapsAbstractMojo
 {
@@ -49,7 +49,7 @@ public class UpdateFromFileMojo
     /**
      * URL of the ESJP to import.
      */
-    @MojoParameter(required = true)
+    @Parameter(required = true)
     private File file;
 
     /**

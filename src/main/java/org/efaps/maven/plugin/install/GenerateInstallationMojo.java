@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
-import org.jfrog.maven.annomojo.annotations.MojoPhase;
-import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -54,13 +54,14 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author The eFaps Team
+ * @version $Id$
  */
-@MojoGoal(value = "generate-installation")
-@MojoRequiresDependencyResolution(value = "compile")
-@MojoPhase(value = "generate-sources")
+@Mojo(name = "generate-installation", requiresDependencyResolution = ResolutionScope.COMPILE,
+                defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GenerateInstallationMojo
     extends AbstractEFapsInstallMojo
 {
+
     /**
      * Tag name of the application.
      */
@@ -104,7 +105,7 @@ public class GenerateInstallationMojo
     /**
      * The current Maven project.
     */
-    @MojoParameter(defaultValue = "${project}",
+    @Parameter(defaultValue = "${project}",
                required = true,
                readonly = true)
     private MavenProject project;
@@ -114,7 +115,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles()
      */
-    @MojoParameter
+    @Parameter
     private final List<String> copyIncludes = null;
 
     /**
@@ -122,7 +123,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles()
      */
-    @MojoParameter
+    @Parameter
     private final List<String> copyExcludes = null;
 
     /**
@@ -130,31 +131,31 @@ public class GenerateInstallationMojo
      * is the classes directory so that the Maven standard jar goal could pack
      * the eFaps installation files.
      */
-    @MojoParameter(expression = "${project.build.outputDirectory}")
+    @Parameter(defaultValue = "${project.build.outputDirectory}")
     private File targetDirectory;
 
     /**
      * Name of the XML installation file (within the target directory).
      */
-    @MojoParameter(defaultValue = "META-INF/efaps/install.xml")
+    @Parameter(defaultValue = "META-INF/efaps/install.xml")
     private String targetInstallFile;
 
     /**
      * Encoding of the target XML installation file.
      */
-    @MojoParameter(defaultValue = "UTF-8")
+    @Parameter(defaultValue = "UTF-8")
     private String targetEncoding;
 
     /**
      * Name of the root package where the installation is copied.
      */
-    @MojoParameter(defaultValue = "org/efaps/installations/applications")
+    @Parameter(defaultValue = "org/efaps/installations/applications")
     private String rootPackage;
 
     /**
      * Must the ESJP's compiled and included in the generated jar file?
      */
-    @MojoParameter(defaultValue = "true")
+    @Parameter(defaultValue = "true")
     private boolean compile;
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.tools.ant.DirectoryScanner;
 import org.efaps.maven.plugin.EFapsAbstractMojo;
 import org.efaps.update.FileType;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
 
 /**
  * @author The eFaps Team
@@ -84,13 +84,13 @@ public abstract class AbstractEFapsInstallMojo
     /**
      * Location of the version file (defining all versions to install).
      */
-    @MojoParameter(expression = "${basedir}/src/main/efaps/versions.xml")
+    @Parameter(defaultValue = "${basedir}/src/main/efaps/versions.xml")
     private File versionFile;
 
     /**
      * Root Directory with the XML installation files.
      */
-    @MojoParameter(expression = "${basedir}/src/main/efaps")
+    @Parameter(defaultValue = "${basedir}/src/main/efaps")
     private File eFapsDir;
 
     /**
@@ -113,7 +113,7 @@ public abstract class AbstractEFapsInstallMojo
      * kernel application. The value is used to define the applications to
      * install or update.
      */
-    @MojoParameter(defaultValue = "eFaps-Kernel")
+    @Parameter(defaultValue = "eFaps-Kernel")
     private String applications;
 
     /**
@@ -122,10 +122,10 @@ public abstract class AbstractEFapsInstallMojo
      * generated files will participate in later build phases like compiling and
      * packaging.
      */
-    @MojoParameter(defaultValue = "${project.build.directory}/generated-sources/efaps")
+    @Parameter(defaultValue = "${project.build.directory}/generated-sources/efaps")
     private File outputDirectory;
 
-    @MojoParameter()
+    @Parameter()
     private String profile;
 
     /**

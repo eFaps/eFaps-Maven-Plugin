@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2012 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,10 @@ import org.apache.maven.plugin.ContextEnabled;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xmlbeans.impl.common.NameUtil;
 import org.efaps.maven.plugin.install.digester.AttributeCI;
@@ -60,10 +64,6 @@ import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
-import org.jfrog.maven.annomojo.annotations.MojoGoal;
-import org.jfrog.maven.annomojo.annotations.MojoParameter;
-import org.jfrog.maven.annomojo.annotations.MojoPhase;
-import org.jfrog.maven.annomojo.annotations.MojoRequiresDependencyResolution;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -74,9 +74,8 @@ import org.xml.sax.SAXException;
  * @version $Id: GenerateCIClassMojo.java 7384 2012-03-22 15:57:32Z
  *          jan@moxter.net $
  */
-@MojoGoal(value = "generate-ciclass")
-@MojoRequiresDependencyResolution(value = "compile")
-@MojoPhase(value = "generate-sources")
+@Mojo(name = "generate-ciclass", requiresDependencyResolution = ResolutionScope.COMPILE,
+                defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GenerateCIClassMojo
     extends AbstractEFapsInstallMojo
     implements ContextEnabled
@@ -95,7 +94,7 @@ public class GenerateCIClassMojo
         /**
          * Class that is extended.
          */
-        public final String extendClass;
+    public final String extendClass;
 
         /**
          * Prefix for the class Name.
@@ -117,58 +116,52 @@ public class GenerateCIClassMojo
     /**
      * The CiName.
      */
-    @MojoParameter(required = true)
+    @Parameter(required = true)
     private String ciName;
 
     /**
      * The package name.
      */
-    @MojoParameter(required = true, defaultValue = "org.efaps.esjp.ci")
+    @Parameter(required = true, defaultValue = "org.efaps.esjp.ci")
     private String ciPackage;
 
     /**
      * This Regex will be used to replace the ciName with
      * {@link #ciNameReplacement}.
      */
-    @MojoParameter(defaultValue = "^([A-Za-z]*)_",
-                    description = "This Regex will be used to replace the application name with ciNameReplacement")
+    @Parameter(defaultValue = "^([A-Za-z]*)_")
     private String ciTypeRegex;
 
     /**
      * The replacement String used in conjunction with {@link #ciNameRegex}.
      */
-    @MojoParameter(defaultValue = "",
-                    description = "The replacement String used in conjunction with ciNameRegex")
+    @Parameter(defaultValue = "")
     private final String ciTypeReplacement;
 
     /**
      * This Regex will be used to replace the unallowed Characters with
      * {@link #ciUnallowedReplacement}.
      */
-    @MojoParameter(defaultValue = "-",
-                    description = "This Regex will be used to replace the unallowed Characters in Type names")
+    @Parameter(defaultValue = "-")
     private final String ciUnallowedRegex;
 
     /**
      * The replacement String used in conjunction with {@link #ciUnallowedRegex}
      * .
      */
-    @MojoParameter(defaultValue = "",
-                    description = "The replacement String used in conjunction with ciNameRegex")
+    @Parameter(defaultValue = "")
     private final String ciUnallowedReplacement;
 
     /**
      * String to be used for String.indexof.
      */
-    @MojoParameter(defaultValue = "_.+",
-                    description = "The replacement String used in conjunction with ciNameRegex")
+    @Parameter(defaultValue = "_.+")
     private String ciParentRegex;
 
     /**
      * The replacement String used in conjunction with {@link #ciParentRegex}.
      */
-    @MojoParameter(defaultValue = "",
-                    description = "The replacement String used in conjunction with ciParentRegex")
+    @Parameter(defaultValue = "")
     private final String ciParentReplacment;
 
     /**
@@ -185,7 +178,7 @@ public class GenerateCIClassMojo
     /**
      * The current Maven project.
      */
-    @MojoParameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     /** Plugin container context */
