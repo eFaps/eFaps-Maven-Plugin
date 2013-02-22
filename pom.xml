@@ -369,7 +369,7 @@
         <dependency>
             <groupId>org.efaps</groupId>
             <artifactId>maven-slf4jlogger</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.3</version>
         </dependency>
 
         <!-- Apache commons-io needed for the generate installation mojo. -->
