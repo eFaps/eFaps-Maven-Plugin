@@ -26,7 +26,7 @@
 
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>4.0.0-8.1.9.v20130131</version>
+    <version>4.0.1-8.1.9.v20130131-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>eFaps Maven Plug-In</name>
@@ -83,9 +83,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
     </scm>
 
     <!-- Distribution Repository -->
