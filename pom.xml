@@ -11,8 +11,7 @@
     11:43:54 -0500 (Tue, 19 Feb 2013) $ Last Changed By: $Author: jan@moxter.net
     $ -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -27,7 +26,7 @@
 
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>4.0.0-8.1.9.v20130131-SNAPSHOT</version>
+    <version>4.0.0-8.1.9.v20130131</version>
     <packaging>maven-plugin</packaging>
 
     <name>eFaps Maven Plug-In</name>
@@ -84,9 +83,9 @@
 
     <!-- SubVersion Repository -->
     <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
+        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</connection>
+        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</developerConnection>
+        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/tags/efaps-maven-plugin-4.0.0-8.1.9.v20130131</url>
     </scm>
 
     <!-- Distribution Repository -->
