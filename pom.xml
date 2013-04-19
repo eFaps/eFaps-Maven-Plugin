@@ -18,7 +18,7 @@
     <properties>
         <!-- Jetty Version, used also to build the plug-in version number -->
         <jettyVersion>8.1.9.v20130131</jettyVersion>
-        <kernelVersion>[3.0.0-SNAPSHOT,3.1.0-SNAPSHOT)</kernelVersion>
+        <kernelVersion>[3.1.0-SNAPSHOT,3.2.0-SNAPSHOT)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -26,7 +26,7 @@
 
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>4.0.1-8.1.9.v20130131-SNAPSHOT</version>
+    <version>4.1.0-8.1.9.v20130131-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>eFaps Maven Plug-In</name>
@@ -362,6 +362,12 @@
             <groupId>org.efaps</groupId>
             <artifactId>efaps-kernel</artifactId>
             <version>${kernelVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jfreechart</artifactId>
+                    <groupId>jfree</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- eFaps Maven Logger -->
@@ -409,38 +415,21 @@
             <artifactId>jetty-server</artifactId>
             <version>${jettyVersion}</version>
         </dependency>
-        <!-- java transaction manager -->
+         <!-- java transaction manager -->
         <dependency>
-            <groupId>jotm</groupId>
-            <artifactId>jotm</artifactId>
-            <version>2.0.10</version>
+            <groupId>org.jboss.jbossts.jta</groupId>
+            <artifactId>narayana-jta</artifactId>
+            <version>4.17.3.Final</version>
             <exclusions>
                 <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
+                    <artifactId>jfreechart</artifactId>
+                    <groupId>jfree</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>javax.resource</groupId>
-                    <artifactId>connector-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
+                    <artifactId>hornetq-core</artifactId>
+                    <groupId>org.hornetq</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <!-- replacement for the javax.resource.connector-api-1.5 needed
-            by jotm -->
-        <dependency>
-            <groupId>org.ow2.spec.ee</groupId>
-            <artifactId>ow2-connector-1.5-spec</artifactId>
-            <version>1.0.12</version>
-        </dependency>
-        <!-- needed indirectly for the transaction manager -->
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>javax.resource</groupId>
