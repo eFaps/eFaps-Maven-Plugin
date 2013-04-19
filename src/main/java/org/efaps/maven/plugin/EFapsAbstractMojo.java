@@ -101,12 +101,20 @@ public abstract class EFapsAbstractMojo
     private String configProps;
 
     /**
-     *Name of the class for the transaction manager..
+     * Name of the class for the transaction manager.
      */
     @Parameter(property = "org.efaps.transaction.manager",
-               required = true,
-               defaultValue = "org.objectweb.jotm.Current")
+                    defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple",
+                    required = true)
     private String transactionManager;
+
+    /**
+     * Name of the class for the transaction Synchronization Registry.
+     */
+    @Parameter(property = "org.efaps.transaction.synchronizationRegistry",
+           defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple",
+                    required = true)
+    private String transactionSynchronizationRegistry;
 
     /**
      * Project classpath.
@@ -140,8 +148,12 @@ public abstract class EFapsAbstractMojo
         try {
             if (_startupDB) {
                 AppAccessHandler.init(null, new HashSet<String>());
-                StartupDatabaseConnection.startup(this.type, this.factory, convertToMap(this.connection),
-                                              this.transactionManager, convertToMap(this.configProps));
+                StartupDatabaseConnection.startup(this.type,
+                                                  this.factory,
+                                                  convertToMap(this.connection),
+                                                  this.transactionManager,
+                                                  this.transactionSynchronizationRegistry,
+                                                  convertToMap(this.configProps));
             }
         } catch (final StartupException e) {
             getLog().error("Initialize Database Connection failed: " + e.toString());
