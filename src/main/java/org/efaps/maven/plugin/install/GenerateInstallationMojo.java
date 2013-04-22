@@ -89,6 +89,7 @@ public class GenerateInstallationMojo
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.wiki");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xml");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xsl");
+        GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.bpmn2");
     }
 
     /**
