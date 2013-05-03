@@ -73,7 +73,7 @@ public class GenerateJmsClassMojo
      * This Regex will be used to replace the application name
      * with {@link #jmsPackageReplacement}.
      */
-    @Parameter(required = true, defaultValue = "eFaps-|eFapsApp-")
+    @Parameter(required = true, defaultValue = "eFaps-|eFapsApp-|eFapsLocalizations-")
     private String jmsPackageRegex;
 
     /**
