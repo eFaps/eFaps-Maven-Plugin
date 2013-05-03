@@ -20,6 +20,8 @@
 
 package org.efaps.maven.plugin;
 
+import java.sql.Connection;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.efaps.db.Context;
@@ -52,7 +54,11 @@ public class CleanMojo
         try {
             getLog().info("Delete Old Data and Data Model");
             Context.begin();
-            Context.getDbType().deleteAll(Context.getThreadContext().getConnection());
+            final Connection conn = Context.getThreadContext().getConnection();
+            Context.getDbType().deleteAll(conn);
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
             Context.commit();
         } catch (final Exception e) {
             throw new MojoExecutionException("Delete of Old Data and Data Model "
