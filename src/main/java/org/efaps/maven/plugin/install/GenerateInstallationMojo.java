@@ -90,6 +90,7 @@ public class GenerateInstallationMojo
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xml");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xsl");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.bpmn2");
+        GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.svg");
     }
 
     /**

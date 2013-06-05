@@ -67,6 +67,7 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.java");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.js");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.jrxml");
+        AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.svg");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.wiki");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xml");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xsl");
