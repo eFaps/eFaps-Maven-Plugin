@@ -234,6 +234,9 @@ public class GenerateCIClassMojo
 
             final List<InstallFile> files = appl.getInstall().getFiles();
             for (final InstallFile file : files) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug("reading file:" + file);
+                }
                 if (file.getType().equals(FileType.XML)) {
                     final Digester digester = loader.newDigester();
                     final URLConnection connection = file.getUrl().openConnection();
