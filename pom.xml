@@ -29,8 +29,8 @@
 
     <properties>
         <!-- Jetty Version, used also to build the plug-in version number -->
-        <jettyVersion>8.1.10.v20130312</jettyVersion>
-        <kernelVersion>[3.1.0-SNAPSHOT,3.2.0-SNAPSHOT)</kernelVersion>
+        <jettyVersion>8.1.11.v20130520</jettyVersion>
+        <kernelVersion>[3.2.0-SNAPSHOT,3.3.0-SNAPSHOT)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -38,7 +38,7 @@
 
     <groupId>org.efaps</groupId>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>4.1.0-8.1.10.v20130312-SNAPSHOT</version>
+    <version>4.2.0-8.1.11.v20130520-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>eFaps Maven Plug-In</name>
