@@ -22,6 +22,7 @@ package org.efaps.maven.plugin;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.logging.Log;
@@ -143,7 +144,7 @@ public abstract class EFapsAbstractMojo
 
         try {
             if (_startupDB) {
-                AppAccessHandler.init(null, new HashSet<String>());
+                AppAccessHandler.init(null, new HashSet<UUID>());
                 StartupDatabaseConnection.startup(this.type,
                                                   this.factory,
                                                   this.connection,
