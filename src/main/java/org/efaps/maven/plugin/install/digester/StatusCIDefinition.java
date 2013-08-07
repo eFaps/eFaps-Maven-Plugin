@@ -48,7 +48,7 @@ public class StatusCIDefinition
     @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/parent")
     private String parent;
 
-    private final List<AttributeCI> attributes = new ArrayList<AttributeCI>();
+    private final List<IAttributeCI> attributes = new ArrayList<IAttributeCI>();
 
     private final List<String> profiles = new ArrayList<String>();
 
@@ -132,7 +132,7 @@ public class StatusCIDefinition
      *
      * @return value of instance variable {@link #attributes}
      */
-    public List<AttributeCI> getAttributes()
+    public List<IAttributeCI> getAttributes()
     {
         return this.attributes;
     }

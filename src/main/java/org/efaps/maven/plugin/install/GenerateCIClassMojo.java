@@ -51,8 +51,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xmlbeans.impl.common.NameUtil;
-import org.efaps.maven.plugin.install.digester.AttributeCI;
 import org.efaps.maven.plugin.install.digester.FormCI;
+import org.efaps.maven.plugin.install.digester.IAttributeCI;
 import org.efaps.maven.plugin.install.digester.ITypeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
 import org.efaps.maven.plugin.install.digester.StatusCI;
@@ -437,7 +437,7 @@ public class GenerateCIClassMojo
 
             final Map<String, List<String>> attributes = new TreeMap<String, List<String>>();
             for (final ITypeDefintion typeDef : entry.getValue().getDefinitions()) {
-                for (final AttributeCI attribute : typeDef.getAttributes()) {
+                for (final IAttributeCI attribute : typeDef.getAttributes()) {
                     List<String> profiles;
                     if (attributes.containsKey(attribute.getName())) {
                         profiles = attributes.get(attribute.getName());

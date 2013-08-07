@@ -41,7 +41,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.efaps.maven.plugin.install.digester.AttributeCI;
+import org.efaps.maven.plugin.install.digester.IAttributeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
 import org.efaps.maven.plugin.install.digester.StatusCI;
 import org.efaps.maven.plugin.install.digester.TypeCI;
@@ -265,9 +265,9 @@ public class GenerateJmsClassMojo
 
     final StringBuilder getter = new StringBuilder();
 
-    final Map<AttributeCI, List<String>> attributes = new TreeMap<AttributeCI, List<String>>();
+    final Map<IAttributeCI, List<String>> attributes = new TreeMap<IAttributeCI, List<String>>();
     for (final ITypeDefintion typeDef : _typeCI.getDefinitions()) {
-        for (final AttributeCI attribute : typeDef.getAttributes()) {
+        for (final IAttributeCI attribute : typeDef.getAttributes()) {
             List<String> profiles;
             if (attributes.containsKey(attribute)) {
                 profiles = attributes.get(attribute);
@@ -279,7 +279,7 @@ public class GenerateJmsClassMojo
         }
     }
 
-    for (final Entry<AttributeCI, List<String>> entry : attributes.entrySet()) {
+    for (final Entry<IAttributeCI, List<String>> entry : attributes.entrySet()) {
 
         if (!"Type".equals(entry.getKey().getType())
                         && !"OID".equals(entry.getKey().getName()) && !"ID".equals(entry.getKey().getName())) {

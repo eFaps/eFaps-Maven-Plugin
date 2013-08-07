@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,6 @@
 
 package org.efaps.maven.plugin.install.digester;
 
-import java.util.Collection;
-import java.util.List;
-
 
 /**
  * TODO comment!
@@ -31,10 +28,17 @@ import java.util.List;
  * @author The eFaps Team
  * @version $Id$
  */
-public interface ITypeDefintion
+public interface IAttributeCI
 {
-    public String getName();
-    public String getParent();
-    List<IAttributeCI> getAttributes();
-    Collection<? extends String> getProfiles();
+
+    /**
+     * @return the name of the Attribute
+     */
+    String getName();
+
+    /**
+     * @return the name of the attribute type
+     */
+    String getType();
+
 }

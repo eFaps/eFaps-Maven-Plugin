@@ -62,7 +62,7 @@ public class TypeCIDefinition
 
     private final List<String> profiles = new ArrayList<String>();
 
-    private final List<AttributeCI> attributes = new ArrayList<AttributeCI>();
+    private final List<IAttributeCI> attributes = new ArrayList<IAttributeCI>();
 
     /**
      * Getter method for the instance variable {@link #abstractType}.
@@ -158,6 +158,12 @@ public class TypeCIDefinition
         this.attributes.add(_attribute);
     }
 
+    @SetNext
+    public void addAttributeSet(final AttributeSetCI _attributeSet)
+    {
+        this.attributes.add(_attributeSet);
+    }
+
 
     @CallMethod(pattern = "datamodel-type/definition/profiles")
     public void addProfile(@CallParam(pattern = "datamodel-type/definition/profiles/profile",
@@ -213,7 +219,7 @@ public class TypeCIDefinition
      *
      * @return value of instance variable {@link #attributes}
      */
-    public List<AttributeCI> getAttributes()
+    public List<IAttributeCI> getAttributes()
     {
         return this.attributes;
     }

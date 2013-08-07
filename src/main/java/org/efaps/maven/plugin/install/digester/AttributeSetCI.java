@@ -31,13 +31,14 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
  * @author The eFaps Team
  * @version $Id$
  */
-@ObjectCreate(pattern = "datamodel-type/definition/attribute")
-public class AttributeCI
-    implements Comparable<AttributeCI>, IAttributeCI
+@ObjectCreate(pattern = "datamodel-type/definition/attributeset")
+public class AttributeSetCI
+    implements Comparable<AttributeSetCI>, IAttributeCI
 {
-    @BeanPropertySetter(pattern = "datamodel-type/definition/attribute/name")
+    @BeanPropertySetter(pattern = "datamodel-type/definition/attributeset/name")
     private String name;
-    @BeanPropertySetter(pattern = "datamodel-type/definition/attribute/type")
+
+    @BeanPropertySetter(pattern = "datamodel-type/definition/attributeset/type")
     private String type;
 
     /**
@@ -83,7 +84,7 @@ public class AttributeCI
     }
 
     @Override
-    public int compareTo(final AttributeCI _arg0)
+    public int compareTo(final AttributeSetCI _arg0)
     {
         return getName().compareTo(_arg0.getName());
     }
