@@ -18,15 +18,7 @@
  * Last Changed By: $Author$
  */
 
-
 package org.efaps.maven.plugin.install.digester;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.digester3.annotations.rules.BeanPropertySetter;
-import org.apache.commons.digester3.annotations.rules.ObjectCreate;
-import org.apache.commons.digester3.annotations.rules.SetNext;
 
 
 /**
@@ -35,51 +27,44 @@ import org.apache.commons.digester3.annotations.rules.SetNext;
  * @author The eFaps Team
  * @version $Id$
  */
-@ObjectCreate(pattern = "datamodel-statusgroup")
 public class StatusCI
-    implements ITypeCI
+    implements Comparable<StatusCI>, IUniqueCI
 {
 
-    private final List<StatusCIDefinition> definitions = new ArrayList<StatusCIDefinition>();
-
-    @BeanPropertySetter(pattern = "datamodel-statusgroup/uuid")
-    private String uuid;
+    private String key;
 
     /**
-     * Getter method for the instance variable {@link #uuid}.
+     * Getter method for the instance variable {@link #name}.
      *
-     * @return value of instance variable {@link #uuid}
+     * @return value of instance variable {@link #name}
      */
-    public String getUuid()
+    public String getKey()
     {
-        return this.uuid;
+        return this.key;
     }
 
     /**
-     * Setter method for instance variable {@link #uuid}.
+     * Setter method for instance variable {@link #name}.
      *
-     * @param _uuid value for instance variable {@link #uuid}
+     * @param _name value for instance variable {@link #name}
      */
-
-    public void setUuid(final String _uuid)
+    public void setKey(final String _key)
     {
-        this.uuid = _uuid;
+        this.key = _key;
+    }
+
+    @Override
+    public int compareTo(final StatusCI _arg0)
+    {
+        return getKey().compareTo(_arg0.getKey());
     }
 
     /**
-     * Getter method for the instance variable {@link #definitions}.
-     *
-     * @return value of instance variable {@link #definitions}
+     * {@inheritDoc}
      */
-    public List<StatusCIDefinition> getDefinitions()
+    @Override
+    public String getIdentifier()
     {
-        return this.definitions;
-    }
-
-    @SetNext
-    public void addDefinition(final StatusCIDefinition definition)
-    {
-        this.definitions.add(definition);
+        return getKey();
     }
 }
-

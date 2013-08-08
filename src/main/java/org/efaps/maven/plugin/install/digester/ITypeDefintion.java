@@ -33,8 +33,14 @@ import java.util.List;
  */
 public interface ITypeDefintion
 {
+
     public String getName();
+
     public String getParent();
+
     List<IAttributeCI> getAttributes();
+
     Collection<? extends String> getProfiles();
+
+    List<? extends IUniqueCI> getUniques();
 }

@@ -52,10 +52,11 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xmlbeans.impl.common.NameUtil;
 import org.efaps.maven.plugin.install.digester.FormCI;
-import org.efaps.maven.plugin.install.digester.IAttributeCI;
 import org.efaps.maven.plugin.install.digester.ITypeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
-import org.efaps.maven.plugin.install.digester.StatusCI;
+import org.efaps.maven.plugin.install.digester.IUniqueCI;
+import org.efaps.maven.plugin.install.digester.StatusCIDefinition;
+import org.efaps.maven.plugin.install.digester.StatusGroupCI;
 import org.efaps.maven.plugin.install.digester.TableCI;
 import org.efaps.maven.plugin.install.digester.TypeCI;
 import org.efaps.maven.plugin.install.digester.UIDefintion;
@@ -217,7 +218,7 @@ public class GenerateCIClassMojo
                 protected void configureRules()
                 {
                     bindRulesFrom(TypeCI.class);
-                    bindRulesFrom(StatusCI.class);
+                    bindRulesFrom(StatusGroupCI.class);
                     bindRulesFrom(FormCI.class);
                     bindRulesFrom(TableCI.class);
                 }
@@ -398,6 +399,7 @@ public class GenerateCIClassMojo
                 .append("//CHECKSTYLE:OFF\n")
                 .append("package ").append(this.ciPackage).append(";\n")
                 .append("import org.efaps.ci.CIAttribute;\n")
+                .append("import org.efaps.ci.CIStatus;\n")
                 .append("import org.efaps.ci.CIType;\n\n")
                 .append(getClassComment())
                 .append("public final class CI").append(this.ciName).append("\n{\n");
@@ -435,32 +437,45 @@ public class GenerateCIClassMojo
                 .append("            super(_uuid);")
                 .append("\n        }\n");
 
-            final Map<String, List<String>> attributes = new TreeMap<String, List<String>>();
+            final Map<String, List<String>> uniques = new TreeMap<String, List<String>>();
             for (final ITypeDefintion typeDef : entry.getValue().getDefinitions()) {
-                for (final IAttributeCI attribute : typeDef.getAttributes()) {
+                for (final IUniqueCI unique : typeDef.getUniques()) {
                     List<String> profiles;
-                    if (attributes.containsKey(attribute.getName())) {
-                        profiles = attributes.get(attribute.getName());
+                    if (uniques.containsKey(unique.getIdentifier())) {
+                        profiles = uniques.get(unique.getIdentifier());
                     } else {
                         profiles = new ArrayList<String>();
                     }
                     profiles.addAll(typeDef.getProfiles());
-                    attributes.put(attribute.getName(), profiles);
+                    uniques.put(unique.getIdentifier(), profiles);
                 }
             }
-            for (final Entry<String, List<String>> attrEntry : attributes.entrySet()) {
-                if (!"Type".equals(attrEntry.getKey())
-                                && !"OID".equals(attrEntry.getKey()) && !"ID".equals(attrEntry.getKey())) {
+            for (final Entry<String, List<String>> attrEntry : uniques.entrySet()) {
+                if (def instanceof StatusCIDefinition) {
                     // check if the attribute name can be used in java, if not
                     // extend the name
                     final String identifier = NameUtil.isValidJavaIdentifier(attrEntry.getKey())
-                                    ? attrEntry.getKey() : attrEntry.getKey() + "_attr";
-                    java.append("        public final CIAttribute ").append(identifier)
-                            .append(" = new CIAttribute(this, \"").append(attrEntry.getKey()).append("\"");
+                                    ? attrEntry.getKey() : attrEntry.getKey() + "_ci";
+                    java.append("        public final CIStatus ").append(identifier)
+                            .append(" = new CIStatus(this, \"").append(attrEntry.getKey()).append("\"");
                     for (final String profile : attrEntry.getValue()) {
                         java.append(", \"").append(profile).append("\"");
                     }
                     java.append(");\n");
+                } else {
+                    if (!"Type".equals(attrEntry.getKey())
+                                    && !"OID".equals(attrEntry.getKey()) && !"ID".equals(attrEntry.getKey())) {
+                        // check if the attribute name can be used in java, if not
+                        // extend the name
+                        final String identifier = NameUtil.isValidJavaIdentifier(attrEntry.getKey())
+                                        ? attrEntry.getKey() : attrEntry.getKey() + "_ci";
+                        java.append("        public final CIAttribute ").append(identifier)
+                                .append(" = new CIAttribute(this, \"").append(attrEntry.getKey()).append("\"");
+                        for (final String profile : attrEntry.getValue()) {
+                            java.append(", \"").append(profile).append("\"");
+                        }
+                        java.append(");\n");
+                    }
                 }
             }
             java.append("    }\n\n");

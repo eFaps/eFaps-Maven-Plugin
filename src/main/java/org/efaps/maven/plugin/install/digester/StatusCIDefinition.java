@@ -22,6 +22,7 @@
 package org.efaps.maven.plugin.install.digester;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.digester3.annotations.rules.BeanPropertySetter;
@@ -48,7 +49,7 @@ public class StatusCIDefinition
     @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/parent")
     private String parent;
 
-    private final List<IAttributeCI> attributes = new ArrayList<IAttributeCI>();
+    private final List<StatusCI> status = new ArrayList<StatusCI>();
 
     private final List<String> profiles = new ArrayList<String>();
 
@@ -72,11 +73,14 @@ public class StatusCIDefinition
         this.expression = _expression;
     }
 
-//    @SetNext
-//    public void addAttribute(final AttributeCI _attribute)
-//    {
-//        this.attributes.add(_attribute);
-//    }
+    @CallMethod(pattern = "datamodel-statusgroup/definition/status")
+    public void addStatus(@CallParam(pattern = "datamodel-statusgroup/definition/status",
+                    attributeName = "key") final String _key)
+    {
+        final StatusCI statusTmp = new StatusCI();
+        statusTmp.setKey(_key);
+        this.status.add(statusTmp);
+    }
 
     @CallMethod(pattern = "datamodel-statusgroup/definition/profiles")
     public void addProfile(@CallParam(pattern = "datamodel-statusgroup/definition/profiles/profile",
@@ -134,7 +138,7 @@ public class StatusCIDefinition
      */
     public List<IAttributeCI> getAttributes()
     {
-        return this.attributes;
+        return Collections.emptyList();
     }
 
     /**
@@ -145,5 +149,14 @@ public class StatusCIDefinition
     public List<String> getProfiles()
     {
         return this.profiles;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<? extends IUniqueCI> getUniques()
+    {
+        return this.status;
     }
 }

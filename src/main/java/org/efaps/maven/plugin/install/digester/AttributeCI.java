@@ -76,11 +76,20 @@ public class AttributeCI
      *
      * @param _type value for instance variable {@link #type}
      */
-
     public void setType(final String _type)
     {
         this.type = _type;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getIdentifier()
+    {
+        return getName();
+    }
+
 
     @Override
     public int compareTo(final AttributeCI _arg0)

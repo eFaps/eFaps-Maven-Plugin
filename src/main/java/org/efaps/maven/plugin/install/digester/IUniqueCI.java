@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2013 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
  * Last Changed By: $Author$
  */
 
+
 package org.efaps.maven.plugin.install.digester;
 
-import java.util.List;
 
 /**
  * TODO comment!
@@ -28,10 +28,7 @@ import java.util.List;
  * @author The eFaps Team
  * @version $Id$
  */
-public interface ITypeCI
+public interface IUniqueCI
 {
-
-    List<? extends ITypeDefintion> getDefinitions();
-
-    public String getUuid();
+    String getIdentifier();
 }

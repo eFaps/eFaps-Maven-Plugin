@@ -77,7 +77,6 @@ public class AttributeSetCI
      *
      * @param _type value for instance variable {@link #type}
      */
-
     public void setType(final String _type)
     {
         this.type = _type;
@@ -87,5 +86,14 @@ public class AttributeSetCI
     public int compareTo(final AttributeSetCI _arg0)
     {
         return getName().compareTo(_arg0.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getIdentifier()
+    {
+        return getName();
     }
 }

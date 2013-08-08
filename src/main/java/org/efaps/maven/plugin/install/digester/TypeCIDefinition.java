@@ -233,4 +233,13 @@ public class TypeCIDefinition
     {
         return this.profiles;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<? extends IUniqueCI> getUniques()
+    {
+        return getAttributes();
+    }
 }

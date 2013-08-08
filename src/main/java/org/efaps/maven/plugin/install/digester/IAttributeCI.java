@@ -18,9 +18,7 @@
  * Last Changed By: $Author$
  */
 
-
 package org.efaps.maven.plugin.install.digester;
-
 
 /**
  * TODO comment!
@@ -29,6 +27,7 @@ package org.efaps.maven.plugin.install.digester;
  * @version $Id$
  */
 public interface IAttributeCI
+    extends IUniqueCI
 {
 
     /**

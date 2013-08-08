@@ -43,7 +43,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.efaps.maven.plugin.install.digester.IAttributeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
-import org.efaps.maven.plugin.install.digester.StatusCI;
+import org.efaps.maven.plugin.install.digester.StatusGroupCI;
 import org.efaps.maven.plugin.install.digester.TypeCI;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
@@ -184,7 +184,7 @@ public class GenerateJmsClassMojo
                 protected void configureRules()
                 {
                     bindRulesFrom(TypeCI.class);
-                    bindRulesFrom(StatusCI.class);
+                    bindRulesFrom(StatusGroupCI.class);
                 }
             });
             final Digester digester = loader.newDigester();
