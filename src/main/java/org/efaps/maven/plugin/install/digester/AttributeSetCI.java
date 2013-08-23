@@ -33,7 +33,7 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
  */
 @ObjectCreate(pattern = "datamodel-type/definition/attributeset")
 public class AttributeSetCI
-    implements Comparable<AttributeSetCI>, IAttributeCI
+    implements Comparable<IAttributeCI>, IAttributeCI
 {
     @BeanPropertySetter(pattern = "datamodel-type/definition/attributeset/name")
     private String name;
@@ -83,9 +83,13 @@ public class AttributeSetCI
     }
 
     @Override
-    public int compareTo(final AttributeSetCI _arg0)
+    public int compareTo(final IAttributeCI _arg0)
     {
-        return getName().compareTo(_arg0.getName());
+        int ret =0;
+        if (_arg0 instanceof AttributeSetCI) {
+            ret = getName().compareTo(_arg0.getName());
+        }
+        return ret ;
     }
 
     /**
