@@ -82,6 +82,7 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/versions.xml");
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/package-info.java");
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/.svn/**");
+        AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/*DataImport_*.xml");
     }
 
     /**

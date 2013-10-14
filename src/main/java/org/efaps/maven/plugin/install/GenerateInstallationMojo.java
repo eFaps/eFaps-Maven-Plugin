@@ -102,6 +102,7 @@ public class GenerateInstallationMojo
     static {
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/versions.xml");
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/package-info.java");
+        GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/DataImport_*.xml");
     }
 
     /**
