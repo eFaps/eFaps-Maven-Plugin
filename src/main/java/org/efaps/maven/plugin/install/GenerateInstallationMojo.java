@@ -91,6 +91,7 @@ public class GenerateInstallationMojo
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xsl");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.bpmn2");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.svg");
+        GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.csv");
     }
 
     /**
@@ -102,7 +103,6 @@ public class GenerateInstallationMojo
     static {
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/versions.xml");
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/package-info.java");
-        GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/DataImport_*.xml");
     }
 
     /**
@@ -366,7 +366,7 @@ public class GenerateInstallationMojo
             ? GenerateInstallationMojo.DEFAULT_COPYINCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYINCLUDES.size()])
             : this.copyIncludes.toArray(new String[this.copyIncludes.size()]);
-        final String[] excludes = (this.copyIncludes == null)
+        final String[] excludes = (this.copyExcludes == null)
             ? GenerateInstallationMojo.DEFAULT_COPYEXCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.size()])
             : this.copyExcludes.toArray(new String[this.copyExcludes.size()]);

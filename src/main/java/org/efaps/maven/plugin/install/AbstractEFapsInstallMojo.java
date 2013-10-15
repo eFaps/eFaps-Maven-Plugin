@@ -70,6 +70,7 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.wiki");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xml");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.xsl");
+        AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.csv");
     }
 
     /**
@@ -82,7 +83,6 @@ public abstract class AbstractEFapsInstallMojo
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/versions.xml");
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/package-info.java");
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/.svn/**");
-        AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/*DataImport_*.xml");
     }
 
     /**
@@ -100,11 +100,13 @@ public abstract class AbstractEFapsInstallMojo
     /**
      * List of includes.
      */
+    @Parameter
     private final List<String> includes = null;
 
     /**
      * List of excludes.
      */
+    @Parameter
     private final List<String> excludes = null;
 
     /**
