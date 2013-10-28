@@ -126,6 +126,7 @@ public class GenerateJmsClassMojo
      *
      * @throws MojoExecutionException if installation failed
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
@@ -153,7 +154,7 @@ public class GenerateJmsClassMojo
                 final String applicationName = dependApp.getApplication().replaceAll(this.jmsPackageRegex, "")
                                     .toLowerCase();
                 for (final InstallFile file : files) {
-                    if (file.getType().equals(FileType.XML)) {
+                    if (file.getType() != null && file.getType().equals(FileType.XML)) {
                         readFile(applicationName, srcFolder, file);
                     }
                 }
@@ -162,7 +163,7 @@ public class GenerateJmsClassMojo
             final List<InstallFile> files = appl.getInstall().getFiles();
             final String applicationName = appl.getApplication().replaceAll(this.jmsPackageRegex, "").toLowerCase();
             for (final InstallFile file : files) {
-                if (file.getType().equals(FileType.XML)) {
+                if (file.getType() != null && file.getType().equals(FileType.XML)) {
                     readFile(applicationName, srcFolder, file);
                 }
             }
