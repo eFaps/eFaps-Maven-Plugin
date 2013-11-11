@@ -439,7 +439,7 @@
         <dependency>
             <groupId>org.jboss.jbossts.jta</groupId>
             <artifactId>narayana-jta</artifactId>
-            <version>4.17.3.Final</version>
+            <version>4.17.4.Final</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jfreechart</artifactId>
