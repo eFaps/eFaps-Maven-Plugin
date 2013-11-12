@@ -72,8 +72,7 @@ import org.xml.sax.SAXException;
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id: GenerateCIClassMojo.java 7384 2012-03-22 15:57:32Z
- *          jan@moxter.net $
+ * @version $Id$
  */
 @Mojo(name = "generate-ciclass", requiresDependencyResolution = ResolutionScope.COMPILE,
                 defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
