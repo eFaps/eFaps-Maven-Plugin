@@ -53,6 +53,12 @@ public class UpdateFromFileMojo
     private File file;
 
     /**
+     * Using profile.
+     */
+    @Parameter(property = "profile", defaultValue = "eFaps")
+    private String profile;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -71,7 +77,7 @@ public class UpdateFromFileMojo
             final Install install = new Install();
             install.addFile(this.file.toURI().toURL(), filetype.getType());
             final Set<Profile> profiles = new HashSet<Profile>();
-            profiles.add(Profile.getDefaultProfile());
+            profiles.add(Profile.getProfile(this.profile));
             install.updateLatest(profiles);
             commitTransaction();
         } catch (final EFapsException e) {
