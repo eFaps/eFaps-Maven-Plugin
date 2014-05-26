@@ -24,6 +24,7 @@ package org.efaps.maven.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -41,6 +42,7 @@ import org.tmatesoft.svn.core.wc.SVNDiffClient;
 import org.tmatesoft.svn.core.wc.SVNDiffStatus;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
+import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 
 
 /**
@@ -75,6 +77,18 @@ public class GenerateUpdatePackageMojo
     private String revision;
 
     /**
+     * Replace the files if dupplicated.
+     */
+    @Parameter(property = "replace")
+    private final boolean replace = false;
+
+    /**
+     * Execute an svn update first before comparing.
+     */
+    @Parameter(property = "update")
+    private final boolean update = true;
+
+    /**
      * The directory where the generated Class will be stored. The directory
      * will be registered as a compile source root of the project such that the
      * generated files will participate in later build phases like compiling and
@@ -87,8 +101,11 @@ public class GenerateUpdatePackageMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        GenerateUpdatePackageMojo.this.log.info("path: " + this.path);
+
         final SVNClientManager clientManager = SVNClientManager.newInstance();
         final SVNDiffClient diffClient = clientManager.getDiffClient();
+
         final String[] revAr = this.revision.split(":");
         final SVNRevision rev1 = SVNRevision.parse(revAr[0]);
         final SVNRevision rev2;
@@ -97,7 +114,15 @@ public class GenerateUpdatePackageMojo
         } else {
             rev2 = SVNRevision.HEAD;
         }
-
+        if (this.update) {
+            final SVNUpdateClient updateClient = clientManager.getUpdateClient();
+            try {
+                GenerateUpdatePackageMojo.this.log.info("updating to revision: " + rev2);
+                updateClient.doUpdate(this.path, rev2, SVNDepth.INFINITY, true, true);
+            } catch (final SVNException e) {
+                this.log.error(e);
+            }
+        }
         final List<String> paths = new ArrayList<String>();
 
         final ISVNDiffStatusHandler handler = new ISVNDiffStatusHandler()
@@ -135,6 +160,14 @@ public class GenerateUpdatePackageMojo
         try {
             final File file = new File(this.path + StringUtils.removeStart(_path, "trunk"));
             if (file.exists()) {
+                if (!this.replace) {
+                    final File checkfile = new File(this.outputDirectory.getAbsolutePath(), file.getName());
+                    if (checkfile.exists()) {
+                        checkfile.renameTo(new File(this.outputDirectory.getAbsolutePath(), "_" + new Date().getTime()
+                                        + file.getName()));
+                        this.log.info("RENAMED: " + checkfile);
+                    }
+                }
                 if (_path.endsWith("xml")) {
                     FileUtils.copyFileToDirectory(file, this.outputDirectory);
                     this.log.info("COPIED: " + file);
@@ -150,8 +183,7 @@ public class GenerateUpdatePackageMojo
                 }
             }
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.log.error("Catched IOException", e);
         }
     }
 
