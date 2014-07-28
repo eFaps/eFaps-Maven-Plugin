@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.efaps.update.Profile;
 import org.efaps.update.version.Application;
@@ -51,10 +52,17 @@ public final class SourceInstallMojo
     private final List<String> excludes = null;
 
     /**
+     * Activate Compilation.
+     */
+    @Parameter(property = "compile")
+    private boolean compile = true;
+
+    /**
      * Executes the install goal.
      *
      * @throws MojoExecutionException if installation failed
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
@@ -79,10 +87,30 @@ public final class SourceInstallMojo
 
             // install applications
             if (appl != null) {
-                appl.install(getUserName(), getPassWord(), profiles);
+                appl.install(getUserName(), getPassWord(), profiles, isCompile());
             }
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
+    }
+
+    /**
+     * Getter method for the instance variable {@link #compile}.
+     *
+     * @return value of instance variable {@link #compile}
+     */
+    public boolean isCompile()
+    {
+        return this.compile;
+    }
+
+    /**
+     * Setter method for instance variable {@link #compile}.
+     *
+     * @param _compile value for instance variable {@link #compile}
+     */
+    public void setCompile(final boolean _compile)
+    {
+        this.compile = _compile;
     }
 }
