@@ -45,22 +45,24 @@ public final class UpdateMojo
      *
      * @throws MojoExecutionException if update failed
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
         init(true);
         try  {
-            final Application appl = Application.getApplicationFromClassPath(getApplications(),
+            final Application appl = Application.getApplicationFromClassPath(getApplication(),
                                                                              getClasspathElements());
-
-            final Set<Profile> profiles = new HashSet<Profile>();
-            if (getProfile() != null) {
-                profiles.add(Profile.getProfile(getProfile()));
-            } else {
-                profiles.add(Profile.getDefaultProfile());
+            if (appl != null) {
+                final Set<Profile> profiles = new HashSet<Profile>();
+                if (getProfile() != null) {
+                    profiles.add(Profile.getProfile(getProfile()));
+                } else {
+                    profiles.add(Profile.getDefaultProfile());
+                }
+                // update applications
+                appl.updateLastVersion(getUserName(), getPassWord(), profiles);
             }
-            // update applications
-            appl.updateLastVersion(getUserName(), getPassWord(), profiles);
         } catch (final Exception e)  {
             throw new MojoExecutionException("Could not execute Installation script", e);
         }

@@ -46,21 +46,24 @@ public final class InstallMojo
      *                                found or the installation scripts could
      *                                not be executed
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
         init(true);
         try {
-            final Application appl = Application.getApplicationFromClassPath(getApplications(),
+            final Application appl = Application.getApplicationFromClassPath(getApplication(),
                                                                              getClasspathElements());
-            final Set<Profile> profiles = new HashSet<Profile>();
-            if (getProfile() != null) {
-                profiles.add(Profile.getProfile(getProfile()));
-            } else {
-                profiles.add(Profile.getDefaultProfile());
+            if (appl != null) {
+                final Set<Profile> profiles = new HashSet<Profile>();
+                if (getProfile() != null) {
+                    profiles.add(Profile.getProfile(getProfile()));
+                } else {
+                    profiles.add(Profile.getDefaultProfile());
+                }
+                // install application
+                appl.install(getUserName(), getPassWord(), profiles);
             }
-            // install application
-            appl.install(getUserName(), getPassWord(), profiles);
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute Installation script", e);
         }

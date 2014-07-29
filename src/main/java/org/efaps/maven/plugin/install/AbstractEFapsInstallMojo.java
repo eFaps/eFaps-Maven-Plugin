@@ -115,12 +115,12 @@ public abstract class AbstractEFapsInstallMojo
     private final Map<String, String> typeMapping = null;
 
     /**
-     * Comma separated list of applications to install. The default value is the
+     * Application to install. The default value is the
      * kernel application. The value is used to define the applications to
      * install or update.
      */
-    @Parameter(defaultValue = "eFaps-Kernel")
-    private String applications;
+    @Parameter(property = "app", defaultValue = "eFaps-Kernel")
+    private String application;
 
     /**
      * The directory where the generated Class will be stored. The directory
@@ -161,11 +161,11 @@ public abstract class AbstractEFapsInstallMojo
     {
         final List<String> ret = new ArrayList<String>();
         final DirectoryScanner ds = new DirectoryScanner();
-        final String[] included = (getIncludes() == null)
+        final String[] included = getIncludes() == null
             ? AbstractEFapsInstallMojo.DEFAULT_INCLUDES
                             .toArray(new String[AbstractEFapsInstallMojo.DEFAULT_INCLUDES.size()])
             : getIncludes().toArray(new String[getIncludes().size()]);
-        final String[] excluded = (getExcludes() == null)
+        final String[] excluded = getExcludes() == null
             ? AbstractEFapsInstallMojo.DEFAULT_EXCLUDES
                             .toArray(new String[AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.size()])
             : getExcludes().toArray(new String[getExcludes().size()]);
@@ -191,9 +191,9 @@ public abstract class AbstractEFapsInstallMojo
      * @return applications
      * @see #applications
      */
-    protected String getApplications()
+    protected String getApplication()
     {
-        return this.applications;
+        return this.application;
     }
 
     /**
@@ -219,7 +219,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected Map<String, String> getTypeMapping()
     {
-        return (this.typeMapping == null) ? AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING : this.typeMapping;
+        return this.typeMapping == null ? AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING : this.typeMapping;
     }
 
     /**
