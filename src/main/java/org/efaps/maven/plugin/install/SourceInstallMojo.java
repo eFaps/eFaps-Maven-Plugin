@@ -55,7 +55,7 @@ public final class SourceInstallMojo
      * Activate Compilation.
      */
     @Parameter(property = "compile")
-    private boolean compile = true;
+    private Boolean compile = null;
 
     /**
      * Executes the install goal.
@@ -87,19 +87,18 @@ public final class SourceInstallMojo
 
             // install applications
             if (appl != null) {
-                appl.install(getUserName(), getPassWord(), profiles, isCompile());
+                appl.install(getUserName(), getPassWord(), profiles, getCompile());
             }
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
     }
-
     /**
-     * Getter method for the instance variable {@link #compile}.
+     * Getter method for instance variable {@link #compile}.
      *
-     * @return value of instance variable {@link #compile}
+     * @return value for {@link #compile}.
      */
-    public boolean isCompile()
+    public Boolean getCompile()
     {
         return this.compile;
     }
