@@ -177,13 +177,13 @@ public class GenerateUpdatePackageMojo
             final File file = new File(this.path + StringUtils.removeStart(_path, "trunk"));
             File outDir;
             if (this.check4overwrite) {
-            final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
-                            TrueFileFilter.INSTANCE);
-               if (files.isEmpty()) {
-                   outDir = this.outputDirectory;
-               } else {
-                   outDir = new File(this.outputDirectory, "overwrite");
-               }
+                final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
+                                TrueFileFilter.INSTANCE);
+                if (files.isEmpty() || files.contains(file)) {
+                    outDir = this.outputDirectory;
+                } else {
+                    outDir = new File(this.outputDirectory, "overwrite");
+                }
             } else {
                 outDir = this.outputDirectory;
             }
