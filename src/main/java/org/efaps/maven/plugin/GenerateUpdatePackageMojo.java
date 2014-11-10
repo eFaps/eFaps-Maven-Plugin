@@ -157,7 +157,7 @@ public class GenerateUpdatePackageMojo
         };
         try {
             diffClient.getOperationsFactory().setPrimaryWcGeneration(SvnWcGeneration.V17);
-            diffClient.doDiffStatus(this.path, rev2, this.path, rev1, SVNDepth.INFINITY, true, handler);
+            diffClient.doDiffStatus(this.path, rev1, this.path, rev2, SVNDepth.INFINITY, true, handler);
         } catch (final SVNException e) {
             this.log.error(e);
         }
