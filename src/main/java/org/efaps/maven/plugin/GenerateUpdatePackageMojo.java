@@ -18,16 +18,18 @@
  * Last Changed By: $Author$
  */
 
-
 package org.efaps.maven.plugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -36,6 +38,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.internal.wc2.SvnWcGeneration;
 import org.tmatesoft.svn.core.wc.ISVNDiffStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNDiffClient;
@@ -44,12 +47,12 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 
-
 /**
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
+ * @version $Id: GenerateUpdatePackageMojo.java 12861 2014-05-26 15:01:24Z
+ *          jan@moxter.net $
  */
 @Mojo(name = "generateUpdatePackage")
 public class GenerateUpdatePackageMojo
@@ -77,7 +80,7 @@ public class GenerateUpdatePackageMojo
     private String revision;
 
     /**
-     * Replace the files if dupplicated.
+     * Replace the files if duplicated.
      */
     @Parameter(property = "replace")
     private final boolean replace = false;
@@ -89,6 +92,12 @@ public class GenerateUpdatePackageMojo
     private final boolean update = true;
 
     /**
+     * Root Directory with the XML installation files.
+     */
+    @Parameter(property = "check4overwrite")
+    private final boolean check4overwrite = true;
+
+    /**
      * The directory where the generated Class will be stored. The directory
      * will be registered as a compile source root of the project such that the
      * generated files will participate in later build phases like compiling and
@@ -96,6 +105,12 @@ public class GenerateUpdatePackageMojo
      */
     @Parameter(defaultValue = "${project.build.directory}/updatePackage")
     private File outputDirectory;
+
+    /**
+     * Location of the version file (defining all versions to install).
+     */
+    @Parameter(defaultValue = "${basedir}/src")
+    private File baseDir;
 
     @Override
     public void execute()
@@ -141,7 +156,8 @@ public class GenerateUpdatePackageMojo
             }
         };
         try {
-            diffClient.doDiffStatus(this.path, rev1, this.path, rev2, SVNDepth.INFINITY, true, handler);
+            diffClient.getOperationsFactory().setPrimaryWcGeneration(SvnWcGeneration.V17);
+            diffClient.doDiffStatus(this.path, rev2, this.path, rev1, SVNDepth.INFINITY, true, handler);
         } catch (final SVNException e) {
             this.log.error(e);
         }
@@ -159,25 +175,37 @@ public class GenerateUpdatePackageMojo
     {
         try {
             final File file = new File(this.path + StringUtils.removeStart(_path, "trunk"));
+            File outDir;
+            if (this.check4overwrite) {
+            final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
+                            TrueFileFilter.INSTANCE);
+               if (files.isEmpty()) {
+                   outDir = this.outputDirectory;
+               } else {
+                   outDir = new File(this.outputDirectory, "overwrite");
+               }
+            } else {
+                outDir = this.outputDirectory;
+            }
             if (file.exists()) {
                 if (!this.replace) {
-                    final File checkfile = new File(this.outputDirectory.getAbsolutePath(), file.getName());
+                    final File checkfile = new File(outDir.getAbsolutePath(), file.getName());
                     if (checkfile.exists()) {
-                        checkfile.renameTo(new File(this.outputDirectory.getAbsolutePath(), "_" + new Date().getTime()
+                        checkfile.renameTo(new File(outDir.getAbsolutePath(), "_" + new Date().getTime()
                                         + file.getName()));
                         this.log.info("RENAMED: " + checkfile);
                     }
                 }
                 if (_path.endsWith("xml")) {
-                    FileUtils.copyFileToDirectory(file, this.outputDirectory);
+                    FileUtils.copyFileToDirectory(file, outDir);
                     this.log.info("COPIED: " + file);
                 } else if (_path.endsWith("java")) {
-                    FileUtils.copyFileToDirectory(file, this.outputDirectory);
+                    FileUtils.copyFileToDirectory(file, outDir);
                     this.log.info("COPIED: " + file);
                 } else if (_path.endsWith("properties")) {
                     for (final File aFile : FileUtils.listFiles(file.getParentFile(), new String[] { "xml",
                                     "properties" }, false)) {
-                        FileUtils.copyFileToDirectory(aFile, this.outputDirectory);
+                        FileUtils.copyFileToDirectory(aFile, outDir);
                         this.log.info("COPIED: " + aFile);
                     }
                 }
