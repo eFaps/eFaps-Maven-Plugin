@@ -36,13 +36,17 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.internal.wc2.SvnWcGeneration;
 import org.tmatesoft.svn.core.wc.ISVNDiffStatusHandler;
+import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNDiffClient;
 import org.tmatesoft.svn.core.wc.SVNDiffStatus;
+import org.tmatesoft.svn.core.wc.SVNEvent;
+import org.tmatesoft.svn.core.wc.SVNEventAction;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
@@ -132,8 +136,32 @@ public class GenerateUpdatePackageMojo
         if (this.update) {
             final SVNUpdateClient updateClient = clientManager.getUpdateClient();
             try {
+                updateClient.setIgnoreExternals(true);
+
+                final ISVNEventHandler handler = new ISVNEventHandler()
+                {
+
+                    @Override
+                    public void checkCancelled()
+                        throws SVNCancelException
+                    {
+                    }
+
+                    @Override
+                    public void handleEvent(final SVNEvent _event,
+                                            final double _progress)
+                        throws SVNException
+                    {
+                        if (SVNEventAction.UPDATE_UPDATE.equals(_event.getAction())) {
+                            GenerateUpdatePackageMojo.this.log.info("updating: " + _event.getFile());
+                        }
+                    }
+                };
+
+                updateClient.setEventHandler(handler);
                 GenerateUpdatePackageMojo.this.log.info("updating to revision: " + rev2);
-                updateClient.doUpdate(this.path, rev2, SVNDepth.INFINITY, true, true);
+                final long rev = updateClient.doUpdate(this.path, rev2, SVNDepth.INFINITY, true, true);
+                GenerateUpdatePackageMojo.this.log.info("updated to revision: " + rev);
             } catch (final SVNException e) {
                 this.log.error(e);
             }
