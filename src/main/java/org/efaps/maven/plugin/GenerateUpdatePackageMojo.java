@@ -20,8 +20,13 @@
 
 package org.efaps.maven.plugin;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -36,6 +41,17 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
@@ -116,9 +132,120 @@ public class GenerateUpdatePackageMojo
     @Parameter(defaultValue = "${basedir}/src")
     private File baseDir;
 
+    /**
+     * SCM to use "scm" or "git".
+     */
+    @Parameter(defaultValue = "git")
+    private String scm;
+
+    /**
+     * Path of a SVN base file.
+     */
+    @Parameter(property = "repo")
+    private File gitRepository;
+
+    /**
+     * Path of a SVN base file.
+     */
+    @Parameter(property = "gitFile")
+    private File gitFile;
+
     @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
+    {
+        switch (this.scm) {
+            case "svn":
+                executeSVN();
+                break;
+            default:
+                executeGit();
+                break;
+        }
+    }
+
+    private void executeGit()
+    {
+        try {
+            if (this.gitRepository != null && this.gitRepository.exists()) {
+                final File gitDir = new File(this.gitRepository, ".git");
+                final Repository repo = new FileRepository(gitDir);
+                final ObjectId oldID = repo.resolve(this.revision + "^{tree}");
+                final ObjectId newID = repo.resolve("HEAD" + "^{tree}");
+                copyGit(repo, oldID, newID);
+            } else if (this.gitFile != null && this.gitFile.exists()) {
+                final StringBuilder sb = new StringBuilder();
+                final FileInputStream fstream = new FileInputStream(this.gitFile);
+                final BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+                String strLine;
+                // Read File Line By Line
+                while ((strLine = br.readLine()) != null) {
+                    final String[] strArrary = strLine.split(" ");
+                    if (strArrary.length > 0) {
+                        final File gitDir = new File(strArrary[0], ".git");
+                        final Repository repo = new FileRepository(gitDir);
+                        final ObjectId newID = repo.resolve("HEAD" + "^{tree}");
+                        if (strArrary.length > 1) {
+                            final ObjectId oldID = repo.resolve(strArrary[1] + "^{tree}");
+                            copyGit(repo, oldID, newID);
+                        }
+                        sb.append(strArrary[0]).append(" ").append(newID.name()).append("\n");
+                    }
+                }
+                br.close();
+                final FileWriter fwriter = new FileWriter(this.gitFile);
+                final BufferedWriter bwriter = new BufferedWriter(fwriter);
+                bwriter.write(sb.toString());
+                bwriter.close();
+            }
+        } catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (final GitAPIException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void copyGit(final Repository _repo,
+                         final ObjectId _oldID,
+                         final ObjectId _newID)
+        throws IOException, GitAPIException
+    {
+
+        final List<DiffEntry> list = new Git(_repo)
+                        .diff()
+                        .setShowNameAndStatusOnly(true)
+                        .setOldTree(prepareTreeParser(_repo, _oldID))
+                        .setNewTree(prepareTreeParser(_repo, _newID))
+                        .call();
+        for (final DiffEntry entyr : list) {
+            GenerateUpdatePackageMojo.this.log.info(entyr.toString());
+            switch (entyr.getChangeType()) {
+                case ADD:
+                case MODIFY:
+                case COPY:
+                case RENAME:
+                    copyFile(new File(_repo.getDirectory().getParentFile(), entyr.getNewPath()).getPath(), false);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+    private CanonicalTreeParser prepareTreeParser(final Repository _repository,
+                                                  final ObjectId _objectId)
+        throws MissingObjectException, IncorrectObjectTypeException, IOException
+    {
+        final CanonicalTreeParser parser = new CanonicalTreeParser();
+        final ObjectReader or = _repository.newObjectReader();
+        parser.reset(or, new RevWalk(_repository).parseTree(_objectId));
+        return parser;
+    }
+
+    private void executeSVN()
     {
         GenerateUpdatePackageMojo.this.log.info("path: " + this.path);
 
@@ -191,18 +318,19 @@ public class GenerateUpdatePackageMojo
         }
 
         for (final String path : paths) {
-            copyFile(path);
+            copyFile(path, true);
         }
-
     }
 
     /**
      * @param _file file to copy
      */
-    private void copyFile(final String _path)
+    private void copyFile(final String _path,
+                          final boolean _correctPath)
     {
         try {
-            final File file = new File(this.path + StringUtils.removeStart(_path, "trunk"));
+            final File file = _correctPath ? new File(this.path + StringUtils.removeStart(_path, "trunk")) : new File(
+                            _path);
             File outDir;
             if (this.check4overwrite) {
                 final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
