@@ -171,7 +171,7 @@ public class GenerateUpdatePackageMojo
                 final File gitDir = new File(this.gitRepository, ".git");
                 final Repository repo = new FileRepository(gitDir);
                 final ObjectId oldID = repo.resolve(this.revision + "^{tree}");
-                final ObjectId newID = repo.resolve("HEAD" + "^{tree}");
+                final ObjectId newID = repo.resolve("refs/heads/master"); // HEAD^{tree}
                 copyGit(repo, oldID, newID);
             } else if (this.gitFile != null && this.gitFile.exists()) {
                 final StringBuilder sb = new StringBuilder();
@@ -183,8 +183,9 @@ public class GenerateUpdatePackageMojo
                     final String[] strArrary = strLine.split(" ");
                     if (strArrary.length > 0) {
                         final File gitDir = new File(strArrary[0], ".git");
+                        getLog().info("Using Repository: " + gitDir);
                         final Repository repo = new FileRepository(gitDir);
-                        final ObjectId newID = repo.resolve("HEAD" + "^{tree}");
+                        final ObjectId newID = repo.resolve("refs/heads/master");
                         if (strArrary.length > 1) {
                             final ObjectId oldID = repo.resolve(strArrary[1] + "^{tree}");
                             copyGit(repo, oldID, newID);
