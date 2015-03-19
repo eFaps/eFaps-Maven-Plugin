@@ -90,13 +90,13 @@ public class GenerateUpdatePackageMojo
     /**
      * Path of a SVN base file.
      */
-    @Parameter(property = "path", required = true)
+    @Parameter(property = "path")
     private File path;
 
     /**
      * The revision to use.
      */
-    @Parameter(property = "rev", required = true)
+    @Parameter(property = "rev")
     private String revision;
 
     /**
