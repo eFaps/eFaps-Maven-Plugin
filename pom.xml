@@ -88,10 +88,11 @@
     </issueManagement>
 
     <!-- SubVersion Repository -->
-    <scm>
-        <connection>scm:svn:http://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</connection>
-        <developerConnection>scm:svn:https://efaps.googlecode.com/svn/maven-eFaps-PlugIn/trunk</developerConnection>
-        <url>http://efaps.googlecode.com/svn/maven-eFaps-PlugIn</url>
+     <scm>
+        <connection>scm:git:git://github.com/eFaps/eFaps-Maven-Plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:eFaps/eFaps-Maven-Plugin.git</developerConnection>
+        <url>https://github.com/eFaps/eFaps-Maven-Plugin/</url>
+        <tag>HEAD</tag>
     </scm>
 
     <!-- Distribution Repository -->
