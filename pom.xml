@@ -27,15 +27,14 @@
     <parent>
         <groupId>org.efaps</groupId>
         <artifactId>efaps-parent</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <properties>
-        <kernelVersion>[3.2.0-SNAPSHOT,3.3.0-SNAPSHOT)</kernelVersion>
+        <kernelVersion>[5.0.0-SNAPSHOT,5.1.0-SNAPSHOT)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <artifactId>efaps-maven-plugin</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>eFaps Maven Plug-In</name>
     <description>
