@@ -170,6 +170,7 @@ public class GenerateInstallationMojo
      * @throws MojoExecutionException on error
      * @throws MojoFailureException on error
      */
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -219,7 +220,7 @@ public class GenerateInstallationMojo
             String application = null;
             for (int idx = 0; idx < subNodeList.getLength(); idx++) {
                 final Node subNode = subNodeList.item(idx);
-                if ((Node.ELEMENT_NODE == subNode.getNodeType())
+                if (Node.ELEMENT_NODE == subNode.getNodeType()
                         && GenerateInstallationMojo.TAG_APPLICATION.equals(subNode.getNodeName())) {
                     final Node subSubNode = subNode.getFirstChild();
                     if (Node.TEXT_NODE == subSubNode.getNodeType()) {
@@ -268,6 +269,16 @@ public class GenerateInstallationMojo
                 final Attr fileAttr = doc.createAttribute("name");
                 fileAttr.setValue(rootPackageTmp + fileName);
                 file.getAttributes().setNamedItem(fileAttr);
+
+                final FileInfo fileInfo = getFileInformation(fileName);
+
+                final Attr revAttr = doc.createAttribute("revision");
+                revAttr.setValue(fileInfo.getRev());
+                file.getAttributes().setNamedItem(revAttr);
+
+                final Attr dateAttr = doc.createAttribute("date");
+                dateAttr.setValue(fileInfo.getDate().toString());
+                file.getAttributes().setNamedItem(dateAttr);
 
                 files.appendChild(file);
             }
@@ -362,11 +373,11 @@ public class GenerateInstallationMojo
     {
         // scan
         final DirectoryScanner ds = new DirectoryScanner();
-        final String[] includes = (this.copyIncludes == null)
+        final String[] includes = this.copyIncludes == null
             ? GenerateInstallationMojo.DEFAULT_COPYINCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYINCLUDES.size()])
             : this.copyIncludes.toArray(new String[this.copyIncludes.size()]);
-        final String[] excludes = (this.copyExcludes == null)
+        final String[] excludes = this.copyExcludes == null
             ? GenerateInstallationMojo.DEFAULT_COPYEXCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.size()])
             : this.copyExcludes.toArray(new String[this.copyExcludes.size()]);
