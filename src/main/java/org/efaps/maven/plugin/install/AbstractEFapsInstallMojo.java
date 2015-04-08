@@ -232,14 +232,18 @@ public abstract class AbstractEFapsInstallMojo
             plotCommitList.source(revWalk);
             plotCommitList.fillTo(2);
             final PlotCommit<PlotLane> commit = plotCommitList.get(0);
+            if (commit != null) {
+                final PersonIdent authorIdent = commit.getAuthorIdent();
+                final Date authorDate = authorIdent.getWhen();
+                final TimeZone authorTimeZone = authorIdent.getTimeZone();
+                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
 
-            final PersonIdent authorIdent = commit.getAuthorIdent();
-            final Date authorDate = authorIdent.getWhen();
-            final TimeZone authorTimeZone = authorIdent.getTimeZone();
-            final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
-
-            ret.setDate(dateTime);
-            ret.setRev(commit.getId().getName());
+                ret.setDate(dateTime);
+                ret.setRev(commit.getId().getName());
+            } else {
+                ret.setDate(new DateTime());
+                ret.setRev("UNKNOWN");
+            }
         } catch (RevisionSyntaxException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
