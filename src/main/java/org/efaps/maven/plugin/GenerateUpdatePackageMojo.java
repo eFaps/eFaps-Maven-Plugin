@@ -76,7 +76,7 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
  */
 @Mojo(name = "generateUpdatePackage")
 public class GenerateUpdatePackageMojo
-    implements org.apache.maven.plugin.Mojo
+    extends EFapsAbstractMojo
 {
 
     /**
@@ -220,14 +220,20 @@ public class GenerateUpdatePackageMojo
                         .setOldTree(prepareTreeParser(_repo, _oldID))
                         .setNewTree(prepareTreeParser(_repo, _newID))
                         .call();
-        for (final DiffEntry entyr : list) {
-            GenerateUpdatePackageMojo.this.log.info(entyr.toString());
-            switch (entyr.getChangeType()) {
+        for (final DiffEntry entry : list) {
+            GenerateUpdatePackageMojo.this.log.info(entry.toString());
+            switch (entry.getChangeType()) {
                 case ADD:
                 case MODIFY:
                 case COPY:
                 case RENAME:
-                    copyFile(new File(_repo.getDirectory().getParentFile(), entyr.getNewPath()).getPath(), false);
+                    final File file = new File(_repo.getDirectory().getParentFile(), entry.getNewPath());
+                    copyFile(file.getPath(), false);
+                    final FileInfo fileInfo = getFileInformation(file);
+                    final StringBuilder line = new StringBuilder().append(file.getName()).append(" ")
+                                    .append(fileInfo.getRev()).append(" ")
+                                   .append(fileInfo.getDate()).append("\n") ;
+                    FileUtils.writeStringToFile(new File(this.outputDirectory, "_revFile.txt"), line.toString(), true);
                     break;
                 default:
                     break;
