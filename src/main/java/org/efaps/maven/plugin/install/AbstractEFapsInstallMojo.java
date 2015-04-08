@@ -20,37 +20,18 @@
 package org.efaps.maven.plugin.install;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.tools.ant.DirectoryScanner;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revplot.PlotCommit;
-import org.eclipse.jgit.revplot.PlotCommitList;
-import org.eclipse.jgit.revplot.PlotLane;
-import org.eclipse.jgit.revplot.PlotWalk;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.efaps.maven.plugin.EFapsAbstractMojo;
 import org.efaps.update.FileType;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 /**
  * @author The eFaps Team
@@ -115,12 +96,6 @@ public abstract class AbstractEFapsInstallMojo
      */
     @Parameter(defaultValue = "${basedir}/src/main/efaps")
     private File eFapsDir;
-
-    /**
-     * Root Directory with the XML installation files.
-     */
-    @Parameter(defaultValue = "${basedir}/.git")
-    private File gitDir;
 
     /**
      * List of includes.
@@ -210,47 +185,6 @@ public abstract class AbstractEFapsInstallMojo
         return ret;
     }
 
-
-    protected FileInfo getFileInformation(final String _subPath)
-    {
-        final FileInfo ret = new FileInfo();
-        final File file = new File(getEFapsDir(), _subPath);
-
-        try {
-            final Repository repo = new FileRepository(getGitDir());
-
-            final ObjectId lastCommitId = repo.resolve(Constants.HEAD);
-
-            final PlotCommitList<PlotLane> plotCommitList = new PlotCommitList<PlotLane>();
-            final PlotWalk revWalk = new PlotWalk(repo);
-
-            final RevCommit root = revWalk.parseCommit(lastCommitId);
-            revWalk.markStart(root);
-            revWalk.setTreeFilter(AndTreeFilter.create(
-                            PathFilter.create(file.getPath().replaceFirst(repo.getWorkTree().getPath() + "/", "")),
-                            TreeFilter.ANY_DIFF));
-            plotCommitList.source(revWalk);
-            plotCommitList.fillTo(2);
-            final PlotCommit<PlotLane> commit = plotCommitList.get(0);
-            if (commit != null) {
-                final PersonIdent authorIdent = commit.getAuthorIdent();
-                final Date authorDate = authorIdent.getWhen();
-                final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
-
-                ret.setDate(dateTime);
-                ret.setRev(commit.getId().getName());
-            } else {
-                ret.setDate(new DateTime());
-                ret.setRev("UNKNOWN");
-            }
-        } catch (RevisionSyntaxException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return ret;
-    }
-
     /**
      * Returns the {@link #applications} to install / update.
      *
@@ -327,68 +261,5 @@ public abstract class AbstractEFapsInstallMojo
     public List<String> getExcludes()
     {
         return this.excludes;
-    }
-
-
-    /**
-     * Getter method for the instance variable {@link #gitDir}.
-     *
-     * @return value of instance variable {@link #gitDir}
-     */
-    public File getGitDir()
-    {
-        return this.gitDir;
-    }
-
-
-    public static class FileInfo
-    {
-        private String rev;
-
-        private DateTime date;
-
-
-        /**
-         * Getter method for the instance variable {@link #rev}.
-         *
-         * @return value of instance variable {@link #rev}
-         */
-        public String getRev()
-        {
-            return this.rev;
-        }
-
-
-        /**
-         * Setter method for instance variable {@link #rev}.
-         *
-         * @param _rev value for instance variable {@link #rev}
-         */
-        public void setRev(final String _rev)
-        {
-            this.rev = _rev;
-        }
-
-
-        /**
-         * Getter method for the instance variable {@link #date}.
-         *
-         * @return value of instance variable {@link #date}
-         */
-        public DateTime getDate()
-        {
-            return this.date;
-        }
-
-
-        /**
-         * Setter method for instance variable {@link #date}.
-         *
-         * @param _date value for instance variable {@link #date}
-         */
-        public void setDate(final DateTime _date)
-        {
-            this.date = _date;
-        }
     }
 }

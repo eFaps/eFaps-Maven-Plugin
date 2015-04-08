@@ -270,7 +270,7 @@ public class GenerateInstallationMojo
                 fileAttr.setValue(rootPackageTmp + fileName);
                 file.getAttributes().setNamedItem(fileAttr);
 
-                final FileInfo fileInfo = getFileInformation(fileName);
+                final FileInfo fileInfo = getFileInformation(new File(getEFapsDir(), fileName));
 
                 final Attr revAttr = doc.createAttribute("revision");
                 revAttr.setValue(fileInfo.getRev());

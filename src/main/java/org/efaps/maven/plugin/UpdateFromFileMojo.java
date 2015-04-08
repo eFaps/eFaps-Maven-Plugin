@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2015 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.efaps.update.FileType;
 import org.efaps.update.Install;
+import org.efaps.update.Install.InstallFile;
 import org.efaps.update.Profile;
 import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
@@ -72,10 +73,13 @@ public class UpdateFromFileMojo
 
             final String ending = this.file.getName().substring(this.file.getName().lastIndexOf(".") + 1);
 
-            final FileType filetype = FileType.getFileTypeByExensione(ending);
+            final FileType filetype = FileType.getFileTypeByExtension(ending);
 
             final Install install = new Install();
-            install.addFile(this.file.toURI().toURL(), filetype.getType());
+            final FileInfo fileInfo = getFileInformation( this.file);
+
+            install.addFile(new InstallFile().setURL(this.file.toURI().toURL()).setType(filetype.getType())
+                            .setDate(fileInfo.getDate()).setRevision(fileInfo.getRev()));
             final Set<Profile> profiles = new HashSet<Profile>();
             profiles.add(Profile.getProfile(this.profile));
             install.updateLatest(profiles);
