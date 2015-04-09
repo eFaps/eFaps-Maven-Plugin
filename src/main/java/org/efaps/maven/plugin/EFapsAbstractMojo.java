@@ -23,8 +23,10 @@ package org.efaps.maven.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -37,11 +39,9 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revplot.PlotCommit;
-import org.eclipse.jgit.revplot.PlotCommitList;
-import org.eclipse.jgit.revplot.PlotLane;
-import org.eclipse.jgit.revplot.PlotWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevCommitList;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -145,6 +145,9 @@ public abstract class EFapsAbstractMojo
     @Parameter(defaultValue = "${basedir}/.git")
     private File gitDir;
 
+    private final Map<String, RevWalk> walkers = new HashMap<>();
+
+    private final Map<String, ObjectId> heads = new HashMap<>();
 
     protected EFapsAbstractMojo()
     {
@@ -290,24 +293,16 @@ public abstract class EFapsAbstractMojo
     protected FileInfo getFileInformation(final File _file)
     {
         final FileInfo ret = new FileInfo();
-
         try {
-            final Repository repo = new FileRepository(evalGitDir(_file));
-
-            final ObjectId lastCommitId = repo.resolve(Constants.HEAD);
-
-            final PlotCommitList<PlotLane> plotCommitList = new PlotCommitList<PlotLane>();
-            final PlotWalk revWalk = new PlotWalk(repo);
-
-            final RevCommit root = revWalk.parseCommit(lastCommitId);
-            revWalk.markStart(root);
-            revWalk.setTreeFilter(AndTreeFilter.create(
-                            PathFilter.create(_file.getPath().replaceFirst(repo.getWorkTree().getPath() + "/", "")),
-                            TreeFilter.ANY_DIFF));
-            plotCommitList.source(revWalk);
-            plotCommitList.fillTo(2);
-            final PlotCommit<PlotLane> commit = plotCommitList.get(0);
-            if (commit != null) {
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Searching FileInfo for: " + _file);
+            }
+            final RevWalk revWalk = getWalker(_file);
+            final RevCommitList<RevCommit> commitList = new RevCommitList<RevCommit>();
+            commitList.source(revWalk);
+            commitList.fillTo(2);
+            final RevCommit commit = commitList.get(0);
+            if (commit != null && commit.getRawBuffer() != null) {
                 final PersonIdent authorIdent = commit.getAuthorIdent();
                 final Date authorDate = authorIdent.getWhen();
                 final TimeZone authorTimeZone = authorIdent.getTimeZone();
@@ -325,6 +320,34 @@ public abstract class EFapsAbstractMojo
         }
         return ret;
     }
+
+
+
+    protected RevWalk getWalker(final File _file) throws IOException
+    {
+        RevWalk ret;
+        final File gitDirTmp = evalGitDir(_file);
+        if (this.walkers.containsKey(gitDirTmp.toString())) {
+            ret = this.walkers.get(gitDirTmp.toString());
+            ret.reset();
+            ret.markStart(ret.parseCommit(this.heads.get(gitDirTmp.toString())));
+            ret.setTreeFilter(AndTreeFilter.create(
+                            PathFilter.create(_file.getPath().replaceFirst(gitDirTmp.getParent() + "/", "")),
+                            TreeFilter.ANY_DIFF));
+        } else {
+            final Repository repo = new FileRepository(gitDirTmp);
+            final ObjectId lastCommitId = repo.resolve(Constants.HEAD);
+            this.heads.put(gitDirTmp.toString(), lastCommitId);
+            ret = new RevWalk(repo);
+            ret.markStart(ret.parseCommit(lastCommitId));
+            ret.setTreeFilter(AndTreeFilter.create(
+                            PathFilter.create(_file.getPath().replaceFirst(repo.getWorkTree().getPath() + "/", "")),
+                            TreeFilter.ANY_DIFF));
+            this.walkers.put(gitDirTmp.toString(), ret);
+        }
+        return ret;
+    }
+
 
     /**
      * @param _file
