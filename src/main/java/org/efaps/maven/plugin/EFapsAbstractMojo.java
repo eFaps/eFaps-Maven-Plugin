@@ -40,7 +40,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevCommitList;
+import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -298,18 +298,23 @@ public abstract class EFapsAbstractMojo
                 getLog().debug("Searching FileInfo for: " + _file);
             }
             final RevWalk revWalk = getWalker(_file);
-            final RevCommitList<RevCommit> commitList = new RevCommitList<RevCommit>();
-            commitList.source(revWalk);
-            commitList.fillTo(2);
-            final RevCommit commit = commitList.get(0);
-            if (commit != null && commit.getRawBuffer() != null) {
-                final PersonIdent authorIdent = commit.getAuthorIdent();
-                final Date authorDate = authorIdent.getWhen();
-                final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
-
-                ret.setDate(dateTime);
+            final RevCommit commit = revWalk.next();
+            if (commit != null) {
                 ret.setRev(commit.getId().getName());
+                RevCommit tmpCommit = commit;
+                while (tmpCommit.getRawBuffer() == null && tmpCommit.getParentCount() > 0) {
+                    tmpCommit = tmpCommit.getParent(0);
+                }
+                if (tmpCommit.getRawBuffer() != null) {
+                    final PersonIdent authorIdent = tmpCommit.getAuthorIdent();
+                    final Date authorDate = authorIdent.getWhen();
+                    final TimeZone authorTimeZone = authorIdent.getTimeZone();
+                    final DateTime dateTime = new DateTime(authorDate.getTime(),
+                                    DateTimeZone.forTimeZone(authorTimeZone));
+                    ret.setDate(dateTime);
+                } else {
+                    ret.setDate(new DateTime(new Date(commit.getCommitTime() * 1000L)));
+                }
             } else {
                 ret.setDate(new DateTime());
                 ret.setRev("UNKNOWN");
@@ -321,15 +326,13 @@ public abstract class EFapsAbstractMojo
         return ret;
     }
 
-
-
     protected RevWalk getWalker(final File _file) throws IOException
     {
         RevWalk ret;
         final File gitDirTmp = evalGitDir(_file);
         if (this.walkers.containsKey(gitDirTmp.toString())) {
             ret = this.walkers.get(gitDirTmp.toString());
-            ret.reset();
+            ret.dispose();
             ret.markStart(ret.parseCommit(this.heads.get(gitDirTmp.toString())));
             ret.setTreeFilter(AndTreeFilter.create(
                             PathFilter.create(_file.getPath().replaceFirst(gitDirTmp.getParent() + "/", "")),
@@ -342,7 +345,9 @@ public abstract class EFapsAbstractMojo
             ret.markStart(ret.parseCommit(lastCommitId));
             ret.setTreeFilter(AndTreeFilter.create(
                             PathFilter.create(_file.getPath().replaceFirst(repo.getWorkTree().getPath() + "/", "")),
-                            TreeFilter.ANY_DIFF));
+                            TreeFilter.ANY_DIFF ));
+            ret.sort(RevSort.TOPO, true);
+            ret.sort(RevSort.COMMIT_TIME_DESC, true);
             this.walkers.put(gitDirTmp.toString(), ret);
         }
         return ret;
