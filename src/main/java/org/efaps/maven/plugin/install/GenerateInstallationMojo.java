@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -253,7 +255,11 @@ public class GenerateInstallationMojo
             // append all file name and the type to files node (sorted
             // alphabetical)
             final Set<String> filesSet = new TreeSet<String>(getFiles());
-            for (final String fileName : filesSet) {
+
+            final Map<String, FileInfo> filemap = getFileInformations(getEFapsDir(), filesSet);
+
+            for (final Entry<String, FileInfo> entry : filemap.entrySet()) {
+                final String fileName = entry.getKey();
                 final Node file = doc.createElement("file");
 
                 final Attr typeAttr = doc.createAttribute("type");
@@ -270,7 +276,7 @@ public class GenerateInstallationMojo
                 fileAttr.setValue(rootPackageTmp + fileName);
                 file.getAttributes().setNamedItem(fileAttr);
 
-                final FileInfo fileInfo = getFileInformation(new File(getEFapsDir(), fileName));
+                final FileInfo fileInfo = entry.getValue();
 
                 final Attr revAttr = doc.createAttribute("revision");
                 revAttr.setValue(fileInfo.getRev());
