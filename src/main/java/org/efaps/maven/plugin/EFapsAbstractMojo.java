@@ -40,21 +40,13 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevSort;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
-import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.db.Context;
 import org.efaps.init.StartupDatabaseConnection;
@@ -154,13 +146,6 @@ public abstract class EFapsAbstractMojo
      */
     @Parameter(defaultValue = "${basedir}/.git")
     private File gitDir;
-
-    private final Map<String, RevWalk> walkers = new HashMap<>();
-
-    private final Map<String, ObjectId> heads = new HashMap<>();
-
-
-    private Repository repository;
 
     protected EFapsAbstractMojo()
     {
@@ -303,42 +288,6 @@ public abstract class EFapsAbstractMojo
         return this.classpathElements;
     }
 
-    protected FileInfo getFileInformation2(final File _file)
-    {
-        final FileInfo ret = new FileInfo();
-        try {
-            if (getLog().isDebugEnabled()) {
-                getLog().debug("Searching FileInfo for: " + _file);
-            }
-            final RevWalk revWalk = getWalker(_file);
-            final RevCommit commit = revWalk.next();
-            if (commit != null) {
-                ret.setRev(commit.getId().getName());
-                RevCommit tmpCommit = commit;
-                while (tmpCommit.getRawBuffer() == null && tmpCommit.getParentCount() > 0) {
-                    tmpCommit = tmpCommit.getParent(0);
-                }
-                if (tmpCommit.getRawBuffer() != null) {
-                    final PersonIdent authorIdent = tmpCommit.getAuthorIdent();
-                    final Date authorDate = authorIdent.getWhen();
-                    final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                    final DateTime dateTime = new DateTime(authorDate.getTime(),
-                                    DateTimeZone.forTimeZone(authorTimeZone));
-                    ret.setDate(dateTime);
-                } else {
-                    ret.setDate(new DateTime(new Date(commit.getCommitTime() * 1000L)));
-                }
-            } else {
-                ret.setDate(new DateTime());
-                ret.setRev("UNKNOWN");
-            }
-        } catch (RevisionSyntaxException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return ret;
-    }
-
     protected FileInfo getFileInformation(final File _file)
     {
         FileInfo ret = null;
@@ -438,59 +387,8 @@ public abstract class EFapsAbstractMojo
     protected Repository getRepository(final File _file)
         throws IOException
     {
-        if (this.repository == null) {
-            final RepositoryBuilder builder = new RepositoryBuilder();
-            this.repository = builder.setWorkTree(_file)
-                            .readEnvironment().findGitDir(_file).build();
-        }
-        return this.repository;
-    }
-
-    protected RevWalk getWalker(final File _file) throws IOException
-    {
-        RevWalk ret;
-        final File gitDirTmp = evalGitDir(_file);
-        if (this.walkers.containsKey(gitDirTmp.toString())) {
-            ret = this.walkers.get(gitDirTmp.toString());
-            ret.dispose();
-            ret.markStart(ret.parseCommit(this.heads.get(gitDirTmp.toString())));
-            ret.setTreeFilter(AndTreeFilter.create(
-                            PathFilter.create(_file.getPath().replaceFirst(gitDirTmp.getParent() + "/", "")),
-                            TreeFilter.ANY_DIFF));
-        } else {
-            final Repository repo = new FileRepository(gitDirTmp);
-            final ObjectId lastCommitId = repo.resolve(Constants.HEAD);
-            this.heads.put(gitDirTmp.toString(), lastCommitId);
-            ret = new RevWalk(repo);
-            ret.markStart(ret.parseCommit(lastCommitId));
-            ret.setTreeFilter(AndTreeFilter.create(
-                            PathFilter.create(_file.getPath().replaceFirst(repo.getWorkTree().getPath() + "/", "")),
-                            TreeFilter.ANY_DIFF ));
-            ret.sort(RevSort.TOPO, true);
-            ret.sort(RevSort.COMMIT_TIME_DESC, true);
-            this.walkers.put(gitDirTmp.toString(), ret);
-        }
-        return ret;
-    }
-
-
-    /**
-     * @param _file
-     * @return
-     */
-    protected File evalGitDir(final File _file)
-    {
-        File ret = null;
-        File parent = _file.getParentFile();;
-        while (parent != null) {
-            ret = new File(parent, ".git");
-            if (ret.exists()) {
-                break;
-            } else {
-                parent = parent.getParentFile();
-            }
-        }
-        return ret;
+        final RepositoryBuilder builder = new RepositoryBuilder();
+        return builder.setWorkTree(_file).readEnvironment().findGitDir(_file).build();
     }
 
     public static class FileInfo
