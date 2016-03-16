@@ -55,6 +55,7 @@ import org.efaps.maven.plugin.install.digester.FormCI;
 import org.efaps.maven.plugin.install.digester.ITypeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
 import org.efaps.maven.plugin.install.digester.IUniqueCI;
+import org.efaps.maven.plugin.install.digester.MsgPhraseCI;
 import org.efaps.maven.plugin.install.digester.StatusCIDefinition;
 import org.efaps.maven.plugin.install.digester.StatusGroupCI;
 import org.efaps.maven.plugin.install.digester.TableCI;
@@ -174,6 +175,10 @@ public class GenerateCIClassMojo
      */
     private final Set<UserInterfaceCI> uiCIs = new HashSet<UserInterfaceCI>();
 
+    /**
+     * Set of MsgPhrases.
+     */
+    private final Set<MsgPhraseCI> msgPhraseCIs = new HashSet<MsgPhraseCI>();
 
     /**
      * The current Maven project.
@@ -205,6 +210,7 @@ public class GenerateCIClassMojo
      * @throws MojoExecutionException on error
      * @throws MojoFailureException on error
      */
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -220,6 +226,7 @@ public class GenerateCIClassMojo
                     bindRulesFrom(StatusGroupCI.class);
                     bindRulesFrom(FormCI.class);
                     bindRulesFrom(TableCI.class);
+                    bindRulesFrom(MsgPhraseCI.class);
                 }
             });
 
@@ -248,6 +255,8 @@ public class GenerateCIClassMojo
                     if (item != null) {
                         if (item instanceof ITypeCI) {
                             this.types.put(((ITypeCI) item).getDefinitions().get(0).getName(), (ITypeCI) item);
+                        } else if (item instanceof MsgPhraseCI) {
+                            this.msgPhraseCIs.add((MsgPhraseCI) item);
                         } else {
                             this.uiCIs.add((UserInterfaceCI) item);
                         }
@@ -257,6 +266,7 @@ public class GenerateCIClassMojo
             buildCIType();
             buildCI4UI(CIDef4UI.FORM);
             buildCI4UI(CIDef4UI.TABLE);
+            buildCIMsgPhrase();
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
@@ -273,11 +283,6 @@ public class GenerateCIClassMojo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * org.apache.maven.plugin.ContextEnabled#setPluginContext(java.util.Map)
-     */
     @SuppressWarnings("rawtypes")
     @Override
     public void setPluginContext(final Map _pluginContext)
@@ -286,10 +291,6 @@ public class GenerateCIClassMojo
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.maven.plugin.ContextEnabled#getPluginContext()
-     */
     @SuppressWarnings("rawtypes")
     @Override
     public Map getPluginContext()
@@ -384,7 +385,7 @@ public class GenerateCIClassMojo
         for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
             final String name = entry.getValue().getDefinitions().get(0).getName();
             String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
-            typeName = typeName.replaceAll(this.ciTypeRegex == null ? (this.ciName + "_") : this.ciTypeRegex,
+            typeName = typeName.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
                             this.ciTypeReplacement);
             if (typeTmp.containsKey(typeName)) {
                 duplicated.add(name);
@@ -408,7 +409,7 @@ public class GenerateCIClassMojo
             final String name = def.getName();
             String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
             if (!duplicated.contains(name)) {
-                typeName = typeName.replaceAll(this.ciTypeRegex == null ? (this.ciName + "_") : this.ciTypeRegex,
+                typeName = typeName.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
                                 this.ciTypeReplacement);
             }
 
@@ -417,7 +418,7 @@ public class GenerateCIClassMojo
                 parentType = def.getParent().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
                 if (!duplicated.contains(def.getParent())) {
                     parentType = parentType.replaceAll(this.ciTypeRegex == null
-                                    ? (this.ciName + "_") : this.ciTypeRegex, this.ciTypeReplacement);
+                                    ? this.ciName + "_" : this.ciTypeRegex, this.ciTypeReplacement);
                 }
                 parentType = "_" + parentType;
                 if (!this.types.containsKey(def.getParent())) {
@@ -506,5 +507,47 @@ public class GenerateCIClassMojo
             .append(" * @author The eFaps Team\n")
             .append("*/\n");
         return ret;
+    }
+
+    /**
+     * Builds the ci msg phrase.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private void buildCIMsgPhrase()
+        throws IOException
+    {
+        final StringBuilder java = new StringBuilder()
+                        .append("//CHECKSTYLE:OFF\n")
+                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.ci.*;\n\n")
+                        .append(getClassComment())
+                        .append("public final class CIMsg").append(this.ciName)
+                        .append("\n{\n");
+
+        for (final MsgPhraseCI msgPhci : this.msgPhraseCIs) {
+             String name = msgPhci.getName().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
+             name = name.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
+                             this.ciTypeReplacement);
+             java.append("    public static final _").append(name).append(" ").append(name)
+                 .append(" = new _").append(name).append("(\"").append(msgPhci.getUuid()).append("\");\n")
+                 .append("    public static class _").append(name).append(" extends CIMsgPhrase")
+                 .append("\n    {\n")
+                 .append("        protected _").append(name).append("(final String _uuid)\n        {\n")
+                 .append("            super(_uuid);")
+                 .append("\n        }\n");
+             java.append("    }\n\n");
+        }
+         java.append("}\n");
+
+        getOutputDirectory().mkdir();
+
+        final String folders = this.ciPackage.replace(".", File.separator);
+        final File srcFolder = new File(getOutputDirectory(), folders);
+        srcFolder.mkdirs();
+
+        final File javaFile = new File(srcFolder, "CIMsg" + this.ciName + ".java");
+
+        FileUtils.writeStringToFile(javaFile, java.toString());
     }
 }
