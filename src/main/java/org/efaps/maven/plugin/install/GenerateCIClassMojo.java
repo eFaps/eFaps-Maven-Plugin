@@ -56,6 +56,7 @@ import org.efaps.maven.plugin.install.digester.ITypeCI;
 import org.efaps.maven.plugin.install.digester.ITypeDefintion;
 import org.efaps.maven.plugin.install.digester.IUniqueCI;
 import org.efaps.maven.plugin.install.digester.MsgPhraseCI;
+import org.efaps.maven.plugin.install.digester.NumGenCI;
 import org.efaps.maven.plugin.install.digester.StatusCIDefinition;
 import org.efaps.maven.plugin.install.digester.StatusGroupCI;
 import org.efaps.maven.plugin.install.digester.TableCI;
@@ -181,6 +182,12 @@ public class GenerateCIClassMojo
     private final Set<MsgPhraseCI> msgPhraseCIs = new HashSet<MsgPhraseCI>();
 
     /**
+     * Set of MsgPhrases.
+     */
+    private final Set<NumGenCI> numGenCIs = new HashSet<NumGenCI>();
+
+
+    /**
      * The current Maven project.
      */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -227,6 +234,7 @@ public class GenerateCIClassMojo
                     bindRulesFrom(FormCI.class);
                     bindRulesFrom(TableCI.class);
                     bindRulesFrom(MsgPhraseCI.class);
+                    bindRulesFrom(NumGenCI.class);
                 }
             });
 
@@ -257,6 +265,8 @@ public class GenerateCIClassMojo
                             this.types.put(((ITypeCI) item).getDefinitions().get(0).getName(), (ITypeCI) item);
                         } else if (item instanceof MsgPhraseCI) {
                             this.msgPhraseCIs.add((MsgPhraseCI) item);
+                        } else if (item instanceof NumGenCI) {
+                            this.numGenCIs.add((NumGenCI) item);
                         } else {
                             this.uiCIs.add((UserInterfaceCI) item);
                         }
@@ -267,6 +277,7 @@ public class GenerateCIClassMojo
             buildCI4UI(CIDef4UI.FORM);
             buildCI4UI(CIDef4UI.TABLE);
             buildCIMsgPhrase();
+            buildCINumGen();
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
@@ -547,6 +558,49 @@ public class GenerateCIClassMojo
         srcFolder.mkdirs();
 
         final File javaFile = new File(srcFolder, "CIMsg" + this.ciName + ".java");
+
+        FileUtils.writeStringToFile(javaFile, java.toString());
+    }
+
+
+    /**
+     * Builds the ci msg phrase.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private void buildCINumGen()
+        throws IOException
+    {
+        final StringBuilder java = new StringBuilder()
+                        .append("//CHECKSTYLE:OFF\n")
+                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.ci.*;\n\n")
+                        .append(getClassComment())
+                        .append("public final class CINumGen").append(this.ciName)
+                        .append("\n{\n");
+
+        for (final NumGenCI numGenci : this.numGenCIs) {
+             String name = numGenci.getName().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
+             name = name.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
+                             this.ciTypeReplacement);
+             java.append("    public static final _").append(name).append(" ").append(name)
+                 .append(" = new _").append(name).append("(\"").append(numGenci.getUuid()).append("\");\n")
+                 .append("    public static class _").append(name).append(" extends CINumGen")
+                 .append("\n    {\n")
+                 .append("        protected _").append(name).append("(final String _uuid)\n        {\n")
+                 .append("            super(_uuid);")
+                 .append("\n        }\n");
+             java.append("    }\n\n");
+        }
+         java.append("}\n");
+
+        getOutputDirectory().mkdir();
+
+        final String folders = this.ciPackage.replace(".", File.separator);
+        final File srcFolder = new File(getOutputDirectory(), folders);
+        srcFolder.mkdirs();
+
+        final File javaFile = new File(srcFolder, "CINumGen" + this.ciName + ".java");
 
         FileUtils.writeStringToFile(javaFile, java.toString());
     }
