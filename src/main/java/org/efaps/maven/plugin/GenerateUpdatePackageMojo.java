@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2014 The eFaps Team
+ * Copyright 2003 - 2016 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin;
@@ -71,8 +68,6 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id: GenerateUpdatePackageMojo.java 12861 2014-05-26 15:01:24Z
- *          jan@moxter.net $
  */
 @Mojo(name = "generateUpdatePackage")
 public class GenerateUpdatePackageMojo
@@ -164,6 +159,9 @@ public class GenerateUpdatePackageMojo
         }
     }
 
+    /**
+     * Execute git.
+     */
     private void executeGit()
     {
         try {
@@ -200,20 +198,26 @@ public class GenerateUpdatePackageMojo
                 bwriter.close();
             }
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error(e);
         } catch (final GitAPIException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            getLog().error(e);
         }
     }
 
+    /**
+     * Copy git.
+     *
+     * @param _repo the repo
+     * @param _oldID the old id
+     * @param _newID the new id
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws GitAPIException the git api exception
+     */
     private void copyGit(final Repository _repo,
                          final ObjectId _oldID,
                          final ObjectId _newID)
         throws IOException, GitAPIException
     {
-
         final List<DiffEntry> list = new Git(_repo)
                         .diff()
                         .setShowNameAndStatusOnly(true)
@@ -241,7 +245,16 @@ public class GenerateUpdatePackageMojo
         }
     }
 
-
+    /**
+     * Prepare tree parser.
+     *
+     * @param _repository the repository
+     * @param _objectId the object id
+     * @return the canonical tree parser
+     * @throws MissingObjectException the missing object exception
+     * @throws IncorrectObjectTypeException the incorrect object type exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private CanonicalTreeParser prepareTreeParser(final Repository _repository,
                                                   final ObjectId _objectId)
         throws MissingObjectException, IncorrectObjectTypeException, IOException
@@ -252,6 +265,9 @@ public class GenerateUpdatePackageMojo
         return parser;
     }
 
+    /**
+     * Execute svn.
+     */
     private void executeSVN()
     {
         GenerateUpdatePackageMojo.this.log.info("path: " + this.path);
@@ -336,8 +352,9 @@ public class GenerateUpdatePackageMojo
                           final boolean _correctPath)
     {
         try {
-            final File file = _correctPath ? new File(this.path + StringUtils.removeStart(_path, "trunk")) : new File(
-                            _path);
+            final File file = _correctPath
+                            ? new File(this.path + StringUtils.removeStart(_path, "trunk"))
+                            : new File(_path);
             File outDir;
             if (this.check4overwrite) {
                 final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
@@ -363,6 +380,9 @@ public class GenerateUpdatePackageMojo
                     FileUtils.copyFileToDirectory(file, outDir);
                     this.log.info("COPIED: " + file);
                 } else if (_path.endsWith("java")) {
+                    FileUtils.copyFileToDirectory(file, outDir);
+                    this.log.info("COPIED: " + file);
+                } else if (_path.endsWith("css")) {
                     FileUtils.copyFileToDirectory(file, outDir);
                     this.log.info("COPIED: " + file);
                 } else if (_path.endsWith("properties")) {
