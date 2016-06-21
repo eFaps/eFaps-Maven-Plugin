@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2015 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin;
@@ -25,6 +22,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,7 +36,6 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -60,7 +57,6 @@ import org.joda.time.DateTimeZone;
 /**
  *
  * @author The eFaps Team
- * @version $Id$
  */
 public abstract class EFapsAbstractMojo
     implements Mojo
@@ -147,6 +143,9 @@ public abstract class EFapsAbstractMojo
     @Parameter(defaultValue = "${basedir}/.git")
     private File gitDir;
 
+    /**
+     * Instantiates a new eFaps abstract mojo.
+     */
     protected EFapsAbstractMojo()
     {
     }
@@ -288,6 +287,12 @@ public abstract class EFapsAbstractMojo
         return this.classpathElements;
     }
 
+    /**
+     * Gets the file information.
+     *
+     * @param _file the file
+     * @return the file information
+     */
     protected FileInfo getFileInformation(final File _file)
     {
         FileInfo ret = null;
@@ -299,31 +304,33 @@ public abstract class EFapsAbstractMojo
             final Repository repository = getRepository(_file);
             final Git git = new Git(repository);
 
-            for (final RevCommit commit : git.log()
-                            .addPath(_file.getPath().replaceFirst(repository.getDirectory().getParent() + "/", ""))
-                            .call()) {
+            final Iterator<RevCommit> iter = git.log().addPath(_file.getPath().replaceFirst(repository.getDirectory()
+                            .getParent() + "/", "")).call().iterator();
+
+            if (iter.hasNext()) {
+                final RevCommit commit = iter.next();
                 final PersonIdent authorIdent = commit.getAuthorIdent();
                 final Date authorDate = authorIdent.getWhen();
                 final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                final DateTime dateTime = new DateTime(authorDate.getTime(),
-                                DateTimeZone.forTimeZone(authorTimeZone));
+                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
                 ret.setDate(dateTime);
                 ret.setRev(commit.getId().getName());
             }
-        } catch (final NoHeadException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final GitAPIException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (final GitAPIException | IOException e) {
+            this.log.error(e);
         }
         return ret;
     }
 
-    protected Map<String,FileInfo> getFileInformations(final File _file, final Set<String> _filesSet)
+    /**
+     * Gets the file informations.
+     *
+     * @param _file the file
+     * @param _filesSet the files set
+     * @return the file informations
+     */
+    protected Map<String, FileInfo> getFileInformations(final File _file,
+                                                        final Set<String> _filesSet)
     {
         final Map<String, FileInfo> ret = new TreeMap<String, FileInfo>();
 
@@ -331,7 +338,7 @@ public abstract class EFapsAbstractMojo
             final Repository repository = getRepository(_file);
             final String relPath = _file.getPath().replaceFirst(repository.getDirectory().getParent() + "/", "");
             final Map<String, String> fileMap = new HashMap<>();
-            for (final String file: _filesSet) {
+            for (final String file : _filesSet) {
                 fileMap.put(relPath + "/" + file, file);
             }
             final Git git = new Git(repository);
@@ -347,26 +354,24 @@ public abstract class EFapsAbstractMojo
                 newTreeIter.reset(reader, previous);
 
                 // finally get the list of changed files
-                final List<DiffEntry> diffs= new Git(repository).diff()
-                                .setNewTree(newTreeIter)
-                                .setOldTree(oldTreeIter)
+                final List<DiffEntry> diffs = new Git(repository).diff().setNewTree(newTreeIter).setOldTree(oldTreeIter)
                                 .call();
                 for (final DiffEntry entry : diffs) {
-                     if (fileMap.containsKey(entry.getNewPath())) {
+                    if (fileMap.containsKey(entry.getNewPath())) {
                         final FileInfo info = new FileInfo();
                         final PersonIdent authorIdent = commit.getAuthorIdent();
                         final Date authorDate = authorIdent.getWhen();
                         final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                        final DateTime dateTime = new DateTime(authorDate.getTime(),
-                                        DateTimeZone.forTimeZone(authorTimeZone));
+                        final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
+                                        authorTimeZone));
                         info.setDate(dateTime);
                         info.setRev(commit.getId().getName());
                         ret.put(fileMap.get(entry.getNewPath()), info);
                         fileMap.remove(entry.getNewPath());
                     }
-                     if (fileMap.isEmpty()) {
-                         break;
-                     }
+                    if (fileMap.isEmpty()) {
+                        break;
+                    }
                 }
                 previous = commit.getTree();
                 if (fileMap.isEmpty()) {
@@ -374,9 +379,9 @@ public abstract class EFapsAbstractMojo
                 }
             }
             if (!fileMap.isEmpty()) {
-               for (final Entry<String, String> entry : fileMap.entrySet()) {
-                   ret.put(entry.getValue(), new FileInfo().setDate(new DateTime()).setRev("-"));
-               }
+                for (final Entry<String, String> entry : fileMap.entrySet()) {
+                    ret.put(entry.getValue(), new FileInfo().setDate(new DateTime()).setRev("-"));
+                }
             }
         } catch (final Exception e) {
             System.out.println();
@@ -384,6 +389,13 @@ public abstract class EFapsAbstractMojo
         return ret;
     }
 
+    /**
+     * Gets the repository.
+     *
+     * @param _file the file
+     * @return the repository
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     protected Repository getRepository(final File _file)
         throws IOException
     {
@@ -391,10 +403,18 @@ public abstract class EFapsAbstractMojo
         return builder.setWorkTree(_file).readEnvironment().findGitDir(_file).build();
     }
 
+    /**
+     * The Class FileInfo.
+     *
+     * @author The eFaps Team
+     */
     public static class FileInfo
     {
+
+        /** The rev. */
         private String rev;
 
+        /** The date. */
         private DateTime date;
 
         /**
