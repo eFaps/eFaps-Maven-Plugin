@@ -31,10 +31,11 @@ import org.apache.commons.digester3.annotations.rules.SetNext;
  */
 @ObjectCreate(pattern = "numbergenerator")
 public class NumGenCI
+    implements IBaseCI
 {
 
     /** The definitions. */
-    private final List<NumGenCIDefinition> definitions = new ArrayList<NumGenCIDefinition>();
+    private final List<NumGenCIDefinition> definitions = new ArrayList<>();
 
     /** The uuid. */
     @BeanPropertySetter(pattern = "numbergenerator/uuid")
@@ -45,6 +46,7 @@ public class NumGenCI
      *
      * @return value of instance variable {@link #uuid}
      */
+    @Override
     public String getUuid()
     {
         return this.uuid;

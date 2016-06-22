@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2016 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -33,15 +30,16 @@ import org.apache.commons.digester3.annotations.rules.SetNext;
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "datamodel-statusgroup")
 public class StatusGroupCI
     implements ITypeCI
 {
 
-    private final List<StatusCIDefinition> definitions = new ArrayList<StatusCIDefinition>();
+    /** The definitions. */
+    private final List<StatusCIDefinition> definitions = new ArrayList<>();
 
+    /** The uuid. */
     @BeanPropertySetter(pattern = "datamodel-statusgroup/uuid")
     private String uuid;
 
@@ -50,6 +48,7 @@ public class StatusGroupCI
      *
      * @return value of instance variable {@link #uuid}
      */
+    @Override
     public String getUuid()
     {
         return this.uuid;
@@ -71,11 +70,17 @@ public class StatusGroupCI
      *
      * @return value of instance variable {@link #definitions}
      */
+    @Override
     public List<StatusCIDefinition> getDefinitions()
     {
         return this.definitions;
     }
 
+    /**
+     * Adds the definition.
+     *
+     * @param definition the definition
+     */
     @SetNext
     public void addDefinition(final StatusCIDefinition definition)
     {

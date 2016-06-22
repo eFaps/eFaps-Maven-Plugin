@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2016 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,46 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
 package org.efaps.maven.plugin.install.digester;
 
-import java.util.Collection;
-
-import org.efaps.maven.plugin.install.GenerateCIClassMojo.CIDef4UI;
-
+import org.apache.commons.digester3.annotations.rules.BeanPropertySetter;
+import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 /**
  * TODO comment!
  *
  * @author The eFaps Team
  */
-public interface UserInterfaceCI
-    extends IBaseCI
+@ObjectCreate(pattern = "ui-menu")
+public class MenuCI
+    implements IBaseCI
 {
+    /** The uuid. */
+    @BeanPropertySetter(pattern = "ui-menu/uuid")
+    private String uuid;
+
+    @Override
+    public String getUuid()
+    {
+        return this.uuid;
+    }
 
     /**
-     * Gets the CI def.
+     * Setter method for instance variable {@link #uuid}.
      *
-     * @return the CI def
+     * @param _uuid value for instance variable {@link #uuid}
      */
-    CIDef4UI getCIDef();
-
-    /**
-     * Gets the definitions.
-     *
-     * @return the definitions
-     */
-    Collection<? extends UIDefintion> getDefinitions();
-
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    String getName();
+    public void setUuid(final String _uuid)
+    {
+        this.uuid = _uuid;
+    }
 }
