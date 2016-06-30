@@ -17,13 +17,13 @@
 
 package org.efaps.maven.plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
@@ -32,6 +32,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.efaps.maven.plugin.install.AbstractEFapsInstallMojo;
 import org.efaps.maven.plugin.install.digester.AccessSetCI;
 import org.efaps.maven.plugin.install.digester.CommandCI;
@@ -51,8 +53,13 @@ import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.version.Application;
 import org.efaps.update.version.Dependency;
+import org.joda.time.DateTime;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 /**
  * TODO comment!
@@ -64,19 +71,22 @@ public class GenerateRevisionFile
     extends AbstractEFapsInstallMojo
 {
 
+    /** The project. */
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    private MavenProject project;
+
+    /** The target directory. */
+    @Parameter(defaultValue = "${project.build.directory}")
+    private File targetDirectory;
+
+
     @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
         try {
-            final Application app = Application.getApplicationFromSource(
-                            getVersionFile(),
-                            getClasspathElements(),
-                            getEFapsDir(),
-                            getOutputDirectory(),
-                            null,
-                            null,
-                            getTypeMapping());
+            final Application app = Application.getApplication(getVersionFile().toURI().toURL(),
+                            getEFapsDir().toURI().toURL(), getClasspathElements());
 
             final DigesterLoader loader = DigesterLoader.newLoader(new FromAnnotationsRuleModule()
             {
@@ -108,11 +118,22 @@ public class GenerateRevisionFile
                 final List<InstallFile> files = dependApp.getInstall().getFiles();
                 mapping.putAll(addItems(loader, dependApp.getApplication(), files));
             }
+            final Dependency dependency = new Dependency();
+            dependency.setArtifactId(this.project.getArtifactId());
+            dependency.setGroupId(this.project.getGroupId());
+            dependency.setVersion(this.project.getVersion());
+            dependency.resolve();
 
-            mapping.putAll(addItems(loader, app.getApplication(), app.getInstall().getFiles()));
-            for (final Entry<String, RevItem> entry : mapping.entrySet()) {
-                System.out.println(entry.getValue());
-            }
+            final Application currentApp = Application.getApplicationFromJarFile(
+                            dependency.getJarFile(), getClasspathElements());
+
+            mapping.putAll(addItems(loader, currentApp.getApplication(), currentApp.getInstall().getFiles()));
+
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            mapper.registerModule(new JodaModule());
+            mapper.writeValue(new File(this.targetDirectory, "revisions.json"), mapping.values());
+
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
@@ -143,8 +164,8 @@ public class GenerateRevisionFile
                 final InputSource source = new InputSource(stream);
                 final IBaseCI item = digester.parse(source);
                 stream.close();
-                if (item != null) {
-                    ret.put(item.getUuid(), new RevItem(item.getUuid(), _appName, file.getRevision()));
+                if (item != null && item.getUuid() != null) {
+                    ret.put(item.getUuid(), new RevItem(item.getUuid(), _appName, file.getRevision(), file.getDate()));
                 } else {
                     getLog().debug("Ignoring: " + file);
                 }
@@ -153,6 +174,11 @@ public class GenerateRevisionFile
         return ret;
     }
 
+    /**
+     * The Class RevItem.
+     *
+     * @author The eFaps Team
+     */
     public static class RevItem
     {
 
@@ -165,20 +191,26 @@ public class GenerateRevisionFile
         /** The revision. */
         private final String revision;
 
+        /** The date. */
+        private final DateTime date;
+
         /**
          * Instantiates a new rev item.
          *
          * @param _uuid the uuid
          * @param _application the application
          * @param _revision the revision
+         * @param _date the date
          */
         public RevItem(final String _uuid,
                        final String _application,
-                       final String _revision)
+                       final String _revision,
+                       final DateTime _date)
         {
             this.uuid = _uuid;
             this.application = _application;
             this.revision = _revision;
+            this.date = _date;
         }
 
         /**
@@ -209,6 +241,16 @@ public class GenerateRevisionFile
         public String getUuid()
         {
             return this.uuid;
+        }
+
+        /**
+         * Gets the date.
+         *
+         * @return the date
+         */
+        public DateTime getDate()
+        {
+            return this.date;
         }
 
         @Override
