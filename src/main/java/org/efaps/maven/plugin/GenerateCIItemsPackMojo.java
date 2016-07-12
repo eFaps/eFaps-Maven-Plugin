@@ -18,16 +18,22 @@
 package org.efaps.maven.plugin;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -39,7 +45,6 @@ import org.efaps.maven.plugin.install.digester.AccessSetCI;
 import org.efaps.maven.plugin.install.digester.CommandCI;
 import org.efaps.maven.plugin.install.digester.FormCI;
 import org.efaps.maven.plugin.install.digester.IBaseCI;
-import org.efaps.maven.plugin.install.digester.ImageCI;
 import org.efaps.maven.plugin.install.digester.MenuCI;
 import org.efaps.maven.plugin.install.digester.MsgPhraseCI;
 import org.efaps.maven.plugin.install.digester.NumGenCI;
@@ -66,8 +71,8 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
  *
  * @author The eFaps Team
  */
-@Mojo(name = "generateRevisionFile")
-public class GenerateRevisionFile
+@Mojo(name = "generate-CIItemsPack")
+public class GenerateCIItemsPackMojo
     extends AbstractEFapsInstallMojo
 {
 
@@ -79,6 +84,9 @@ public class GenerateRevisionFile
     @Parameter(defaultValue = "${project.build.directory}")
     private File targetDirectory;
 
+    /** The name of the generated pack file. */
+    @Parameter(required = true, defaultValue = "CIItems.tar")
+    private String ciItemsPackFileName;
 
     @Override
     public void execute()
@@ -105,10 +113,12 @@ public class GenerateRevisionFile
                     bindRulesFrom(SearchCI.class);
                     bindRulesFrom(SQLTableCI.class);
                     bindRulesFrom(RoleCI.class);
-                    bindRulesFrom(ImageCI.class);
+                    //bindRulesFrom(ImageCI.class);
                     bindRulesFrom(AccessSetCI.class);
                 }
             });
+            final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory, this.ciItemsPackFileName));
+            final TarArchiveOutputStream tarOut = new TarArchiveOutputStream(out);
 
             final Map<String, RevItem> mapping = new HashMap<>();
             for (final Dependency dependency : app.getDependencies()) {
@@ -116,7 +126,7 @@ public class GenerateRevisionFile
                 final Application dependApp = Application.getApplicationFromJarFile(
                                 dependency.getJarFile(), getClasspathElements());
                 final List<InstallFile> files = dependApp.getInstall().getFiles();
-                mapping.putAll(addItems(loader, dependApp.getApplication(), files));
+                mapping.putAll(addItems(loader, dependApp.getApplication(), files, tarOut));
             }
             final Dependency dependency = new Dependency();
             dependency.setArtifactId(this.project.getArtifactId());
@@ -127,12 +137,21 @@ public class GenerateRevisionFile
             final Application currentApp = Application.getApplicationFromJarFile(
                             dependency.getJarFile(), getClasspathElements());
 
-            mapping.putAll(addItems(loader, currentApp.getApplication(), currentApp.getInstall().getFiles()));
+            mapping.putAll(addItems(loader, currentApp.getApplication(), currentApp.getInstall().getFiles(), tarOut));
 
             final ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.registerModule(new JodaModule());
-            mapper.writeValue(new File(this.targetDirectory, "revisions.json"), mapping.values());
+            final File revJson = new File(this.targetDirectory, "revisions.json");
+            mapper.writeValue(revJson, mapping.values());
+
+            final byte[] content = IOUtils.toByteArray(new FileInputStream(revJson));
+            final TarArchiveEntry entry = new TarArchiveEntry("revisions.json");
+            entry.setSize(content.length);
+            tarOut.putArchiveEntry(entry);
+            tarOut.write(content);
+            tarOut.closeArchiveEntry();
+            tarOut.close();
 
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
@@ -148,11 +167,13 @@ public class GenerateRevisionFile
      * @return the map
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws SAXException the SAX exception
+     * @throws URISyntaxException
      */
     private Map<String, RevItem> addItems(final DigesterLoader _loader,
                                           final String _appName,
-                                          final List<InstallFile> _files)
-        throws IOException, SAXException
+                                          final List<InstallFile> _files,
+                                          final TarArchiveOutputStream _tarOut)
+        throws IOException, SAXException, URISyntaxException
     {
         final Map<String, RevItem> ret = new HashMap<>();
         for (final InstallFile file : _files) {
@@ -166,6 +187,12 @@ public class GenerateRevisionFile
                 stream.close();
                 if (item != null && item.getUuid() != null) {
                     ret.put(item.getUuid(), new RevItem(item.getUuid(), _appName, file.getRevision(), file.getDate()));
+                    final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                    final TarArchiveEntry entry = new TarArchiveEntry(item.getUuid() + ".xml");
+                    entry.setSize(content.length);
+                    _tarOut.putArchiveEntry(entry);
+                    _tarOut.write(content);
+                    _tarOut.closeArchiveEntry();
                 } else {
                     getLog().debug("Ignoring: " + file);
                 }

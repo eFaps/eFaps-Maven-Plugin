@@ -69,7 +69,7 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
  *
  * @author The eFaps Team
  */
-@Mojo(name = "generateUpdatePackage")
+@Mojo(name = "generate-UpdatePackage")
 public class GenerateUpdatePackageMojo
     extends EFapsAbstractMojo
 {
@@ -316,7 +316,7 @@ public class GenerateUpdatePackageMojo
                 this.log.error(e);
             }
         }
-        final List<String> paths = new ArrayList<String>();
+        final List<String> paths = new ArrayList<>();
 
         final ISVNDiffStatusHandler handler = new ISVNDiffStatusHandler()
         {
