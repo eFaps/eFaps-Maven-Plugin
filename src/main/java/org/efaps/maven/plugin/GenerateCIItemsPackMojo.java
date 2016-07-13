@@ -76,6 +76,16 @@ public class GenerateCIItemsPackMojo
     extends AbstractEFapsInstallMojo
 {
 
+    public enum CIItemsGroup
+    {
+        /** All CIItems. */
+        ALL,
+        /** Type, StatusGroup, SQLTable. */
+        DATAMODEL,
+        /** CIITems belongin to UserInterface. */
+        UI;
+    }
+
     /** The project. */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
@@ -85,8 +95,14 @@ public class GenerateCIItemsPackMojo
     private File targetDirectory;
 
     /** The name of the generated pack file. */
-    @Parameter(required = true, defaultValue = "CIItems.tar")
-    private String ciItemsPackFileName;
+    @Parameter(required = true, property = "ciItemsPack.fileName", alias = "ciItemsPack.fileName",
+                    defaultValue = "CIItems.tar")
+    private String fileName;
+
+    /** The name of the generated pack file. */
+    @Parameter(required = true, property = "ciItemsPack.group", alias = "ciItemsPack.group",
+                    defaultValue = "ALL")
+    private CIItemsGroup group;
 
     @Override
     public void execute()
@@ -102,22 +118,39 @@ public class GenerateCIItemsPackMojo
                 @Override
                 protected void configureRules()
                 {
-                    bindRulesFrom(TypeCI.class);
-                    bindRulesFrom(StatusGroupCI.class);
-                    bindRulesFrom(FormCI.class);
-                    bindRulesFrom(TableCI.class);
-                    bindRulesFrom(MsgPhraseCI.class);
-                    bindRulesFrom(NumGenCI.class);
-                    bindRulesFrom(CommandCI.class);
-                    bindRulesFrom(MenuCI.class);
-                    bindRulesFrom(SearchCI.class);
-                    bindRulesFrom(SQLTableCI.class);
-                    bindRulesFrom(RoleCI.class);
-                    //bindRulesFrom(ImageCI.class);
-                    bindRulesFrom(AccessSetCI.class);
+                    switch (GenerateCIItemsPackMojo.this.group) {
+                        case DATAMODEL:
+                            bindRulesFrom(TypeCI.class);
+                            bindRulesFrom(StatusGroupCI.class);
+                            bindRulesFrom(SQLTableCI.class);
+                            break;
+                        case UI:
+                            bindRulesFrom(FormCI.class);
+                            bindRulesFrom(TableCI.class);
+                            bindRulesFrom(CommandCI.class);
+                            bindRulesFrom(MenuCI.class);
+                            bindRulesFrom(SearchCI.class);
+                            break;
+                        case ALL:
+                        default:
+                            bindRulesFrom(TypeCI.class);
+                            bindRulesFrom(StatusGroupCI.class);
+                            bindRulesFrom(FormCI.class);
+                            bindRulesFrom(TableCI.class);
+                            bindRulesFrom(MsgPhraseCI.class);
+                            bindRulesFrom(NumGenCI.class);
+                            bindRulesFrom(CommandCI.class);
+                            bindRulesFrom(MenuCI.class);
+                            bindRulesFrom(SearchCI.class);
+                            bindRulesFrom(SQLTableCI.class);
+                            bindRulesFrom(RoleCI.class);
+                            //bindRulesFrom(ImageCI.class);
+                            bindRulesFrom(AccessSetCI.class);
+                            break;
+                    }
                 }
             });
-            final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory, this.ciItemsPackFileName));
+            final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory, this.fileName));
             final TarArchiveOutputStream tarOut = new TarArchiveOutputStream(out);
 
             final Map<String, RevItem> mapping = new HashMap<>();
