@@ -92,7 +92,9 @@ public class GenerateUpdatePackMojo
         /** Type, StatusGroup, SQLTable. */
         DATAMODEL,
         /** CIITems belongin to UserInterface. */
-        UI;
+        UI,
+        /** PROGRAM ITEMS. */
+        PROGRAM;
     }
 
     /** The project. */
@@ -254,7 +256,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     case JAVA:
-                        if (UpdateGroup.ALL.equals(this.group)) {
+                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
                             final ESJPImporter importer = new ESJPImporter(file);
                             final String identifier = importer.getProgramName();
 
