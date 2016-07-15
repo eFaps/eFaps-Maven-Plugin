@@ -169,22 +169,22 @@ public class GenerateCIClassMojo
     /**
      * Set of types.
      */
-    private final Map<String, ITypeCI> types = new TreeMap<String, ITypeCI>();
+    private final Map<String, ITypeCI> types = new TreeMap<>();
 
     /**
      * Set of Tables.
      */
-    private final Set<UserInterfaceCI> uiCIs = new HashSet<UserInterfaceCI>();
+    private final Set<UserInterfaceCI> uiCIs = new HashSet<>();
 
     /**
      * Set of MsgPhrases.
      */
-    private final Set<MsgPhraseCI> msgPhraseCIs = new HashSet<MsgPhraseCI>();
+    private final Set<MsgPhraseCI> msgPhraseCIs = new HashSet<>();
 
     /**
      * Set of MsgPhrases.
      */
-    private final Set<NumGenCI> numGenCIs = new HashSet<NumGenCI>();
+    private final Set<NumGenCI> numGenCIs = new HashSet<>();
 
 
     /**
@@ -273,11 +273,11 @@ public class GenerateCIClassMojo
                     }
                 }
             }
-            buildCIType();
-            buildCI4UI(CIDef4UI.FORM);
-            buildCI4UI(CIDef4UI.TABLE);
-            buildCIMsgPhrase();
-            buildCINumGen();
+            buildCIType(appl.getApplication());
+            buildCI4UI(appl.getApplication(), CIDef4UI.FORM);
+            buildCI4UI(appl.getApplication(), CIDef4UI.TABLE);
+            buildCIMsgPhrase(appl.getApplication());
+            buildCINumGen(appl.getApplication());
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
@@ -312,17 +312,21 @@ public class GenerateCIClassMojo
     /**
      * Build the CI UI File for a given CI Defintion.
      *
+     * @param _appName the app name
      * @param _ciDef CI Definition the file will e build for
      * @throws IOException if writing of the actual file fails
      */
-    private void buildCI4UI(final CIDef4UI _ciDef)
+    private void buildCI4UI(final String _appName,
+                            final CIDef4UI _ciDef)
         throws IOException
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
                         .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
+                        .append("@EFapsApplication(\"").append(_appName).append("\")\n")
                         .append("public final class ").append(_ciDef.classNamePrefix).append(this.ciName)
                         .append("\n{\n");
 
@@ -339,14 +343,14 @@ public class GenerateCIClassMojo
                      .append("            super(_uuid);")
                      .append("\n        }\n");
 
-                final Map<String, List<String>> fields = new TreeMap<String, List<String>>();
+                final Map<String, List<String>> fields = new TreeMap<>();
                 for (final UIDefintion uiDef : uici.getDefinitions()) {
                     for (final String field : uiDef.getFields()) {
                         List<String> profiles;
                         if (fields.containsKey(field)) {
                             profiles = fields.get(field);
                         } else {
-                            profiles = new ArrayList<String>();
+                            profiles = new ArrayList<>();
                         }
                         profiles.addAll(uiDef.getProfiles());
                         fields.put(field, profiles);
@@ -384,15 +388,16 @@ public class GenerateCIClassMojo
     /**
      * Build the Java class for the CITypes.
      *
+     * @param _appName the app name
      * @throws IOException on error during writing of the file
      */
-    private void buildCIType()
+    private void buildCIType(final String _appName)
         throws IOException
     {
         // there is a not unlikely chance to produce a duplicated Type,
         // therefore it is checked here
-        final Map<String, String> typeTmp = new HashMap<String, String>();
-        final Set<String> duplicated = new HashSet<String>();
+        final Map<String, String> typeTmp = new HashMap<>();
+        final Set<String> duplicated = new HashSet<>();
         for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
             final String name = entry.getValue().getDefinitions().get(0).getName();
             String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
@@ -409,10 +414,12 @@ public class GenerateCIClassMojo
         final StringBuilder java = new StringBuilder()
                 .append("//CHECKSTYLE:OFF\n")
                 .append("package ").append(this.ciPackage).append(";\n")
+                .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                 .append("import org.efaps.ci.CIAttribute;\n")
                 .append("import org.efaps.ci.CIStatus;\n")
                 .append("import org.efaps.ci.CIType;\n\n")
                 .append(getClassComment())
+                .append("@EFapsApplication(\"").append(_appName).append("\")\n")
                 .append("public final class CI").append(this.ciName).append("\n{\n");
 
         for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
@@ -448,14 +455,14 @@ public class GenerateCIClassMojo
                 .append("            super(_uuid);")
                 .append("\n        }\n");
 
-            final Map<String, List<String>> uniques = new TreeMap<String, List<String>>();
+            final Map<String, List<String>> uniques = new TreeMap<>();
             for (final ITypeDefintion typeDef : entry.getValue().getDefinitions()) {
                 for (final IUniqueCI unique : typeDef.getUniques()) {
                     List<String> profiles;
                     if (uniques.containsKey(unique.getIdentifier())) {
                         profiles = uniques.get(unique.getIdentifier());
                     } else {
-                        profiles = new ArrayList<String>();
+                        profiles = new ArrayList<>();
                     }
                     profiles.addAll(typeDef.getProfiles());
                     uniques.put(unique.getIdentifier(), profiles);
@@ -523,16 +530,19 @@ public class GenerateCIClassMojo
     /**
      * Builds the ci msg phrase.
      *
+     * @param _appName the app name
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void buildCIMsgPhrase()
+    private void buildCIMsgPhrase(final String _appName)
         throws IOException
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
                         .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
+                        .append("@EFapsApplication(\"").append(_appName).append("\")\n")
                         .append("public final class CIMsg").append(this.ciName)
                         .append("\n{\n");
 
@@ -566,16 +576,19 @@ public class GenerateCIClassMojo
     /**
      * Builds the ci msg phrase.
      *
+     * @param _appName the app name
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void buildCINumGen()
+    private void buildCINumGen(final String _appName)
         throws IOException
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
                         .append("package ").append(this.ciPackage).append(";\n")
+                        .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
+                        .append("@EFapsApplication(\"").append(_appName).append("\")\n")
                         .append("public final class CINumGen").append(this.ciName)
                         .append("\n{\n");
 
