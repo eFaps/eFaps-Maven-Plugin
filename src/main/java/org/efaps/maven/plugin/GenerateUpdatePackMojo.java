@@ -145,6 +145,8 @@ public class GenerateUpdatePackMojo
                 protected void configureRules()
                 {
                     switch (GenerateUpdatePackMojo.this.group) {
+                        case PROGRAM:
+                            break;
                         case DATAMODEL:
                             bindRulesFrom(TypeCI.class);
                             bindRulesFrom(StatusGroupCI.class);
