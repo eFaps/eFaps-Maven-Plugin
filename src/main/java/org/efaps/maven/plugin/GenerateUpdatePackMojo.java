@@ -30,6 +30,8 @@ import java.util.Map;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipUtils;
 import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
@@ -56,6 +58,8 @@ import org.efaps.maven.plugin.install.digester.TableCI;
 import org.efaps.maven.plugin.install.digester.TypeCI;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
+import org.efaps.update.schema.program.esjp.ESJPImporter;
+import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.update.version.Dependency;
 import org.joda.time.DateTime;
@@ -71,12 +75,17 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
  *
  * @author The eFaps Team
  */
-@Mojo(name = "generate-CIItemsPack")
-public class GenerateCIItemsPackMojo
+@Mojo(name = "generate-UpdatePack")
+public class GenerateUpdatePackMojo
     extends AbstractEFapsInstallMojo
 {
 
-    public enum CIItemsGroup
+    /**
+     * The Enum UpdateGroup.
+     *
+     * @author The eFaps Team
+     */
+    public enum UpdateGroup
     {
         /** All CIItems. */
         ALL,
@@ -95,20 +104,35 @@ public class GenerateCIItemsPackMojo
     private File targetDirectory;
 
     /** The name of the generated pack file. */
-    @Parameter(required = true, property = "ciItemsPack.fileName", alias = "ciItemsPack.fileName",
-                    defaultValue = "CIItems.tar")
+    @Parameter(required = true, property = "updatePack.fileName", alias = "updatePack.fileName",
+                    defaultValue = "UpdatePack")
     private String fileName;
 
     /** The name of the generated pack file. */
-    @Parameter(required = true, property = "ciItemsPack.group", alias = "ciItemsPack.group",
+    @Parameter(required = true, property = "updatePack.group", alias = "updatePack.group",
                     defaultValue = "ALL")
-    private CIItemsGroup group;
+    private UpdateGroup group;
+
+    /** The compress. */
+    @Parameter(property = "updatePack.compress", alias = "updatePack.compress", defaultValue = "true")
+    private boolean compress;
 
     @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        try {
+
+        final String tarFileName = this.fileName + ".tar";
+        final String gzFileName = GzipUtils.getCompressedFilename(tarFileName);
+
+        try
+            (
+                final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory,
+                                this.compress ? gzFileName : tarFileName));
+                final TarArchiveOutputStream tarOut = new TarArchiveOutputStream(
+                                this.compress ? new GzipCompressorOutputStream(out) : out);
+            ) {
+
             final Application app = Application.getApplication(getVersionFile().toURI().toURL(),
                             getEFapsDir().toURI().toURL(), getClasspathElements());
 
@@ -118,7 +142,7 @@ public class GenerateCIItemsPackMojo
                 @Override
                 protected void configureRules()
                 {
-                    switch (GenerateCIItemsPackMojo.this.group) {
+                    switch (GenerateUpdatePackMojo.this.group) {
                         case DATAMODEL:
                             bindRulesFrom(TypeCI.class);
                             bindRulesFrom(StatusGroupCI.class);
@@ -150,16 +174,13 @@ public class GenerateCIItemsPackMojo
                     }
                 }
             });
-            final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory, this.fileName));
-            final TarArchiveOutputStream tarOut = new TarArchiveOutputStream(out);
 
             final Map<String, RevItem> mapping = new HashMap<>();
             for (final Dependency dependency : app.getDependencies()) {
                 dependency.resolve();
                 final Application dependApp = Application.getApplicationFromJarFile(
                                 dependency.getJarFile(), getClasspathElements());
-                final List<InstallFile> files = dependApp.getInstall().getFiles();
-                mapping.putAll(addItems(loader, dependApp.getApplication(), files, tarOut));
+                mapping.putAll(addItems(dependApp, tarOut, loader));
             }
             final Dependency dependency = new Dependency();
             dependency.setArtifactId(this.project.getArtifactId());
@@ -170,7 +191,7 @@ public class GenerateCIItemsPackMojo
             final Application currentApp = Application.getApplicationFromJarFile(
                             dependency.getJarFile(), getClasspathElements());
 
-            mapping.putAll(addItems(loader, currentApp.getApplication(), currentApp.getInstall().getFiles(), tarOut));
+            mapping.putAll(addItems(currentApp, tarOut, loader));
 
             final ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -184,8 +205,6 @@ public class GenerateCIItemsPackMojo
             tarOut.putArchiveEntry(entry);
             tarOut.write(content);
             tarOut.closeArchiveEntry();
-            tarOut.close();
-
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
@@ -194,40 +213,65 @@ public class GenerateCIItemsPackMojo
     /**
      * Adds the items.
      *
+     * @param _app the app
+     * @param _tarOut the tar out
      * @param _loader the loader
-     * @param _appName the app name
-     * @param _files the files
      * @return the map
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws SAXException the SAX exception
-     * @throws URISyntaxException
+     * @throws URISyntaxException the URI syntax exception
+     * @throws InstallationException the installation exception
      */
-    private Map<String, RevItem> addItems(final DigesterLoader _loader,
-                                          final String _appName,
-                                          final List<InstallFile> _files,
-                                          final TarArchiveOutputStream _tarOut)
-        throws IOException, SAXException, URISyntaxException
+    private Map<String, RevItem> addItems(final Application _app,
+                                          final TarArchiveOutputStream _tarOut,
+                                          final DigesterLoader _loader)
+        throws IOException, SAXException, URISyntaxException, InstallationException
     {
+        final List<InstallFile> files = _app.getInstall().getFiles();
         final Map<String, RevItem> ret = new HashMap<>();
-        for (final InstallFile file : _files) {
-            if (FileType.XML.equals(file.getType())) {
-                final Digester digester = _loader.newDigester();
-                final URLConnection connection = file.getUrl().openConnection();
-                connection.setUseCaches(false);
-                final InputStream stream = connection.getInputStream();
-                final InputSource source = new InputSource(stream);
-                final IBaseCI item = digester.parse(source);
-                stream.close();
-                if (item != null && item.getUuid() != null) {
-                    ret.put(item.getUuid(), new RevItem(item.getUuid(), _appName, file.getRevision(), file.getDate()));
-                    final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
-                    final TarArchiveEntry entry = new TarArchiveEntry(item.getUuid() + ".xml");
-                    entry.setSize(content.length);
-                    _tarOut.putArchiveEntry(entry);
-                    _tarOut.write(content);
-                    _tarOut.closeArchiveEntry();
-                } else {
-                    getLog().debug("Ignoring: " + file);
+        for (final InstallFile file : files) {
+            if (file.getType() == null) {
+                getLog().error("File without FileType: " + file);
+            } else {
+                switch (file.getType()) {
+                    case XML:
+                        final Digester digester = _loader.newDigester();
+                        final URLConnection connection = file.getUrl().openConnection();
+                        connection.setUseCaches(false);
+                        final InputStream stream = connection.getInputStream();
+                        final InputSource source = new InputSource(stream);
+                        final IBaseCI item = digester.parse(source);
+                        stream.close();
+                        if (item != null && item.getUuid() != null) {
+                            ret.put(item.getUuid(), new RevItem(FileType.XML, item.getUuid(), _app.getApplication(),
+                                            file.getRevision(), file.getDate()));
+                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                            final TarArchiveEntry entry = new TarArchiveEntry(item.getUuid());
+                            entry.setSize(content.length);
+                            _tarOut.putArchiveEntry(entry);
+                            _tarOut.write(content);
+                            _tarOut.closeArchiveEntry();
+                        }
+                        break;
+                    case JAVA:
+                        if (UpdateGroup.ALL.equals(this.group)) {
+                            final ESJPImporter importer = new ESJPImporter(file);
+                            final String identifier = importer.getProgramName();
+
+                            ret.put(identifier, new RevItem(FileType.JAVA, identifier, _app.getApplication(),
+                                            file.getRevision(), file.getDate()));
+                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                            final TarArchiveEntry entry = new TarArchiveEntry(
+                                            identifier.replaceAll("\\.", "/") + ".java");
+                            entry.setSize(content.length);
+                            _tarOut.putArchiveEntry(entry);
+                            _tarOut.write(content);
+                            _tarOut.closeArchiveEntry();
+                        }
+                        break;
+                    default:
+                        getLog().debug("Ignoring: " + file);
+                        break;
                 }
             }
         }
@@ -242,8 +286,11 @@ public class GenerateCIItemsPackMojo
     public static class RevItem
     {
 
-        /** The uuid. */
-        private final String uuid;
+        /** The file type. */
+        private final FileType fileType;
+
+        /** The identifier. */
+        private final String identifier;
 
         /** The application. */
         private final String application;
@@ -257,20 +304,33 @@ public class GenerateCIItemsPackMojo
         /**
          * Instantiates a new rev item.
          *
-         * @param _uuid the uuid
+         * @param _fileType the file type
+         * @param _identifier the identifier
          * @param _application the application
          * @param _revision the revision
          * @param _date the date
          */
-        public RevItem(final String _uuid,
+        public RevItem(final FileType _fileType,
+                       final String _identifier,
                        final String _application,
                        final String _revision,
                        final DateTime _date)
         {
-            this.uuid = _uuid;
+            this.fileType = _fileType;
+            this.identifier = _identifier;
             this.application = _application;
             this.revision = _revision;
             this.date = _date;
+        }
+
+        /**
+         * Gets the file type.
+         *
+         * @return the file type
+         */
+        public FileType getFileType()
+        {
+            return this.fileType;
         }
 
         /**
@@ -294,13 +354,13 @@ public class GenerateCIItemsPackMojo
         }
 
         /**
-         * Getter method for the instance variable {@link #uuid}.
+         * Getter method for the instance variable {@link #identifier}.
          *
-         * @return value of instance variable {@link #uuid}
+         * @return value of instance variable {@link #identifier}
          */
-        public String getUuid()
+        public String getIdentifier()
         {
-            return this.uuid;
+            return this.identifier;
         }
 
         /**
