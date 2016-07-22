@@ -18,7 +18,10 @@
 package org.efaps.maven.plugin;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +34,9 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.commons.digester3.Digester;
+import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
+import org.apache.commons.digester3.binder.DigesterLoader;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -50,9 +56,13 @@ import org.efaps.init.StartupDatabaseConnection;
 import org.efaps.init.StartupException;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.maven.logger.SLF4JOverMavenLog;
+import org.efaps.maven.plugin.install.digester.DBPropertiesCI;
+import org.efaps.maven.plugin.install.digester.IBaseCI;
 import org.efaps.util.EFapsException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -365,8 +375,9 @@ public abstract class EFapsAbstractMojo
                         final TimeZone authorTimeZone = authorIdent.getTimeZone();
                         final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
                                         authorTimeZone));
-                        info.setDate(dateTime);
-                        info.setRev(prevCommit.getId().getName());
+                        info.setDate(dateTime)
+                            .setRev(prevCommit.getId().getName())
+                            .setFile(new File(_file, fileMap.get(entry.getNewPath())));
                         ret.put(fileMap.get(entry.getNewPath()), info);
                         fileMap.remove(entry.getNewPath());
                     }
@@ -412,12 +423,54 @@ public abstract class EFapsAbstractMojo
      */
     public static class FileInfo
     {
+        /** The file. */
+        private File file;
 
         /** The rev. */
         private String rev;
 
         /** The date. */
         private DateTime date;
+
+        /** The checked. */
+        private boolean evaluated;
+
+        /**
+         * Eval revision 4 related files.
+         */
+        private void evalRevision4RelatedFiles()
+        {
+            try {
+                if (!this.evaluated && this.file != null && this.file.getName().endsWith("xml")) {
+                    this.evaluated = true;
+                    final DigesterLoader loader = DigesterLoader.newLoader(new FromAnnotationsRuleModule()
+                    {
+                        @Override
+                        protected void configureRules()
+                        {
+                            bindRulesFrom(DBPropertiesCI.class);
+                        }
+                    });
+                    final Digester digester = loader.newDigester();
+                    final InputStream stream = new FileInputStream(getFile());
+                    final InputSource source = new InputSource(stream);
+                    final IBaseCI item = digester.parse(source);
+                    if (item != null) {
+                        System.out.println(item);
+                    }
+                    stream.close();
+                }
+            } catch (final FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (final SAXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
         /**
          * Getter method for the instance variable {@link #rev}.
@@ -426,6 +479,7 @@ public abstract class EFapsAbstractMojo
          */
         public String getRev()
         {
+            evalRevision4RelatedFiles();
             return this.rev;
         }
 
@@ -447,6 +501,7 @@ public abstract class EFapsAbstractMojo
          */
         public DateTime getDate()
         {
+            evalRevision4RelatedFiles();
             return this.date;
         }
 
@@ -458,6 +513,27 @@ public abstract class EFapsAbstractMojo
         public FileInfo setDate(final DateTime _date)
         {
             this.date = _date;
+            return this;
+        }
+
+        /**
+         * Getter method for the instance variable {@link #file}.
+         *
+         * @return value of instance variable {@link #file}
+         */
+        public File getFile()
+        {
+            return this.file;
+        }
+
+        /**
+         * Setter method for instance variable {@link #file}.
+         *
+         * @param _file value for instance variable {@link #file}
+         */
+        public FileInfo setFile(final File _file)
+        {
+            this.file = _file;
             return this;
         }
     }
