@@ -332,7 +332,7 @@ public abstract class EFapsAbstractMojo
     protected Map<String, FileInfo> getFileInformations(final File _file,
                                                         final Set<String> _filesSet)
     {
-        final Map<String, FileInfo> ret = new TreeMap<String, FileInfo>();
+        final Map<String, FileInfo> ret = new TreeMap<>();
 
         try {
             final Repository repository = getRepository(_file);
@@ -343,6 +343,7 @@ public abstract class EFapsAbstractMojo
             }
             final Git git = new Git(repository);
             ObjectId previous = repository.resolve("HEAD^{tree}");
+            RevCommit prevCommit = null;
             for (final RevCommit commit : git.log().call()) {
 
                 final ObjectId older = commit.getTree();
@@ -359,13 +360,13 @@ public abstract class EFapsAbstractMojo
                 for (final DiffEntry entry : diffs) {
                     if (fileMap.containsKey(entry.getNewPath())) {
                         final FileInfo info = new FileInfo();
-                        final PersonIdent authorIdent = commit.getAuthorIdent();
+                        final PersonIdent authorIdent = prevCommit.getAuthorIdent();
                         final Date authorDate = authorIdent.getWhen();
                         final TimeZone authorTimeZone = authorIdent.getTimeZone();
                         final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
                                         authorTimeZone));
                         info.setDate(dateTime);
-                        info.setRev(commit.getId().getName());
+                        info.setRev(prevCommit.getId().getName());
                         ret.put(fileMap.get(entry.getNewPath()), info);
                         fileMap.remove(entry.getNewPath());
                     }
@@ -374,6 +375,7 @@ public abstract class EFapsAbstractMojo
                     }
                 }
                 previous = commit.getTree();
+                prevCommit = commit;
                 if (fileMap.isEmpty()) {
                     break;
                 }
