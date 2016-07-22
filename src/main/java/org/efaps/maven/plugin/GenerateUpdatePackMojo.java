@@ -36,6 +36,7 @@ import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -59,6 +60,9 @@ import org.efaps.maven.plugin.install.digester.TypeCI;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.schema.program.esjp.ESJPImporter;
+import org.efaps.update.schema.program.jasperreport.JasperReportImporter;
+import org.efaps.update.schema.program.staticsource.CSSImporter;
+import org.efaps.update.schema.program.staticsource.JavaScriptImporter;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.update.version.Dependency;
@@ -120,6 +124,7 @@ public class GenerateUpdatePackMojo
     private boolean compress;
 
     @Override
+    @SuppressWarnings("checkstyle:illegalcatch")
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -267,6 +272,53 @@ public class GenerateUpdatePackMojo
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
                                             identifier.replaceAll("\\.", "/") + ".java");
+                            entry.setSize(content.length);
+                            _tarOut.putArchiveEntry(entry);
+                            _tarOut.write(content);
+                            _tarOut.closeArchiveEntry();
+                        }
+                        break;
+                    case CSS:
+                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                            final CSSImporter importer = new CSSImporter(file);
+                            final String identifier = importer.getProgramName();
+
+                            ret.put(identifier, new RevItem(FileType.CSS, identifier, _app.getApplication(),
+                                            file.getRevision(), file.getDate()));
+                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                            final TarArchiveEntry entry = new TarArchiveEntry(
+                                            StringUtils.removeEnd(identifier, ".css").replaceAll("\\.", "/") + ".css");
+                            entry.setSize(content.length);
+                            _tarOut.putArchiveEntry(entry);
+                            _tarOut.write(content);
+                            _tarOut.closeArchiveEntry();
+                        }
+                        break;
+                    case JS:
+                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                            final JavaScriptImporter importer = new JavaScriptImporter(file);
+                            final String identifier = importer.getProgramName();
+
+                            ret.put(identifier, new RevItem(FileType.JS, identifier, _app.getApplication(),
+                                            file.getRevision(), file.getDate()));
+                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                            final TarArchiveEntry entry = new TarArchiveEntry(
+                                            StringUtils.removeEnd(identifier, ".js").replaceAll("\\.", "/") + ".js");
+                            entry.setSize(content.length);
+                            _tarOut.putArchiveEntry(entry);
+                            _tarOut.write(content);
+                            _tarOut.closeArchiveEntry();
+                        }
+                        break;
+                    case JRXML:
+                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                            final JasperReportImporter importer = new JasperReportImporter(file);
+                            final String identifier = importer.getEFapsUUID().toString();
+
+                            ret.put(identifier, new RevItem(FileType.JRXML, identifier, _app.getApplication(),
+                                            file.getRevision(), file.getDate()));
+                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                            final TarArchiveEntry entry = new TarArchiveEntry(identifier + ".jrxml");
                             entry.setSize(content.length);
                             _tarOut.putArchiveEntry(entry);
                             _tarOut.write(content);
