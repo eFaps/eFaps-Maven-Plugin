@@ -79,7 +79,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles
      */
-    private static final Set<String> DEFAULT_COPYINCLUDES = new HashSet<String>();
+    private static final Set<String> DEFAULT_COPYINCLUDES = new HashSet<>();
     static {
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.css");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.gif");
@@ -101,7 +101,7 @@ public class GenerateInstallationMojo
      *
      * @see #getCopyFiles
      */
-    private static final Set<String> DEFAULT_COPYEXCLUDES = new HashSet<String>();
+    private static final Set<String> DEFAULT_COPYEXCLUDES = new HashSet<>();
     static {
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/versions.xml");
         GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.add("**/package-info.java");
@@ -254,9 +254,9 @@ public class GenerateInstallationMojo
 
             // append all file name and the type to files node (sorted
             // alphabetical)
-            final Set<String> filesSet = new TreeSet<String>(getFiles());
+            final Set<String> filesSet = new TreeSet<>(getFiles());
 
-            final Map<String, FileInfo> filemap = getFileInformations(getEFapsDir(), filesSet);
+            final Map<String, FileInfo> filemap = getFileInformations(getEFapsDir(), filesSet, true);
 
             for (final Entry<String, FileInfo> entry : filemap.entrySet()) {
                 final String fileName = entry.getKey();

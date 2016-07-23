@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +47,12 @@ import org.apache.maven.project.MavenProject;
 import org.efaps.maven.plugin.install.AbstractEFapsInstallMojo;
 import org.efaps.maven.plugin.install.digester.AccessSetCI;
 import org.efaps.maven.plugin.install.digester.CommandCI;
+import org.efaps.maven.plugin.install.digester.DBPropertiesCI;
 import org.efaps.maven.plugin.install.digester.FormCI;
 import org.efaps.maven.plugin.install.digester.IBaseCI;
+import org.efaps.maven.plugin.install.digester.IRelatedFiles;
+import org.efaps.maven.plugin.install.digester.ImageCI;
+import org.efaps.maven.plugin.install.digester.JasperImageCI;
 import org.efaps.maven.plugin.install.digester.MenuCI;
 import org.efaps.maven.plugin.install.digester.MsgPhraseCI;
 import org.efaps.maven.plugin.install.digester.NumGenCI;
@@ -163,6 +168,9 @@ public class GenerateUpdatePackMojo
                             bindRulesFrom(CommandCI.class);
                             bindRulesFrom(MenuCI.class);
                             bindRulesFrom(SearchCI.class);
+                            bindRulesFrom(DBPropertiesCI.class);
+                            bindRulesFrom(ImageCI.class);
+                            bindRulesFrom(JasperImageCI.class);
                             break;
                         case ALL:
                         default:
@@ -177,8 +185,10 @@ public class GenerateUpdatePackMojo
                             bindRulesFrom(SearchCI.class);
                             bindRulesFrom(SQLTableCI.class);
                             bindRulesFrom(RoleCI.class);
-                            //bindRulesFrom(ImageCI.class);
                             bindRulesFrom(AccessSetCI.class);
+                            bindRulesFrom(DBPropertiesCI.class);
+                            bindRulesFrom(ImageCI.class);
+                            bindRulesFrom(JasperImageCI.class);
                             break;
                     }
                 }
@@ -260,6 +270,20 @@ public class GenerateUpdatePackMojo
                             _tarOut.putArchiveEntry(entry);
                             _tarOut.write(content);
                             _tarOut.closeArchiveEntry();
+                            if (item instanceof IRelatedFiles) {
+                                for (final String tmpFile : ((IRelatedFiles) item).getFiles()) {
+                                    final String urlStr = file.getUrl().toString();
+                                    final URL url = new URL(urlStr.substring(0, urlStr.lastIndexOf("/") + 1)
+                                                    + tmpFile);
+                                    final URLConnection relCon = url.openConnection();
+                                    final byte[] relContent = IOUtils.toByteArray(relCon.getInputStream());
+                                    final TarArchiveEntry relEntry = new TarArchiveEntry(tmpFile);
+                                    relEntry.setSize(relContent.length);
+                                    _tarOut.putArchiveEntry(relEntry);
+                                    _tarOut.write(relContent);
+                                    _tarOut.closeArchiveEntry();
+                                }
+                            }
                         }
                         break;
                     case JAVA:

@@ -32,8 +32,10 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
  */
 @ObjectCreate(pattern = "dbproperties")
 public class DBPropertiesCI
-    implements IBaseCI
+    implements IRelatedFiles
 {
+
+    /** The uuid. */
     @BeanPropertySetter(pattern = "dbproperties/uuid")
     private String uuid;
 
@@ -61,10 +63,20 @@ public class DBPropertiesCI
         this.uuid = _uuid;
     }
 
+    /**
+     * Adds the definition.
+     *
+     * @param _file the file
+     */
     @CallMethod(pattern = "dbproperties/resource/file", usingElementBodyAsArgument=true)
-    public void addDefinition(final String _file)
+    public void addFile(final String _file)
     {
         this.files.add(_file);
     }
 
+    @Override
+    public List<String> getFiles()
+    {
+        return this.files;
+    }
 }

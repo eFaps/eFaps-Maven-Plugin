@@ -76,11 +76,11 @@ public class UpdateFromFileMojo
             final FileType filetype = FileType.getFileTypeByExtension(ending);
 
             final Install install = new Install();
-            final FileInfo fileInfo = getFileInformation( this.file);
+            final FileInfo fileInfo = getFileInformation(this.file, true);
 
             install.addFile(new InstallFile().setURL(this.file.toURI().toURL()).setType(filetype.getType())
                             .setDate(fileInfo.getDate()).setRevision(fileInfo.getRev()));
-            final Set<Profile> profiles = new HashSet<Profile>();
+            final Set<Profile> profiles = new HashSet<>();
             profiles.add(Profile.getProfile(this.profile));
             install.updateLatest(profiles);
             commitTransaction();

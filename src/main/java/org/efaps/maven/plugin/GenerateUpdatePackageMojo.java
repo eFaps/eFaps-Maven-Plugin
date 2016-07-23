@@ -233,7 +233,7 @@ public class GenerateUpdatePackageMojo
                 case RENAME:
                     final File file = new File(_repo.getDirectory().getParentFile(), entry.getNewPath());
                     copyFile(file.getPath(), false);
-                    final FileInfo fileInfo = getFileInformation(file);
+                    final FileInfo fileInfo = getFileInformation(file, true);
                     final StringBuilder line = new StringBuilder().append(file.getName()).append(" ")
                                     .append(fileInfo.getRev()).append(" ")
                                    .append(fileInfo.getDate()).append("\n") ;

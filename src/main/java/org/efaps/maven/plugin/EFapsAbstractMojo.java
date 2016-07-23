@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2015 The eFaps Team
+ * Copyright 2003 - 2016 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.efaps.maven.plugin;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -37,6 +36,7 @@ import java.util.UUID;
 import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -57,7 +57,9 @@ import org.efaps.init.StartupException;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.maven.logger.SLF4JOverMavenLog;
 import org.efaps.maven.plugin.install.digester.DBPropertiesCI;
-import org.efaps.maven.plugin.install.digester.IBaseCI;
+import org.efaps.maven.plugin.install.digester.IRelatedFiles;
+import org.efaps.maven.plugin.install.digester.ImageCI;
+import org.efaps.maven.plugin.install.digester.JasperImageCI;
 import org.efaps.util.EFapsException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -303,7 +305,8 @@ public abstract class EFapsAbstractMojo
      * @param _file the file
      * @return the file information
      */
-    protected FileInfo getFileInformation(final File _file)
+    protected FileInfo getFileInformation(final File _file,
+                                          final boolean _evalRelated)
     {
         FileInfo ret = null;
         try {
@@ -323,8 +326,11 @@ public abstract class EFapsAbstractMojo
                 final Date authorDate = authorIdent.getWhen();
                 final TimeZone authorTimeZone = authorIdent.getTimeZone();
                 final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
-                ret.setDate(dateTime);
-                ret.setRev(commit.getId().getName());
+                ret.setDate(dateTime)
+                 .setRev(commit.getId().getName());
+                if (_evalRelated) {
+                    evalRelated(ret, _file);
+                }
             }
         } catch (final GitAPIException | IOException e) {
             this.log.error(e);
@@ -337,10 +343,12 @@ public abstract class EFapsAbstractMojo
      *
      * @param _file the file
      * @param _filesSet the files set
+     * @param _evalRel the eval rel
      * @return the file informations
      */
     protected Map<String, FileInfo> getFileInformations(final File _file,
-                                                        final Set<String> _filesSet)
+                                                        final Set<String> _filesSet,
+                                                        final boolean _evalRelated)
     {
         final Map<String, FileInfo> ret = new TreeMap<>();
 
@@ -376,10 +384,14 @@ public abstract class EFapsAbstractMojo
                         final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
                                         authorTimeZone));
                         info.setDate(dateTime)
-                            .setRev(prevCommit.getId().getName())
-                            .setFile(new File(_file, fileMap.get(entry.getNewPath())));
-                        ret.put(fileMap.get(entry.getNewPath()), info);
+                            .setRev(prevCommit.getId().getName());
+                        final String path = fileMap.get(entry.getNewPath());
+
+                        ret.put(path, info);
                         fileMap.remove(entry.getNewPath());
+                        if (_evalRelated) {
+                            evalRelated(info, new File(_file, path));
+                        }
                     }
                     if (fileMap.isEmpty()) {
                         break;
@@ -397,9 +409,53 @@ public abstract class EFapsAbstractMojo
                 }
             }
         } catch (final Exception e) {
-            System.out.println();
+            getLog().error(e);
         }
         return ret;
+    }
+
+    /**
+     * Eval related.
+     *
+     * @param _info the info
+     * @param _file the file
+     */
+    protected void evalRelated(final FileInfo _info,
+                               final File _file)
+    {
+        try {
+            if (_file.exists() && FilenameUtils.isExtension(_file.getName(), "xml")) {
+                final DigesterLoader loader = DigesterLoader.newLoader(new FromAnnotationsRuleModule()
+                {
+                    @Override
+                    protected void configureRules()
+                    {
+                        bindRulesFrom(DBPropertiesCI.class);
+                        bindRulesFrom(ImageCI.class);
+                        bindRulesFrom(JasperImageCI.class);
+                    }
+                });
+                final Digester digester = loader.newDigester();
+                final InputStream stream = new FileInputStream(_file);
+                final InputSource source = new InputSource(stream);
+                final IRelatedFiles item = digester.parse(source);
+                if (item != null) {
+                    for (final String tmpFile : item.getFiles()) {
+                        final String path = FilenameUtils.normalize(_file.getParent() + "/" + tmpFile);
+                        final File relFile = new File(path);
+                        if (relFile.exists()) {
+                            final FileInfo relInfo = getFileInformation(relFile, false);
+                            if (relInfo.getDate().isAfter(_info.getDate())) {
+                                _info.setDate(relInfo.getDate()).setRev(relInfo.getRev());
+                            }
+                        }
+                    }
+                }
+                stream.close();
+            }
+        } catch (final IOException | SAXException e) {
+            getLog().error(e);
+        }
     }
 
     /**
@@ -423,54 +479,11 @@ public abstract class EFapsAbstractMojo
      */
     public static class FileInfo
     {
-        /** The file. */
-        private File file;
-
         /** The rev. */
         private String rev;
 
         /** The date. */
         private DateTime date;
-
-        /** The checked. */
-        private boolean evaluated;
-
-        /**
-         * Eval revision 4 related files.
-         */
-        private void evalRevision4RelatedFiles()
-        {
-            try {
-                if (!this.evaluated && this.file != null && this.file.getName().endsWith("xml")) {
-                    this.evaluated = true;
-                    final DigesterLoader loader = DigesterLoader.newLoader(new FromAnnotationsRuleModule()
-                    {
-                        @Override
-                        protected void configureRules()
-                        {
-                            bindRulesFrom(DBPropertiesCI.class);
-                        }
-                    });
-                    final Digester digester = loader.newDigester();
-                    final InputStream stream = new FileInputStream(getFile());
-                    final InputSource source = new InputSource(stream);
-                    final IBaseCI item = digester.parse(source);
-                    if (item != null) {
-                        System.out.println(item);
-                    }
-                    stream.close();
-                }
-            } catch (final FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (final IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (final SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
 
         /**
          * Getter method for the instance variable {@link #rev}.
@@ -479,7 +492,6 @@ public abstract class EFapsAbstractMojo
          */
         public String getRev()
         {
-            evalRevision4RelatedFiles();
             return this.rev;
         }
 
@@ -501,7 +513,6 @@ public abstract class EFapsAbstractMojo
          */
         public DateTime getDate()
         {
-            evalRevision4RelatedFiles();
             return this.date;
         }
 
@@ -513,27 +524,6 @@ public abstract class EFapsAbstractMojo
         public FileInfo setDate(final DateTime _date)
         {
             this.date = _date;
-            return this;
-        }
-
-        /**
-         * Getter method for the instance variable {@link #file}.
-         *
-         * @return value of instance variable {@link #file}
-         */
-        public File getFile()
-        {
-            return this.file;
-        }
-
-        /**
-         * Setter method for instance variable {@link #file}.
-         *
-         * @param _file value for instance variable {@link #file}
-         */
-        public FileInfo setFile(final File _file)
-        {
-            this.file = _file;
             return this;
         }
     }

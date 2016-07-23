@@ -30,12 +30,12 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
  *
  * @author The eFaps Team
  */
-@ObjectCreate(pattern = "ui-image")
-public class ImageCI
+@ObjectCreate(pattern = "jasper-image")
+public class JasperImageCI
     implements IRelatedFiles
 {
     /** The uuid. */
-    @BeanPropertySetter(pattern = "ui-image/uuid")
+    @BeanPropertySetter(pattern = "jasper-image/uuid")
     private String uuid;
 
     /** The files. */
@@ -62,7 +62,7 @@ public class ImageCI
      *
      * @param _file the file
      */
-    @CallMethod(pattern = "ui-image/definition/file", usingElementBodyAsArgument=true)
+    @CallMethod(pattern = "jasper-image/definition/file", usingElementBodyAsArgument=true)
     public void addFile(final String _file)
     {
         this.files.add(_file);
