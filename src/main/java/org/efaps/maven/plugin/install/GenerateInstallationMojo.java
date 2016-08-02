@@ -87,6 +87,7 @@ public class GenerateInstallationMojo
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.js");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.jrxml");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.png");
+        GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.jpg");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.properties");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.wiki");
         GenerateInstallationMojo.DEFAULT_COPYINCLUDES.add("**/*.xml");
