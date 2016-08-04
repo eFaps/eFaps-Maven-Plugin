@@ -39,4 +39,14 @@ public class AccessSetCI
     {
         return this.uuid;
     }
+
+    /**
+     * Setter method for instance variable {@link #uuid}.
+     *
+     * @param _uuid value for instance variable {@link #uuid}
+     */
+    public void setUuid(final String _uuid)
+    {
+        this.uuid = _uuid;
+    }
 }
