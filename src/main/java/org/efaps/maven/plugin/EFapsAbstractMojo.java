@@ -43,12 +43,14 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.db.Context;
@@ -404,8 +406,16 @@ public abstract class EFapsAbstractMojo
                 }
             }
             if (!fileMap.isEmpty()) {
+                final RevWalk revWalk = new RevWalk(repository);
+                final ObjectId headObjectId = repository.resolve(Constants.HEAD);
+                final RevCommit commit = revWalk.parseCommit(headObjectId);
+                final PersonIdent authorIdent = commit.getAuthorIdent();
+                final Date authorDate = authorIdent.getWhen();
+                final TimeZone authorTimeZone = authorIdent.getTimeZone();
+                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
+                                authorTimeZone));
                 for (final Entry<String, String> entry : fileMap.entrySet()) {
-                    ret.put(entry.getValue(), new FileInfo().setDate(new DateTime()).setRev("-"));
+                    ret.put(entry.getValue(), new FileInfo().setDate(dateTime).setRev("-"));
                 }
             }
         } catch (final Exception e) {
