@@ -104,12 +104,12 @@ public class GenerateJmsClassMojo
     /**
      * Mapping between the Types of eFaps and the package the responding class is in.
      */
-    private final Map<String, String> type2package = new HashMap<String, String>();
+    private final Map<String, String> type2package = new HashMap<>();
 
     /**
      * Mapping between the Types of eFaps and the responding class.
      */
-    private final Map<String, String> type2ClassName = new TreeMap<String, String>();
+    private final Map<String, String> type2ClassName = new TreeMap<>();
 
 
     /**
@@ -151,20 +151,17 @@ public class GenerateJmsClassMojo
                 final Application dependApp = Application.getApplicationFromJarFile(
                                 dependency.getJarFile(), getClasspathElements());
                 final List<InstallFile> files = dependApp.getInstall().getFiles();
-                final String applicationName = dependApp.getApplication().replaceAll(this.jmsPackageRegex, "")
-                                    .toLowerCase();
                 for (final InstallFile file : files) {
                     if (file.getType() != null && file.getType().equals(FileType.XML)) {
-                        readFile(applicationName, srcFolder, file);
+                        readFile(srcFolder, file);
                     }
                 }
             }
 
             final List<InstallFile> files = appl.getInstall().getFiles();
-            final String applicationName = appl.getApplication().replaceAll(this.jmsPackageRegex, "").toLowerCase();
             for (final InstallFile file : files) {
                 if (file.getType() != null && file.getType().equals(FileType.XML)) {
-                    readFile(applicationName, srcFolder, file);
+                    readFile(srcFolder, file);
                 }
             }
             this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
@@ -173,8 +170,7 @@ public class GenerateJmsClassMojo
         }
     }
 
-    private void readFile(final String _applicationName,
-                          final File _srcFolder,
+    private void readFile(final File _srcFolder,
                           final InstallFile _file)
         throws MojoExecutionException
     {
@@ -199,8 +195,10 @@ public class GenerateJmsClassMojo
                 if (item instanceof TypeCI) {
                     final TypeCI typeItem = ((TypeCI) item);
 
-                    final String packageName = typeItem.getPackageName(this.jmsPackageRegex, this.jmsPackageReplacement);
-                    final String className = typeItem.getClassName(this.jmsClassNameRegex, this.jmsClassNameReplacement);
+                    final String packageName = typeItem.getPackageName(this.jmsPackageRegex,
+                                    this.jmsPackageReplacement);
+                    final String className = typeItem.getClassName(this.jmsClassNameRegex,
+                                    this.jmsClassNameReplacement);
                     this.type2package.put(typeItem.getName(), packageName);
                     this.type2ClassName.put(typeItem.getName(), "org.efaps.esjp.jms."
                                     + packageName + "." + className);
@@ -266,14 +264,14 @@ public class GenerateJmsClassMojo
 
     final StringBuilder getter = new StringBuilder();
 
-    final Map<IAttributeCI, List<String>> attributes = new TreeMap<IAttributeCI, List<String>>();
+    final Map<IAttributeCI, List<String>> attributes = new TreeMap<>();
     for (final ITypeDefintion typeDef : _typeCI.getDefinitions()) {
         for (final IAttributeCI attribute : typeDef.getAttributes()) {
             List<String> profiles;
             if (attributes.containsKey(attribute)) {
                 profiles = attributes.get(attribute);
             } else {
-                profiles = new ArrayList<String>();
+                profiles = new ArrayList<>();
             }
             profiles.addAll(typeDef.getProfiles());
             attributes.put(attribute, profiles);

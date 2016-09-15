@@ -152,12 +152,6 @@ public abstract class EFapsAbstractMojo
     private List<String> classpathElements;
 
     /**
-     * Root Directory with the XML installation files.
-     */
-    @Parameter(defaultValue = "${basedir}/.git")
-    private File gitDir;
-
-    /**
      * Instantiates a new eFaps abstract mojo.
      */
     protected EFapsAbstractMojo()
