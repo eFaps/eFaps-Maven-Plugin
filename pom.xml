@@ -2,7 +2,7 @@
 
 <!--
 
- Copyright 2003 - 2015 The eFaps Team
+ Copyright 2003 - 2017 The eFaps Team
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -112,14 +112,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.4</version>
+                <version>3.5</version>
                 <configuration>
                     <goalPrefix>efaps</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>mojo-descriptor</id>
+                        <id>default-descriptor</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>descriptor</goal>
@@ -236,13 +236,11 @@
         </profile>
     </profiles>
 
-    <!-- ************************************************************************
-        * Dependencies ************************************************************************* -->
     <dependencies>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.2</version>
+            <version>3.5</version>
             <!-- annotations are not needed for plugin execution so you can
                 remove this dependency for execution with using provided scope -->
             <scope>provided</scope>
@@ -251,7 +249,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.0.10</version>
+            <version>3.1.0</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -290,7 +288,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.1</version>
+            <version>2.6</version>
         </dependency>
 
         <!-- For Java6 xalan and xerces must be defined (otherwise Java uses
@@ -299,12 +297,12 @@
         <dependency>
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.2</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.0</version>
         </dependency>
 
         <!--  Needed for namespace binding JNDI -->
@@ -334,7 +332,7 @@
         <dependency>
             <groupId>org.jboss.jbossts.jta</groupId>
             <artifactId>narayana-jta</artifactId>
-            <version>4.17.4.Final</version>
+            <version>${jboss.jta.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jfreechart</artifactId>
@@ -354,17 +352,17 @@
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans</artifactId>
-            <version>2.5.0</version>
+            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.8.5</version>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>3.7.0.201502260915-r</version>
+            <version>4.9.0.201710071750-r</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpcore</artifactId>
