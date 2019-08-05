@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -31,10 +28,8 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "ui-table/definition")
 public class TableCIDefinition
@@ -47,8 +42,8 @@ public class TableCIDefinition
     @BeanPropertySetter(pattern = "ui-table/definition/parent")
     private String parent;
 
-    private final List<String> fields = new ArrayList<String>();
-    private final List<String> profiles = new ArrayList<String>();
+    private final List<String> fields = new ArrayList<>();
+    private final List<String> profiles = new ArrayList<>();
 
 
     /**
@@ -58,7 +53,7 @@ public class TableCIDefinition
      */
     public String getExpression()
     {
-        return this.expression;
+        return expression;
     }
 
     /**
@@ -68,14 +63,14 @@ public class TableCIDefinition
      */
     public void setExpression(final String _expression)
     {
-        this.expression = _expression;
+        expression = _expression;
     }
 
     @CallMethod(pattern = "ui-table/definition/field")
     public void addField(@CallParam(pattern = "ui-table/definition/field",
                                                     attributeName = "name") final String _name)
     {
-        this.fields.add(_name);
+        fields.add(_name);
     }
 
 
@@ -83,7 +78,7 @@ public class TableCIDefinition
     public void addProfile(@CallParam(pattern = "ui-table/definition/profiles/profile",
                     attributeName = "name") final String _name)
     {
-        this.profiles.add(_name);
+        profiles.add(_name);
     }
 
     /**
@@ -93,7 +88,7 @@ public class TableCIDefinition
      */
     public String getName()
     {
-        return this.name;
+        return name;
     }
 
     /**
@@ -104,7 +99,7 @@ public class TableCIDefinition
 
     public void setName(final String _name)
     {
-        this.name = _name;
+        name = _name;
     }
 
     /**
@@ -114,7 +109,7 @@ public class TableCIDefinition
      */
     public String getParent()
     {
-        return this.parent;
+        return parent;
     }
 
     /**
@@ -125,7 +120,7 @@ public class TableCIDefinition
 
     public void setParent(final String _parent)
     {
-        this.parent = _parent;
+        parent = _parent;
     }
 
     /**
@@ -133,9 +128,10 @@ public class TableCIDefinition
      *
      * @return value of instance variable {@link #attributes}
      */
+    @Override
     public List<String> getFields()
     {
-        return this.fields;
+        return fields;
     }
 
     /**
@@ -143,8 +139,9 @@ public class TableCIDefinition
      *
      * @return value of instance variable {@link #profiles}
      */
+    @Override
     public List<String> getProfiles()
     {
-        return this.profiles;
+        return profiles;
     }
 }

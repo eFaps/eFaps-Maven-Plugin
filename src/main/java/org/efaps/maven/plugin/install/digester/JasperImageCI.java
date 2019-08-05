@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.commons.digester3.annotations.rules.CallMethod;
 import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
  */
@@ -45,7 +44,7 @@ public class JasperImageCI
     @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
     /**
      * Setter method for instance variable {@link #uuid}.
@@ -54,7 +53,7 @@ public class JasperImageCI
      */
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 
     /**
@@ -65,12 +64,12 @@ public class JasperImageCI
     @CallMethod(pattern = "jasper-image/definition/file", usingElementBodyAsArgument=true)
     public void addFile(final String _file)
     {
-        this.files.add(_file);
+        files.add(_file);
     }
 
     @Override
     public List<String> getFiles()
     {
-        return this.files;
+        return files;
     }
 }

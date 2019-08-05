@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -30,17 +27,15 @@ import org.apache.commons.digester3.annotations.rules.SetNext;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "datamodel-type")
 public class TypeCI
     implements ITypeCI
 {
 
-    private final List<TypeCIDefinition> definitions = new ArrayList<TypeCIDefinition>();
+    private final List<TypeCIDefinition> definitions = new ArrayList<>();
 
     @BeanPropertySetter(pattern = "datamodel-type/uuid")
     private String uuid;
@@ -56,7 +51,7 @@ public class TypeCI
      */
     public String getApplication()
     {
-        return this.application;
+        return application;
     }
 
 
@@ -68,7 +63,7 @@ public class TypeCI
 
     public void setApplication(final String _application)
     {
-        this.application = _application;
+        application = _application;
     }
 
     /**
@@ -76,9 +71,10 @@ public class TypeCI
      *
      * @return value of instance variable {@link #uuid}
      */
+    @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
 
     /**
@@ -89,7 +85,7 @@ public class TypeCI
 
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 
     /**
@@ -97,15 +93,16 @@ public class TypeCI
      *
      * @return value of instance variable {@link #definitions}
      */
+    @Override
     public List<TypeCIDefinition> getDefinitions()
     {
-        return this.definitions;
+        return definitions;
     }
 
     @SetNext
     public void addDefinition(final TypeCIDefinition _definition)
     {
-        this.definitions.add(_definition);
+        definitions.add(_definition);
     }
 
 
@@ -114,7 +111,7 @@ public class TypeCI
      */
     public String getName()
     {
-        return this.definitions.get(0).getName();
+        return definitions.get(0).getName();
     }
 
 
@@ -123,13 +120,13 @@ public class TypeCI
      */
     public String getPackageName(final String _jmsPackageRegex, final String _jmsPackageReplacement)
     {
-         return this.application.trim().replaceAll(_jmsPackageRegex, _jmsPackageReplacement).toLowerCase();
+         return application.trim().replaceAll(_jmsPackageRegex, _jmsPackageReplacement).toLowerCase();
     }
 
 
     public boolean isAbstract()
     {
-        return this.definitions.get(0).isAbstractType();
+        return definitions.get(0).isAbstractType();
     }
 
     /**
@@ -149,7 +146,7 @@ public class TypeCI
      */
     public String getParent()
     {
-        return this.definitions.get(0).getParent();
+        return definitions.get(0).getParent();
     }
 
 
@@ -158,6 +155,6 @@ public class TypeCI
      */
     public boolean isClassification()
     {
-        return this.definitions.get(0).isClassification();
+        return definitions.get(0).isClassification();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
-
 
 package org.efaps.maven.plugin.install.digester;
 
@@ -32,10 +28,8 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "datamodel-statusgroup/definition")
 public class StatusCIDefinition
@@ -49,9 +43,9 @@ public class StatusCIDefinition
     @BeanPropertySetter(pattern = "datamodel-statusgroup/definition/parent")
     private String parent;
 
-    private final List<StatusCI> status = new ArrayList<StatusCI>();
+    private final List<StatusCI> status = new ArrayList<>();
 
-    private final List<String> profiles = new ArrayList<String>();
+    private final List<String> profiles = new ArrayList<>();
 
     /**
      * Getter method for the instance variable {@link #expression}.
@@ -60,7 +54,7 @@ public class StatusCIDefinition
      */
     public String getExpression()
     {
-        return this.expression;
+        return expression;
     }
 
     /**
@@ -70,7 +64,7 @@ public class StatusCIDefinition
      */
     public void setExpression(final String _expression)
     {
-        this.expression = _expression;
+        expression = _expression;
     }
 
     @CallMethod(pattern = "datamodel-statusgroup/definition/status")
@@ -79,14 +73,14 @@ public class StatusCIDefinition
     {
         final StatusCI statusTmp = new StatusCI();
         statusTmp.setKey(_key);
-        this.status.add(statusTmp);
+        status.add(statusTmp);
     }
 
     @CallMethod(pattern = "datamodel-statusgroup/definition/profiles")
     public void addProfile(@CallParam(pattern = "datamodel-statusgroup/definition/profiles/profile",
                     attributeName = "name") final String _name)
     {
-        this.profiles.add(_name);
+        profiles.add(_name);
     }
 
     /**
@@ -94,9 +88,10 @@ public class StatusCIDefinition
      *
      * @return value of instance variable {@link #name}
      */
+    @Override
     public String getName()
     {
-        return this.name;
+        return name;
     }
 
     /**
@@ -107,7 +102,7 @@ public class StatusCIDefinition
 
     public void setName(final String _name)
     {
-        this.name = _name;
+        name = _name;
     }
 
     /**
@@ -115,9 +110,10 @@ public class StatusCIDefinition
      *
      * @return value of instance variable {@link #parent}
      */
+    @Override
     public String getParent()
     {
-        return this.parent;
+        return parent;
     }
 
     /**
@@ -128,7 +124,7 @@ public class StatusCIDefinition
 
     public void setParent(final String _parent)
     {
-        this.parent = _parent;
+        parent = _parent;
     }
 
     /**
@@ -136,6 +132,7 @@ public class StatusCIDefinition
      *
      * @return value of instance variable {@link #attributes}
      */
+    @Override
     public List<IAttributeCI> getAttributes()
     {
         return Collections.emptyList();
@@ -146,9 +143,10 @@ public class StatusCIDefinition
      *
      * @return value of instance variable {@link #profiles}
      */
+    @Override
     public List<String> getProfiles()
     {
-        return this.profiles;
+        return profiles;
     }
 
     /**
@@ -157,6 +155,6 @@ public class StatusCIDefinition
     @Override
     public List<? extends IUniqueCI> getUniques()
     {
-        return this.status;
+        return status;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 package org.efaps.maven.plugin.install;
 
@@ -35,7 +32,6 @@ import org.efaps.update.FileType;
 
 /**
  * @author The eFaps Team
- * @version $Id$
  */
 public abstract class AbstractEFapsInstallMojo
     extends EFapsAbstractMojo
@@ -43,7 +39,7 @@ public abstract class AbstractEFapsInstallMojo
     /**
      * Default Mapping of a a file extension to a Type for import and update.
      */
-    private static final Map<String, String> DEFAULT_TYPE_MAPPING = new HashMap<String, String>();
+    private static final Map<String, String> DEFAULT_TYPE_MAPPING = new HashMap<>();
     static {
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("bpmn2", FileType.BPM.getType());
         AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING.put("css", FileType.CSS.getType());
@@ -60,7 +56,7 @@ public abstract class AbstractEFapsInstallMojo
      *
      * @see #getFiles
      */
-    private static final Set<String> DEFAULT_INCLUDES = new HashSet<String>();
+    private static final Set<String> DEFAULT_INCLUDES = new HashSet<>();
     static {
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.css");
         AbstractEFapsInstallMojo.DEFAULT_INCLUDES.add("**/*.bpmn2");
@@ -78,7 +74,7 @@ public abstract class AbstractEFapsInstallMojo
      *
      * @see #getFiles
      */
-    private static final Set<String> DEFAULT_EXCLUDES = new HashSet<String>();
+    private static final Set<String> DEFAULT_EXCLUDES = new HashSet<>();
     static {
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/versions.xml");
         AbstractEFapsInstallMojo.DEFAULT_EXCLUDES.add("**/package-info.java");
@@ -141,7 +137,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected File getOutputDirectory()
     {
-        return this.outputDirectory;
+        return outputDirectory;
     }
 
     /**
@@ -159,7 +155,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected List<String> getFiles()
     {
-        final List<String> ret = new ArrayList<String>();
+        final List<String> ret = new ArrayList<>();
         final DirectoryScanner ds = new DirectoryScanner();
         final String[] included = getIncludes() == null
             ? AbstractEFapsInstallMojo.DEFAULT_INCLUDES
@@ -175,9 +171,9 @@ public abstract class AbstractEFapsInstallMojo
         ds.setCaseSensitive(true);
         ds.scan();
 
-        if (this.outputDirectory.exists()) {
+        if (outputDirectory.exists()) {
             ret.addAll(Arrays.asList(ds.getIncludedFiles()));
-            ds.setBasedir(this.outputDirectory);
+            ds.setBasedir(outputDirectory);
             ds.scan();
         }
         ret.addAll(Arrays.asList(ds.getIncludedFiles()));
@@ -193,7 +189,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected String getApplication()
     {
-        return this.application;
+        return application;
     }
 
     /**
@@ -204,7 +200,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected File getEFapsDir()
     {
-        return this.eFapsDir;
+        return eFapsDir;
     }
 
     /**
@@ -219,7 +215,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected Map<String, String> getTypeMapping()
     {
-        return this.typeMapping == null ? AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING : this.typeMapping;
+        return typeMapping == null ? AbstractEFapsInstallMojo.DEFAULT_TYPE_MAPPING : typeMapping;
     }
 
     /**
@@ -230,7 +226,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected File getVersionFile()
     {
-        return this.versionFile;
+        return versionFile;
     }
 
     /**
@@ -240,7 +236,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     protected String getProfile()
     {
-        return this.profile;
+        return profile;
     }
 
     /**
@@ -250,7 +246,7 @@ public abstract class AbstractEFapsInstallMojo
      */
     public List<String> getIncludes()
     {
-        return this.includes;
+        return includes;
     }
 
     /**
@@ -260,6 +256,6 @@ public abstract class AbstractEFapsInstallMojo
      */
     public List<String> getExcludes()
     {
-        return this.excludes;
+        return excludes;
     }
 }

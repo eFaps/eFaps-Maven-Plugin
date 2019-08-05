@@ -1,5 +1,5 @@
 /*
-z * Copyright 2003 - 2013 The eFaps Team
+z * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@ z * Copyright 2003 - 2013 The eFaps Team
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin.install;
@@ -24,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,10 +51,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @Mojo(name = "generate-jmsclass", requiresDependencyResolution = ResolutionScope.COMPILE,
             defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
@@ -117,8 +113,8 @@ public class GenerateJmsClassMojo
      */
     public GenerateJmsClassMojo()
     {
-        this.jmsClassNameReplacement = "";
-        this.jmsPackageReplacement = "";
+        jmsClassNameReplacement = "";
+        jmsPackageReplacement = "";
     }
 
     /**
@@ -133,7 +129,7 @@ public class GenerateJmsClassMojo
         try {
             init(false);
             getOutputDirectory().mkdir();
-            final String folders = this.jmsPackage.replace(".", File.separator);
+            final String folders = jmsPackage.replace(".", File.separator);
             final File srcFolder = new File(getOutputDirectory(), folders);
             srcFolder.mkdirs();
 
@@ -164,7 +160,7 @@ public class GenerateJmsClassMojo
                     readFile(srcFolder, file);
                 }
             }
-            this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
+            project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final Exception e) {
             throw new MojoExecutionException("Could not execute SourceInstall script", e);
         }
@@ -193,19 +189,19 @@ public class GenerateJmsClassMojo
             stream.close();
             if (item != null) {
                 if (item instanceof TypeCI) {
-                    final TypeCI typeItem = ((TypeCI) item);
+                    final TypeCI typeItem = (TypeCI) item;
 
-                    final String packageName = typeItem.getPackageName(this.jmsPackageRegex,
-                                    this.jmsPackageReplacement);
-                    final String className = typeItem.getClassName(this.jmsClassNameRegex,
-                                    this.jmsClassNameReplacement);
-                    this.type2package.put(typeItem.getName(), packageName);
-                    this.type2ClassName.put(typeItem.getName(), "org.efaps.esjp.jms."
+                    final String packageName = typeItem.getPackageName(jmsPackageRegex,
+                                    jmsPackageReplacement);
+                    final String className = typeItem.getClassName(jmsClassNameRegex,
+                                    jmsClassNameReplacement);
+                    type2package.put(typeItem.getName(), packageName);
+                    type2ClassName.put(typeItem.getName(), "org.efaps.esjp.jms."
                                     + packageName + "." + className);
                     final File folder = new File(_srcFolder, packageName);
                     folder.mkdirs();
                     final File javaFile = new File(folder, className + ".java");
-                    FileUtils.writeStringToFile(javaFile, getJava(typeItem));
+                    FileUtils.writeStringToFile(javaFile, getJava(typeItem), StandardCharsets.UTF_8);
                 }
             }
 
@@ -220,8 +216,8 @@ public class GenerateJmsClassMojo
     private String getJava(final TypeCI _typeCI)
     {
         final StringBuilder ret = new StringBuilder();
-        final String packageName = _typeCI.getPackageName(this.jmsPackageRegex, this.jmsPackageReplacement);
-        final String className = _typeCI.getClassName(this.jmsClassNameRegex, this.jmsClassNameReplacement);
+        final String packageName = _typeCI.getPackageName(jmsPackageRegex, jmsPackageReplacement);
+        final String className = _typeCI.getClassName(jmsClassNameRegex, jmsClassNameReplacement);
 
 
         ret.append("package org.efaps.esjp.jms.").append(packageName).append(";\n\n")

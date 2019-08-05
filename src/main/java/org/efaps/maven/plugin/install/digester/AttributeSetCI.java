@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -26,10 +23,8 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "datamodel-type/definition/attributeset")
 public class AttributeSetCI
@@ -46,9 +41,10 @@ public class AttributeSetCI
      *
      * @return value of instance variable {@link #name}
      */
+    @Override
     public String getName()
     {
-        return this.name;
+        return name;
     }
 
     /**
@@ -59,7 +55,7 @@ public class AttributeSetCI
 
     public void setName(final String _name)
     {
-        this.name = _name;
+        name = _name;
     }
 
     /**
@@ -67,9 +63,10 @@ public class AttributeSetCI
      *
      * @return value of instance variable {@link #type}
      */
+    @Override
     public String getType()
     {
-        return this.type;
+        return type;
     }
 
     /**
@@ -79,7 +76,7 @@ public class AttributeSetCI
      */
     public void setType(final String _type)
     {
-        this.type = _type;
+        type = _type;
     }
 
     @Override

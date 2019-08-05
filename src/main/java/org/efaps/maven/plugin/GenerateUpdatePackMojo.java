@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
  */
 
 package org.efaps.maven.plugin;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,12 +79,7 @@ import org.joda.time.DateTime;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-
 /**
- * TODO comment!
  *
  * @author The eFaps Team
  */
@@ -134,15 +133,15 @@ public class GenerateUpdatePackMojo
         throws MojoExecutionException, MojoFailureException
     {
 
-        final String tarFileName = this.fileName + ".tar";
+        final String tarFileName = fileName + ".tar";
         final String gzFileName = GzipUtils.getCompressedFilename(tarFileName);
 
         try
             (
-                final FileOutputStream out = new FileOutputStream(new File(this.targetDirectory,
-                                this.compress ? gzFileName : tarFileName));
+                final FileOutputStream out = new FileOutputStream(new File(targetDirectory,
+                                compress ? gzFileName : tarFileName));
                 final TarArchiveOutputStream tarOut = new TarArchiveOutputStream(
-                                this.compress ? new GzipCompressorOutputStream(out) : out);
+                                compress ? new GzipCompressorOutputStream(out) : out);
             ) {
 
             final Application app = Application.getApplication(getVersionFile().toURI().toURL(),
@@ -154,7 +153,7 @@ public class GenerateUpdatePackMojo
                 @Override
                 protected void configureRules()
                 {
-                    switch (GenerateUpdatePackMojo.this.group) {
+                    switch (group) {
                         case PROGRAM:
                             break;
                         case DATAMODEL:
@@ -202,9 +201,9 @@ public class GenerateUpdatePackMojo
                 mapping.putAll(addItems(dependApp, tarOut, loader));
             }
             final Dependency dependency = new Dependency();
-            dependency.setArtifactId(this.project.getArtifactId());
-            dependency.setGroupId(this.project.getGroupId());
-            dependency.setVersion(this.project.getVersion());
+            dependency.setArtifactId(project.getArtifactId());
+            dependency.setGroupId(project.getGroupId());
+            dependency.setVersion(project.getVersion());
             dependency.resolve();
 
             final Application currentApp = Application.getApplicationFromJarFile(
@@ -215,7 +214,7 @@ public class GenerateUpdatePackMojo
             final ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.registerModule(new JodaModule());
-            final File revJson = new File(this.targetDirectory, "revisions.json");
+            final File revJson = new File(targetDirectory, "revisions.json");
             mapper.writeValue(revJson, mapping.values());
 
             final byte[] content = IOUtils.toByteArray(new FileInputStream(revJson));
@@ -287,7 +286,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     case JAVA:
-                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                        if (UpdateGroup.ALL.equals(group) || UpdateGroup.PROGRAM.equals(group)) {
                             final ESJPImporter importer = new ESJPImporter(file);
                             final String identifier = importer.getProgramName();
 
@@ -303,7 +302,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     case CSS:
-                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                        if (UpdateGroup.ALL.equals(group) || UpdateGroup.PROGRAM.equals(group)) {
                             final CSSImporter importer = new CSSImporter(file);
                             final String identifier = importer.getProgramName();
 
@@ -319,7 +318,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     case JS:
-                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                        if (UpdateGroup.ALL.equals(group) || UpdateGroup.PROGRAM.equals(group)) {
                             final JavaScriptImporter importer = new JavaScriptImporter(file);
                             final String identifier = importer.getProgramName();
 
@@ -335,7 +334,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     case JRXML:
-                        if (UpdateGroup.ALL.equals(this.group) || UpdateGroup.PROGRAM.equals(this.group)) {
+                        if (UpdateGroup.ALL.equals(group) || UpdateGroup.PROGRAM.equals(group)) {
                             final JasperReportImporter importer = new JasperReportImporter(file);
                             final String identifier = importer.getEFapsUUID().toString();
 
@@ -396,11 +395,11 @@ public class GenerateUpdatePackMojo
                        final String _revision,
                        final DateTime _date)
         {
-            this.fileType = _fileType;
-            this.identifier = _identifier;
-            this.application = _application;
-            this.revision = _revision;
-            this.date = _date;
+            fileType = _fileType;
+            identifier = _identifier;
+            application = _application;
+            revision = _revision;
+            date = _date;
         }
 
         /**
@@ -410,7 +409,7 @@ public class GenerateUpdatePackMojo
          */
         public FileType getFileType()
         {
-            return this.fileType;
+            return fileType;
         }
 
         /**
@@ -420,7 +419,7 @@ public class GenerateUpdatePackMojo
          */
         public String getApplication()
         {
-            return this.application;
+            return application;
         }
 
         /**
@@ -430,7 +429,7 @@ public class GenerateUpdatePackMojo
          */
         public String getRevision()
         {
-            return this.revision;
+            return revision;
         }
 
         /**
@@ -440,7 +439,7 @@ public class GenerateUpdatePackMojo
          */
         public String getIdentifier()
         {
-            return this.identifier;
+            return identifier;
         }
 
         /**
@@ -450,7 +449,7 @@ public class GenerateUpdatePackMojo
          */
         public DateTime getDate()
         {
-            return this.date;
+            return date;
         }
 
         @Override

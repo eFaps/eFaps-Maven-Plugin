@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.apache.commons.digester3.annotations.rules.BeanPropertySetter;
 import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
  */
@@ -37,7 +36,7 @@ public class MenuCI
     @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
 
     /**
@@ -47,6 +46,6 @@ public class MenuCI
      */
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 }

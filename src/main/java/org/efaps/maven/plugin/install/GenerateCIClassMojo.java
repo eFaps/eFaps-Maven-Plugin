@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin.install;
@@ -71,10 +68,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * TODO comment!
- *
  * @author The eFaps Team
- * @version $Id$
  */
 @Mojo(name = "generate-ciclass", requiresDependencyResolution = ResolutionScope.COMPILE,
                 defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
@@ -110,8 +104,8 @@ public class GenerateCIClassMojo
         private CIDef4UI(final String _extendClass,
                          final String _classNamePrefix)
         {
-            this.extendClass = _extendClass;
-            this.classNamePrefix = _classNamePrefix;
+            extendClass = _extendClass;
+            classNamePrefix = _classNamePrefix;
         }
     }
 
@@ -186,7 +180,6 @@ public class GenerateCIClassMojo
      */
     private final Set<NumGenCI> numGenCIs = new HashSet<>();
 
-
     /**
      * The current Maven project.
      */
@@ -202,10 +195,10 @@ public class GenerateCIClassMojo
      */
     public GenerateCIClassMojo()
     {
-        this.ciTypeReplacement = "";
-        this.ciParentReplacment = "";
-        this.ciUnallowedReplacement = "";
-        this.ciUnallowedRegex = "-";
+        ciTypeReplacement = "";
+        ciParentReplacment = "";
+        ciUnallowedReplacement = "";
+        ciUnallowedRegex = "-";
     }
 
     /**
@@ -262,13 +255,13 @@ public class GenerateCIClassMojo
                     stream.close();
                     if (item != null) {
                         if (item instanceof ITypeCI) {
-                            this.types.put(((ITypeCI) item).getDefinitions().get(0).getName(), (ITypeCI) item);
+                            types.put(((ITypeCI) item).getDefinitions().get(0).getName(), (ITypeCI) item);
                         } else if (item instanceof MsgPhraseCI) {
-                            this.msgPhraseCIs.add((MsgPhraseCI) item);
+                            msgPhraseCIs.add((MsgPhraseCI) item);
                         } else if (item instanceof NumGenCI) {
-                            this.numGenCIs.add((NumGenCI) item);
+                            numGenCIs.add((NumGenCI) item);
                         } else {
-                            this.uiCIs.add((UserInterfaceCI) item);
+                            uiCIs.add((UserInterfaceCI) item);
                         }
                     }
                 }
@@ -278,7 +271,7 @@ public class GenerateCIClassMojo
             buildCI4UI(appl.getApplication(), CIDef4UI.TABLE);
             buildCIMsgPhrase(appl.getApplication());
             buildCINumGen(appl.getApplication());
-            this.project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
+            project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
         } catch (final SAXException e) {
             getLog().error("MojoExecutionException", e);
             throw new MojoExecutionException("SAXException");
@@ -298,7 +291,7 @@ public class GenerateCIClassMojo
     @Override
     public void setPluginContext(final Map _pluginContext)
     {
-        this.pluginContext = _pluginContext;
+        pluginContext = _pluginContext;
 
     }
 
@@ -306,7 +299,7 @@ public class GenerateCIClassMojo
     @Override
     public Map getPluginContext()
     {
-        return this.pluginContext;
+        return pluginContext;
     }
 
     /**
@@ -322,17 +315,17 @@ public class GenerateCIClassMojo
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
-                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("package ").append(ciPackage).append(";\n")
                         .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
                         .append("@EFapsApplication(\"").append(_appName).append("\")\n")
-                        .append("public final class ").append(_ciDef.classNamePrefix).append(this.ciName)
+                        .append("public final class ").append(_ciDef.classNamePrefix).append(ciName)
                         .append("\n{\n");
 
-         for (final UserInterfaceCI uici : this.uiCIs) {
+         for (final UserInterfaceCI uici : uiCIs) {
              if (uici.getCIDef().equals(_ciDef)) {
-                 final String formName = uici.getName().replaceAll(this.ciUnallowedRegex,this.ciUnallowedReplacement);
+                 final String formName = uici.getName().replaceAll(ciUnallowedRegex,ciUnallowedReplacement);
 
                  java.append("    public static final _").append(formName).append(" ").append(formName)
                      .append(" = new _").append(formName).append("(\"").append(uici.getUuid()).append("\");\n")
@@ -376,11 +369,11 @@ public class GenerateCIClassMojo
 
         getOutputDirectory().mkdir();
 
-        final String folders = this.ciPackage.replace(".", File.separator);
+        final String folders = ciPackage.replace(".", File.separator);
         final File srcFolder = new File(getOutputDirectory(), folders);
         srcFolder.mkdirs();
 
-        final File javaFile = new File(srcFolder, _ciDef.classNamePrefix + this.ciName + ".java");
+        final File javaFile = new File(srcFolder, _ciDef.classNamePrefix + ciName + ".java");
 
         FileUtils.writeStringToFile(javaFile, java.toString());
     }
@@ -398,11 +391,11 @@ public class GenerateCIClassMojo
         // therefore it is checked here
         final Map<String, String> typeTmp = new HashMap<>();
         final Set<String> duplicated = new HashSet<>();
-        for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
+        for (final Entry<String, ITypeCI> entry : types.entrySet()) {
             final String name = entry.getValue().getDefinitions().get(0).getName();
-            String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
-            typeName = typeName.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
-                            this.ciTypeReplacement);
+            String typeName = name.replaceAll(ciUnallowedRegex, ciUnallowedReplacement);
+            typeName = typeName.replaceAll(ciTypeRegex == null ? ciName + "_" : ciTypeRegex,
+                            ciTypeReplacement);
             if (typeTmp.containsKey(typeName)) {
                 duplicated.add(name);
                 duplicated.add(typeTmp.get(typeName));
@@ -413,34 +406,34 @@ public class GenerateCIClassMojo
 
         final StringBuilder java = new StringBuilder()
                 .append("//CHECKSTYLE:OFF\n")
-                .append("package ").append(this.ciPackage).append(";\n")
+                .append("package ").append(ciPackage).append(";\n")
                 .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                 .append("import org.efaps.ci.CIAttribute;\n")
                 .append("import org.efaps.ci.CIStatus;\n")
                 .append("import org.efaps.ci.CIType;\n\n")
                 .append(getClassComment())
                 .append("@EFapsApplication(\"").append(_appName).append("\")\n")
-                .append("public final class CI").append(this.ciName).append("\n{\n");
+                .append("public final class CI").append(ciName).append("\n{\n");
 
-        for (final Entry<String, ITypeCI> entry : this.types.entrySet()) {
+        for (final Entry<String, ITypeCI> entry : types.entrySet()) {
             final ITypeDefintion def = entry.getValue().getDefinitions().get(0);
             final String name = def.getName();
-            String typeName = name.replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
+            String typeName = name.replaceAll(ciUnallowedRegex, ciUnallowedReplacement);
             if (!duplicated.contains(name)) {
-                typeName = typeName.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
-                                this.ciTypeReplacement);
+                typeName = typeName.replaceAll(ciTypeRegex == null ? ciName + "_" : ciTypeRegex,
+                                ciTypeReplacement);
             }
 
             String parentType = null;
             if (def.getParent() != null) {
-                parentType = def.getParent().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
+                parentType = def.getParent().replaceAll(ciUnallowedRegex, ciUnallowedReplacement);
                 if (!duplicated.contains(def.getParent())) {
-                    parentType = parentType.replaceAll(this.ciTypeRegex == null
-                                    ? this.ciName + "_" : this.ciTypeRegex, this.ciTypeReplacement);
+                    parentType = parentType.replaceAll(ciTypeRegex == null
+                                    ? ciName + "_" : ciTypeRegex, ciTypeReplacement);
                 }
                 parentType = "_" + parentType;
-                if (!this.types.containsKey(def.getParent())) {
-                    final String parentClass = def.getParent().replaceAll(this.ciParentRegex, this.ciParentReplacment);
+                if (!types.containsKey(def.getParent())) {
+                    final String parentClass = def.getParent().replaceAll(ciParentRegex, ciParentReplacment);
                     parentType = "org.efaps.esjp.ci.CI" + parentClass + "." + parentType;
                 }
             }
@@ -502,18 +495,18 @@ public class GenerateCIClassMojo
 
         getOutputDirectory().mkdir();
 
-        final String folders = this.ciPackage.replace(".", File.separator);
+        final String folders = ciPackage.replace(".", File.separator);
         final File srcFolder = new File(getOutputDirectory(), folders);
         srcFolder.mkdirs();
 
-        final File javaFile = new File(srcFolder, "CI" + this.ciName + ".java");
+        final File javaFile = new File(srcFolder, "CI" + ciName + ".java");
 
         FileUtils.writeStringToFile(javaFile, java.toString());
     }
 
     private StringBuilder getClassComment()
     {
-        final PluginDescriptor descriptor = (PluginDescriptor) this.pluginContext.get("pluginDescriptor");
+        final PluginDescriptor descriptor = (PluginDescriptor) pluginContext.get("pluginDescriptor");
         final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         final Calendar cal = Calendar.getInstance();
         final StringBuilder ret = new StringBuilder()
@@ -538,18 +531,18 @@ public class GenerateCIClassMojo
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
-                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("package ").append(ciPackage).append(";\n")
                         .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
                         .append("@EFapsApplication(\"").append(_appName).append("\")\n")
-                        .append("public final class CIMsg").append(this.ciName)
+                        .append("public final class CIMsg").append(ciName)
                         .append("\n{\n");
 
-        for (final MsgPhraseCI msgPhci : this.msgPhraseCIs) {
-             String name = msgPhci.getName().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
-             name = name.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
-                             this.ciTypeReplacement);
+        for (final MsgPhraseCI msgPhci : msgPhraseCIs) {
+             String name = msgPhci.getName().replaceAll(ciUnallowedRegex, ciUnallowedReplacement);
+             name = name.replaceAll(ciTypeRegex == null ? ciName + "_" : ciTypeRegex,
+                             ciTypeReplacement);
              java.append("    public static final _").append(name).append(" ").append(name)
                  .append(" = new _").append(name).append("(\"").append(msgPhci.getUuid()).append("\");\n")
                  .append("    public static class _").append(name).append(" extends CIMsgPhrase")
@@ -563,11 +556,11 @@ public class GenerateCIClassMojo
 
         getOutputDirectory().mkdir();
 
-        final String folders = this.ciPackage.replace(".", File.separator);
+        final String folders = ciPackage.replace(".", File.separator);
         final File srcFolder = new File(getOutputDirectory(), folders);
         srcFolder.mkdirs();
 
-        final File javaFile = new File(srcFolder, "CIMsg" + this.ciName + ".java");
+        final File javaFile = new File(srcFolder, "CIMsg" + ciName + ".java");
 
         FileUtils.writeStringToFile(javaFile, java.toString());
     }
@@ -584,18 +577,18 @@ public class GenerateCIClassMojo
     {
         final StringBuilder java = new StringBuilder()
                         .append("//CHECKSTYLE:OFF\n")
-                        .append("package ").append(this.ciPackage).append(";\n")
+                        .append("package ").append(ciPackage).append(";\n")
                         .append("import org.efaps.admin.program.esjp.EFapsApplication;\n")
                         .append("import org.efaps.ci.*;\n\n")
                         .append(getClassComment())
                         .append("@EFapsApplication(\"").append(_appName).append("\")\n")
-                        .append("public final class CINumGen").append(this.ciName)
+                        .append("public final class CINumGen").append(ciName)
                         .append("\n{\n");
 
-        for (final NumGenCI numGenci : this.numGenCIs) {
-             String name = numGenci.getName().replaceAll(this.ciUnallowedRegex, this.ciUnallowedReplacement);
-             name = name.replaceAll(this.ciTypeRegex == null ? this.ciName + "_" : this.ciTypeRegex,
-                             this.ciTypeReplacement);
+        for (final NumGenCI numGenci : numGenCIs) {
+             String name = numGenci.getName().replaceAll(ciUnallowedRegex, ciUnallowedReplacement);
+             name = name.replaceAll(ciTypeRegex == null ? ciName + "_" : ciTypeRegex,
+                             ciTypeReplacement);
              java.append("    public static final _").append(name).append(" ").append(name)
                  .append(" = new _").append(name).append("(\"").append(numGenci.getUuid()).append("\");\n")
                  .append("    public static class _").append(name).append(" extends CINumGen")
@@ -609,11 +602,11 @@ public class GenerateCIClassMojo
 
         getOutputDirectory().mkdir();
 
-        final String folders = this.ciPackage.replace(".", File.separator);
+        final String folders = ciPackage.replace(".", File.separator);
         final File srcFolder = new File(getOutputDirectory(), folders);
         srcFolder.mkdirs();
 
-        final File javaFile = new File(srcFolder, "CINumGen" + this.ciName + ".java");
+        final File javaFile = new File(srcFolder, "CINumGen" + ciName + ".java");
 
         FileUtils.writeStringToFile(javaFile, java.toString());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2015 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin;
@@ -37,10 +34,8 @@ import org.efaps.update.util.InstallationException;
 import org.efaps.util.EFapsException;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id: $
  */
 @Mojo(name = "updateFromFile")
 public class UpdateFromFileMojo
@@ -71,25 +66,25 @@ public class UpdateFromFileMojo
             reloadCache();
             startTransaction();
 
-            final String ending = this.file.getName().substring(this.file.getName().lastIndexOf(".") + 1);
+            final String ending = file.getName().substring(file.getName().lastIndexOf(".") + 1);
 
             final FileType filetype = FileType.getFileTypeByExtension(ending);
 
             final Install install = new Install();
-            final FileInfo fileInfo = getFileInformation(this.file, true);
+            final FileInfo fileInfo = getFileInformation(file, true);
 
-            install.addFile(new InstallFile().setURL(this.file.toURI().toURL()).setType(filetype.getType())
+            install.addFile(new InstallFile().setURL(file.toURI().toURL()).setType(filetype.getType())
                             .setDate(fileInfo.getDate()).setRevision(fileInfo.getRev()));
             final Set<Profile> profiles = new HashSet<>();
-            profiles.add(Profile.getProfile(this.profile));
+            profiles.add(Profile.getProfile(profile));
             install.updateLatest(profiles);
             commitTransaction();
         } catch (final EFapsException e) {
-            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
         } catch (final MalformedURLException e) {
-            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
         } catch (final InstallationException e) {
-            throw new MojoFailureException("import failed for file: " +  this.file.getName() + "; " + e.toString());
+            throw new MojoFailureException("import failed for file: " +  file.getName() + "; " + e.toString());
         }
     }
 }

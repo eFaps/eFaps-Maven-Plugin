@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -33,10 +30,8 @@ import org.apache.commons.digester3.annotations.rules.SetProperty;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "datamodel-type/definition")
 public class TypeCIDefinition
@@ -60,9 +55,9 @@ public class TypeCIDefinition
     private boolean generalInstance;
 
 
-    private final List<String> profiles = new ArrayList<String>();
+    private final List<String> profiles = new ArrayList<>();
 
-    private final List<IAttributeCI> attributes = new ArrayList<IAttributeCI>();
+    private final List<IAttributeCI> attributes = new ArrayList<>();
 
     /**
      * Getter method for the instance variable {@link #abstractType}.
@@ -71,7 +66,7 @@ public class TypeCIDefinition
      */
     public boolean isAbstractType()
     {
-        return this.abstractType;
+        return abstractType;
     }
 
 
@@ -83,7 +78,7 @@ public class TypeCIDefinition
 
     public void setAbstractType(final boolean _abstractType)
     {
-        this.abstractType = _abstractType;
+        abstractType = _abstractType;
     }
 
 
@@ -94,7 +89,7 @@ public class TypeCIDefinition
      */
     public boolean isClassification()
     {
-        return this.classification;
+        return classification;
     }
 
 
@@ -106,7 +101,7 @@ public class TypeCIDefinition
 
     public void setClassification(final boolean _classification)
     {
-        this.classification = _classification;
+        classification = _classification;
     }
 
 
@@ -117,7 +112,7 @@ public class TypeCIDefinition
      */
     public boolean isGeneralInstance()
     {
-        return this.generalInstance;
+        return generalInstance;
     }
 
 
@@ -129,7 +124,7 @@ public class TypeCIDefinition
 
     public void setGeneralInstance(final boolean _generalInstance)
     {
-        this.generalInstance = _generalInstance;
+        generalInstance = _generalInstance;
     }
 
     /**
@@ -139,7 +134,7 @@ public class TypeCIDefinition
      */
     public String getExpression()
     {
-        return this.expression;
+        return expression;
     }
 
     /**
@@ -149,19 +144,19 @@ public class TypeCIDefinition
      */
     public void setExpression(final String _expression)
     {
-        this.expression = _expression;
+        expression = _expression;
     }
 
     @SetNext
     public void addAttribute(final AttributeCI _attribute)
     {
-        this.attributes.add(_attribute);
+        attributes.add(_attribute);
     }
 
     @SetNext
     public void addAttributeSet(final AttributeSetCI _attributeSet)
     {
-        this.attributes.add(_attributeSet);
+        attributes.add(_attributeSet);
     }
 
 
@@ -169,7 +164,7 @@ public class TypeCIDefinition
     public void addProfile(@CallParam(pattern = "datamodel-type/definition/profiles/profile",
                     attributeName = "name") final String _name)
     {
-        this.profiles.add(_name);
+        profiles.add(_name);
     }
 
     /**
@@ -177,9 +172,10 @@ public class TypeCIDefinition
      *
      * @return value of instance variable {@link #name}
      */
+    @Override
     public String getName()
     {
-        return this.name;
+        return name;
     }
 
     /**
@@ -190,7 +186,7 @@ public class TypeCIDefinition
 
     public void setName(final String _name)
     {
-        this.name = _name;
+        name = _name;
     }
 
     /**
@@ -198,9 +194,10 @@ public class TypeCIDefinition
      *
      * @return value of instance variable {@link #parent}
      */
+    @Override
     public String getParent()
     {
-        return this.parent;
+        return parent;
     }
 
     /**
@@ -211,7 +208,7 @@ public class TypeCIDefinition
 
     public void setParent(final String _parent)
     {
-        this.parent = _parent;
+        parent = _parent;
     }
 
     /**
@@ -219,9 +216,10 @@ public class TypeCIDefinition
      *
      * @return value of instance variable {@link #attributes}
      */
+    @Override
     public List<IAttributeCI> getAttributes()
     {
-        return this.attributes;
+        return attributes;
     }
 
     /**
@@ -229,9 +227,10 @@ public class TypeCIDefinition
      *
      * @return value of instance variable {@link #profiles}
      */
+    @Override
     public List<String> getProfiles()
     {
-        return this.profiles;
+        return profiles;
     }
 
     /**

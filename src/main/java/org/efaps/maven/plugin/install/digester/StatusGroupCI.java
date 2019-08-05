@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import org.apache.commons.digester3.annotations.rules.SetNext;
 
 
 /**
- * TODO comment!
- *
  * @author The eFaps Team
  */
 @ObjectCreate(pattern = "datamodel-statusgroup")
@@ -51,7 +49,7 @@ public class StatusGroupCI
     @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
 
     /**
@@ -62,7 +60,7 @@ public class StatusGroupCI
 
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 
     /**
@@ -73,7 +71,7 @@ public class StatusGroupCI
     @Override
     public List<StatusCIDefinition> getDefinitions()
     {
-        return this.definitions;
+        return definitions;
     }
 
     /**
@@ -84,7 +82,7 @@ public class StatusGroupCI
     @SetNext
     public void addDefinition(final StatusCIDefinition definition)
     {
-        this.definitions.add(definition);
+        definitions.add(definition);
     }
 }
 
