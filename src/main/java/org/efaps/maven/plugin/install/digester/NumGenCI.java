@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.commons.digester3.annotations.rules.ObjectCreate;
 import org.apache.commons.digester3.annotations.rules.SetNext;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
  */
@@ -49,7 +48,7 @@ public class NumGenCI
     @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
 
     /**
@@ -59,7 +58,7 @@ public class NumGenCI
      */
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 
     /**
@@ -69,7 +68,7 @@ public class NumGenCI
      */
     public List<NumGenCIDefinition> getDefinitions()
     {
-        return this.definitions;
+        return definitions;
     }
 
     /**
@@ -80,7 +79,7 @@ public class NumGenCI
     @SetNext
     public void addDefinition(final NumGenCIDefinition _definition)
     {
-        this.definitions.add(_definition);
+        definitions.add(_definition);
     }
 
     /**
@@ -90,6 +89,6 @@ public class NumGenCI
      */
     public String getName()
     {
-        return this.definitions.get(0).getName();
+        return definitions.get(0).getName();
     }
 }

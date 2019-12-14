@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin.install;
@@ -34,7 +31,6 @@ import org.efaps.update.version.Application;
  * Updates an eFaps application.
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @Mojo(name = "source-update", requiresDependencyResolution = ResolutionScope.COMPILE)
 public final class SourceUpdateMojo
@@ -55,6 +51,7 @@ public final class SourceUpdateMojo
      *
      * @throws MojoExecutionException if installation failed
      */
+    @Override
     public void execute()
         throws MojoExecutionException
     {
@@ -66,11 +63,11 @@ public final class SourceUpdateMojo
                     getClasspathElements(),
                     getEFapsDir(),
                     getOutputDirectory(),
-                    this.includes,
-                    this.excludes,
+                    includes,
+                    excludes,
                     getTypeMapping());
 
-            final Set<Profile> profiles = new HashSet<Profile>();
+            final Set<Profile> profiles = new HashSet<>();
             if (getProfile() != null) {
                 profiles.add(Profile.getProfile(getProfile()));
             } else {

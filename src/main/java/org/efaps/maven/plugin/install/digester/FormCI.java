@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 
@@ -31,17 +28,15 @@ import org.efaps.maven.plugin.install.GenerateCIClassMojo.CIDef4UI;
 
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @ObjectCreate(pattern = "ui-form")
 public class FormCI
     implements UserInterfaceCI
 {
 
-    private final List<FormCIDefinition> definitions = new ArrayList<FormCIDefinition>();
+    private final List<FormCIDefinition> definitions = new ArrayList<>();
 
     @BeanPropertySetter(pattern = "ui-form/uuid")
     private String uuid;
@@ -51,9 +46,10 @@ public class FormCI
      *
      * @return value of instance variable {@link #uuid}
      */
+    @Override
     public String getUuid()
     {
-        return this.uuid;
+        return uuid;
     }
 
     /**
@@ -64,7 +60,7 @@ public class FormCI
 
     public void setUuid(final String _uuid)
     {
-        this.uuid = _uuid;
+        uuid = _uuid;
     }
 
     /**
@@ -72,15 +68,16 @@ public class FormCI
      *
      * @return value of instance variable {@link #definitions}
      */
+    @Override
     public List<FormCIDefinition> getDefinitions()
     {
-        return this.definitions;
+        return definitions;
     }
 
     @SetNext
     public void addDefinition(final FormCIDefinition definition)
     {
-        this.definitions.add(definition);
+        definitions.add(definition);
     }
 
     @Override
@@ -92,6 +89,6 @@ public class FormCI
     @Override
     public String getName()
     {
-        return this.definitions.get(0).getName();
+        return definitions.get(0).getName();
     }
 }

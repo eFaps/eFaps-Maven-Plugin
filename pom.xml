@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 
- Copyright 2003 - 2017 The eFaps Team
+ Copyright 2003 - 2019 The eFaps Team
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,10 +22,10 @@
     <parent>
         <groupId>org.efaps</groupId>
         <artifactId>efaps-parent</artifactId>
-        <version>8.0.0-SNAPSHOT</version>
+        <version>11.0.0-SNAPSHOT</version>
     </parent>
     <properties>
-        <kernelVersion>[8.0.0-SNAPSHOT,8.1.0-SNAPSHOT)</kernelVersion>
+        <kernelVersion>[11.0.0-SNAPSHOT,11.1.0-SNAPSHOT)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -112,7 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.5</version>
+                <version>3.6.0</version>
                 <configuration>
                     <goalPrefix>efaps</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -124,6 +123,9 @@
                         <goals>
                             <goal>descriptor</goal>
                         </goals>
+                        <configuration>
+                        
+                        </configuration>
                     </execution>
                     <!-- if you want to generate help goal -->
                     <execution>
@@ -145,26 +147,6 @@
         </plugins>
     </build>
     <profiles>
-        <!-- Profile to include the com.sun:tools from the system. -->
-        <profile>
-            <id>default-tools.jar</id>
-            <activation>
-                <property>
-                    <name>java.vendor</name>
-                    <value>Sun Microsystems Inc.</value>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>1.6.0</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-
         <!-- Profile for a release: Only in this case the source and JavaDoc
             will be attached -->
         <profile>
@@ -238,18 +220,26 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.5</version>
-            <!-- annotations are not needed for plugin execution so you can
-                remove this dependency for execution with using provided scope -->
+            <version>3.6.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- generated help mojo has a dependency to plexus-utils -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.1</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -277,13 +267,6 @@
             </exclusions>
         </dependency>
 
-        <!-- eFaps Maven Logger -->
-        <dependency>
-            <groupId>org.efaps</groupId>
-            <artifactId>maven-slf4jlogger</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-
         <!-- Apache commons-io needed for the generate installation mojo. -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -302,7 +285,7 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.11.0</version>
+            <version>2.12.0</version>
         </dependency>
 
         <!--  Needed for namespace binding JNDI -->
@@ -359,12 +342,12 @@
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.9.0</version>
+            <version>1.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>4.9.0.201710071750-r</version>
+            <version>5.4.0.201906121030-r</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpcore</artifactId>

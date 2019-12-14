@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
 import org.apache.commons.digester3.binder.DigesterLoader;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.maven.plugin.Mojo;
-import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -57,7 +56,6 @@ import org.efaps.db.Context;
 import org.efaps.init.StartupDatabaseConnection;
 import org.efaps.init.StartupException;
 import org.efaps.jaas.AppAccessHandler;
-import org.efaps.maven.logger.SLF4JOverMavenLog;
 import org.efaps.maven.plugin.install.digester.DBPropertiesCI;
 import org.efaps.maven.plugin.install.digester.IRelatedFiles;
 import org.efaps.maven.plugin.install.digester.ImageCI;
@@ -73,16 +71,8 @@ import org.xml.sax.SAXException;
  * @author The eFaps Team
  */
 public abstract class EFapsAbstractMojo
-    implements Mojo
+    extends AbstractMojo
 {
-    /**
-     * The apache maven logger is stored in this instance variable.
-     *
-     * @see #getLog
-     * @see #setLog
-     */
-    private Log log = null;
-
     /**
      * Class name of the SQL database factory (implementing interface
      * {@link #javax.sql.DataSource}).
@@ -172,20 +162,14 @@ public abstract class EFapsAbstractMojo
     protected void init(final boolean _startupDB)
     {
         try {
-            Class.forName("org.efaps.maven.logger.SLF4JOverMavenLog");
-            SLF4JOverMavenLog.LOGGER = getLog();
-        } catch (final ClassNotFoundException e) {
-        }
-
-        try {
             if (_startupDB) {
                 AppAccessHandler.init(null, new HashSet<UUID>());
-                StartupDatabaseConnection.startup(this.type,
-                                                  this.factory,
-                                                  this.connection,
-                                                  this.transactionManager,
-                                                  this.transactionSynchronizationRegistry,
-                                                  this.configProps);
+                StartupDatabaseConnection.startup(type,
+                                                  factory,
+                                                  connection,
+                                                  transactionManager,
+                                                  transactionSynchronizationRegistry,
+                                                  configProps);
             }
         } catch (final StartupException e) {
             getLog().error("Initialize Database Connection failed: " + e.toString());
@@ -212,7 +196,7 @@ public abstract class EFapsAbstractMojo
     protected void startTransaction()
         throws EFapsException
     {
-        Context.begin(this.userName);
+        Context.begin(userName);
     }
 
     /**
@@ -235,32 +219,6 @@ public abstract class EFapsAbstractMojo
         Context.commit();
     }
 
-     /**
-     * This is the setter method for instance variable {@link #log}.
-     *
-     * @param _log new value for instance variable {@link #log}
-     * @see #log
-     * @see #getLog
-     */
-    @Override
-    public void setLog(final Log _log)
-    {
-        this.log = _log;
-    }
-
-    /**
-     * This is the getter method for instance variable {@link #log}.
-     *
-     * @return value of instance variable {@link #log}
-     * @see #log
-     * @see #setLog
-     */
-    @Override
-    public Log getLog()
-    {
-        return this.log;
-    }
-
     /**
      * This is the getter method for instance variable {@link #userName}.
      *
@@ -269,7 +227,7 @@ public abstract class EFapsAbstractMojo
      */
     protected String getUserName()
     {
-        return this.userName;
+        return userName;
     }
 
     /**
@@ -280,7 +238,7 @@ public abstract class EFapsAbstractMojo
      */
     protected String getPassWord()
     {
-        return this.passWord;
+        return passWord;
     }
 
     /**
@@ -292,7 +250,7 @@ public abstract class EFapsAbstractMojo
      */
     protected List<String> getClasspathElements()
     {
-        return this.classpathElements;
+        return classpathElements;
     }
 
     /**
@@ -329,7 +287,7 @@ public abstract class EFapsAbstractMojo
                 }
             }
         } catch (final GitAPIException | IOException e) {
-            this.log.error(e);
+            getLog().error(e);
         }
         return ret;
     }
@@ -496,7 +454,7 @@ public abstract class EFapsAbstractMojo
          */
         public String getRev()
         {
-            return this.rev;
+            return rev;
         }
 
         /**
@@ -506,7 +464,7 @@ public abstract class EFapsAbstractMojo
          */
         public FileInfo setRev(final String _rev)
         {
-            this.rev = _rev;
+            rev = _rev;
             return this;
         }
 
@@ -517,7 +475,7 @@ public abstract class EFapsAbstractMojo
          */
         public DateTime getDate()
         {
-            return this.date;
+            return date;
         }
 
         /**
@@ -527,7 +485,7 @@ public abstract class EFapsAbstractMojo
          */
         public FileInfo setDate(final DateTime _date)
         {
-            this.date = _date;
+            date = _date;
             return this;
         }
     }

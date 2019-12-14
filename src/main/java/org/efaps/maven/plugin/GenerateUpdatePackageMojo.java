@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2016 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.tmatesoft.svn.core.wc.ISVNDiffStatusHandler;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNDiffClient;
-import org.tmatesoft.svn.core.wc.SVNDiffStatus;
 import org.tmatesoft.svn.core.wc.SVNEvent;
 import org.tmatesoft.svn.core.wc.SVNEventAction;
 import org.tmatesoft.svn.core.wc.SVNRevision;
@@ -65,7 +64,6 @@ import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 
 /**
- * TODO comment!
  *
  * @author The eFaps Team
  */
@@ -149,7 +147,7 @@ public class GenerateUpdatePackageMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        switch (this.scm) {
+        switch (scm) {
             case "svn":
                 executeSVN();
                 break;
@@ -165,15 +163,15 @@ public class GenerateUpdatePackageMojo
     private void executeGit()
     {
         try {
-            if (this.gitRepository != null && this.gitRepository.exists()) {
-                final File gitDir = new File(this.gitRepository, ".git");
+            if (gitRepository != null && gitRepository.exists()) {
+                final File gitDir = new File(gitRepository, ".git");
                 final Repository repo = new FileRepository(gitDir);
-                final ObjectId oldID = repo.resolve(this.revision + "^{tree}");
+                final ObjectId oldID = repo.resolve(revision + "^{tree}");
                 final ObjectId newID = repo.resolve("HEAD^{tree}"); // HEAD^{tree}
                 copyGit(repo, oldID, newID);
-            } else if (this.gitFile != null && this.gitFile.exists()) {
+            } else if (gitFile != null && gitFile.exists()) {
                 final StringBuilder sb = new StringBuilder();
-                final FileInputStream fstream = new FileInputStream(this.gitFile);
+                final FileInputStream fstream = new FileInputStream(gitFile);
                 final BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
                 String strLine;
                 // Read File Line By Line
@@ -192,7 +190,7 @@ public class GenerateUpdatePackageMojo
                     }
                 }
                 br.close();
-                final FileWriter fwriter = new FileWriter(this.gitFile);
+                final FileWriter fwriter = new FileWriter(gitFile);
                 final BufferedWriter bwriter = new BufferedWriter(fwriter);
                 bwriter.write(sb.toString());
                 bwriter.close();
@@ -237,7 +235,7 @@ public class GenerateUpdatePackageMojo
                     final StringBuilder line = new StringBuilder().append(file.getName()).append(" ")
                                     .append(fileInfo.getRev()).append(" ")
                                    .append(fileInfo.getDate()).append("\n") ;
-                    FileUtils.writeStringToFile(new File(this.outputDirectory, "_revFile.txt"), line.toString(), true);
+                    FileUtils.writeStringToFile(new File(outputDirectory, "_revFile.txt"), line.toString(), true);
                     break;
                 default:
                     break;
@@ -270,12 +268,12 @@ public class GenerateUpdatePackageMojo
      */
     private void executeSVN()
     {
-        GenerateUpdatePackageMojo.this.log.info("path: " + this.path);
+        GenerateUpdatePackageMojo.this.log.info("path: " + path);
 
         final SVNClientManager clientManager = SVNClientManager.newInstance();
         final SVNDiffClient diffClient = clientManager.getDiffClient();
 
-        final String[] revAr = this.revision.split(":");
+        final String[] revAr = revision.split(":");
         final SVNRevision rev1 = SVNRevision.parse(revAr[0]);
         final SVNRevision rev2;
         if (revAr.length > 1) {
@@ -283,7 +281,7 @@ public class GenerateUpdatePackageMojo
         } else {
             rev2 = SVNRevision.HEAD;
         }
-        if (this.update) {
+        if (update) {
             final SVNUpdateClient updateClient = clientManager.getUpdateClient();
             try {
                 updateClient.setIgnoreExternals(true);
@@ -303,41 +301,34 @@ public class GenerateUpdatePackageMojo
                         throws SVNException
                     {
                         if (SVNEventAction.UPDATE_UPDATE.equals(_event.getAction())) {
-                            GenerateUpdatePackageMojo.this.log.info("updating: " + _event.getFile());
+                            log.info("updating: " + _event.getFile());
                         }
                     }
                 };
 
                 updateClient.setEventHandler(handler);
                 GenerateUpdatePackageMojo.this.log.info("updating to revision: " + rev2);
-                final long rev = updateClient.doUpdate(this.path, rev2, SVNDepth.INFINITY, true, true);
+                final long rev = updateClient.doUpdate(path, rev2, SVNDepth.INFINITY, true, true);
                 GenerateUpdatePackageMojo.this.log.info("updated to revision: " + rev);
             } catch (final SVNException e) {
-                this.log.error(e);
+                log.error(e);
             }
         }
         final List<String> paths = new ArrayList<>();
 
-        final ISVNDiffStatusHandler handler = new ISVNDiffStatusHandler()
-        {
-
-            @Override
-            public void handleDiffStatus(final SVNDiffStatus _diffStatus)
-                throws SVNException
-            {
-                if (SVNStatusType.STATUS_DELETED.equals(_diffStatus.getModificationType())) {
-                    GenerateUpdatePackageMojo.this.log.debug("DELETED: " + _diffStatus.getFile());
-                } else {
-                    GenerateUpdatePackageMojo.this.log.info("ADDED: " + _diffStatus.getFile());
-                    paths.add(_diffStatus.getPath());
-                }
+        final ISVNDiffStatusHandler handler = _diffStatus -> {
+            if (SVNStatusType.STATUS_DELETED.equals(_diffStatus.getModificationType())) {
+                log.debug("DELETED: " + _diffStatus.getFile());
+            } else {
+                log.info("ADDED: " + _diffStatus.getFile());
+                paths.add(_diffStatus.getPath());
             }
         };
         try {
             diffClient.getOperationsFactory().setPrimaryWcGeneration(SvnWcGeneration.V17);
-            diffClient.doDiffStatus(this.path, rev1, this.path, rev2, SVNDepth.INFINITY, true, handler);
+            diffClient.doDiffStatus(path, rev1, path, rev2, SVNDepth.INFINITY, true, handler);
         } catch (final SVNException e) {
-            this.log.error(e);
+            log.error(e);
         }
 
         for (final String path : paths) {
@@ -353,60 +344,60 @@ public class GenerateUpdatePackageMojo
     {
         try {
             final File file = _correctPath
-                            ? new File(this.path + StringUtils.removeStart(_path, "trunk"))
+                            ? new File(path + StringUtils.removeStart(_path, "trunk"))
                             : new File(_path);
             File outDir;
-            if (this.check4overwrite) {
-                final Collection<File> files = FileUtils.listFiles(this.baseDir, new NameFileFilter(file.getName()),
+            if (check4overwrite) {
+                final Collection<File> files = FileUtils.listFiles(baseDir, new NameFileFilter(file.getName()),
                                 TrueFileFilter.INSTANCE);
                 if (files.isEmpty() || files.contains(file)) {
-                    outDir = this.outputDirectory;
+                    outDir = outputDirectory;
                 } else {
-                    outDir = new File(this.outputDirectory, "overwrite");
+                    outDir = new File(outputDirectory, "overwrite");
                 }
             } else {
-                outDir = this.outputDirectory;
+                outDir = outputDirectory;
             }
             if (file.exists()) {
-                if (!this.replace) {
+                if (!replace) {
                     final File checkfile = new File(outDir.getAbsolutePath(), file.getName());
                     if (checkfile.exists()) {
                         checkfile.renameTo(new File(outDir.getAbsolutePath(), "_" + new Date().getTime()
                                         + file.getName()));
-                        this.log.info("RENAMED: " + checkfile);
+                        log.info("RENAMED: " + checkfile);
                     }
                 }
                 if (_path.endsWith("xml")) {
                     FileUtils.copyFileToDirectory(file, outDir);
-                    this.log.info("COPIED: " + file);
+                    log.info("COPIED: " + file);
                 } else if (_path.endsWith("java")) {
                     FileUtils.copyFileToDirectory(file, outDir);
-                    this.log.info("COPIED: " + file);
+                    log.info("COPIED: " + file);
                 } else if (_path.endsWith("css")) {
                     FileUtils.copyFileToDirectory(file, outDir);
-                    this.log.info("COPIED: " + file);
+                    log.info("COPIED: " + file);
                 } else if (_path.endsWith("properties")) {
                     for (final File aFile : FileUtils.listFiles(file.getParentFile(), new String[] { "xml",
                                     "properties" }, false)) {
                         FileUtils.copyFileToDirectory(aFile, outDir);
-                        this.log.info("COPIED: " + aFile);
+                        log.info("COPIED: " + aFile);
                     }
                 }
             }
         } catch (final IOException e) {
-            this.log.error("Catched IOException", e);
+            log.error("Catched IOException", e);
         }
     }
 
     @Override
     public void setLog(final Log _log)
     {
-        this.log = _log;
+        log = _log;
     }
 
     @Override
     public Log getLog()
     {
-        return this.log;
+        return log;
     }
 }

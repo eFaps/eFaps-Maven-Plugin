@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2013 The eFaps Team
+ * Copyright 2003 - 2019 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.maven.plugin.install;
@@ -56,7 +53,6 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author The eFaps Team
- * @version $Id$
  */
 @Mojo(name = "generate-installation", requiresDependencyResolution = ResolutionScope.COMPILE,
                 defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
@@ -179,8 +175,8 @@ public class GenerateInstallationMojo
     {
         copyFiles(generateInstallFile());
         final File esjpDir = new File(getEFapsDir(), "ESJP");
-        if (this.compile && esjpDir.exists() && esjpDir.isDirectory())  {
-            this.project.addCompileSourceRoot(new File(getEFapsDir(), "ESJP").getAbsolutePath());
+        if (compile && esjpDir.exists() && esjpDir.isDirectory())  {
+            project.addCompileSourceRoot(new File(getEFapsDir(), "ESJP").getAbsolutePath());
         }
     }
 
@@ -240,7 +236,7 @@ public class GenerateInstallationMojo
             application = application.trim();
 
             // prepare root package name
-            final String rootPackageTmp = this.rootPackage.replaceAll("/*$", "").replaceAll("^/*", "")
+            final String rootPackageTmp = rootPackage.replaceAll("/*$", "").replaceAll("^/*", "")
                 + "/" + application + "/";
             // store the root package name in to the file
             final Node rootPackageName = doc.createElement("rootPackage");
@@ -291,7 +287,7 @@ public class GenerateInstallationMojo
             }
 
             // prepare file install of the target install file
-            final File targetInstallFileTmp = new File(this.targetDirectory, this.targetInstallFile);
+            final File targetInstallFileTmp = new File(targetDirectory, targetInstallFile);
 
             // get parent directory of target installation file
             // and create directories (if needed)
@@ -307,7 +303,7 @@ public class GenerateInstallationMojo
             // initialize StreamResult with File object to save to file
             // flush output stream and write to file (and close file)
             final OutputStream os = new FileOutputStream(targetInstallFileTmp);
-            final StreamResult result = new StreamResult(new OutputStreamWriter(os, this.targetEncoding));
+            final StreamResult result = new StreamResult(new OutputStreamWriter(os, targetEncoding));
             final DOMSource source = new DOMSource(doc);
             transformer.transform(source, result);
             os.flush();
@@ -337,13 +333,13 @@ public class GenerateInstallationMojo
         try {
             for (final String fileName : getCopyFiles(getEFapsDir())) {
                 final File srcFile = new File(getEFapsDir(), fileName);
-                final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
+                final File dstFile = new File(targetDirectory, _rootPackage + fileName);
                 FileUtils.copyFile(srcFile, dstFile, true);
             }
             if (getOutputDirectory().exists()) {
                 for (final String fileName : getCopyFiles(getOutputDirectory())) {
                     final File srcFile = new File(getOutputDirectory(), fileName);
-                    final File dstFile = new File(this.targetDirectory, _rootPackage + fileName);
+                    final File dstFile = new File(targetDirectory, _rootPackage + fileName);
                     FileUtils.copyFile(srcFile, dstFile, true);
                 }
             }
@@ -380,14 +376,14 @@ public class GenerateInstallationMojo
     {
         // scan
         final DirectoryScanner ds = new DirectoryScanner();
-        final String[] includes = this.copyIncludes == null
+        final String[] includes = copyIncludes == null
             ? GenerateInstallationMojo.DEFAULT_COPYINCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYINCLUDES.size()])
-            : this.copyIncludes.toArray(new String[this.copyIncludes.size()]);
-        final String[] excludes = this.copyExcludes == null
+            : copyIncludes.toArray(new String[copyIncludes.size()]);
+        final String[] excludes = copyExcludes == null
             ? GenerateInstallationMojo.DEFAULT_COPYEXCLUDES
                             .toArray(new String[GenerateInstallationMojo.DEFAULT_COPYEXCLUDES.size()])
-            : this.copyExcludes.toArray(new String[this.copyExcludes.size()]);
+            : copyExcludes.toArray(new String[copyExcludes.size()]);
         ds.setIncludes(includes);
         ds.setExcludes(excludes);
         ds.setBasedir(_rootFile);
