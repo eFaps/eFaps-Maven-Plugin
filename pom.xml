@@ -266,6 +266,18 @@
                     <artifactId>httpcore</artifactId>
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-bridge</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-vfs2</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -276,9 +288,11 @@
             <version>2.11.0</version>
         </dependency>
 
+
+
         <!-- For Java6 xalan and xerces must be defined (otherwise Java uses
             the new DOM Api which currently does not work together with used and required
-            maven version) -->
+            maven version)
         <dependency>
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
@@ -288,7 +302,7 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.12.2</version>
-        </dependency>
+        </dependency> -->
 
         <!--  Needed for namespace binding JNDI -->
         <dependency>
