@@ -22,10 +22,10 @@
     <parent>
         <groupId>org.efaps</groupId>
         <artifactId>efaps-parent</artifactId>
-        <version>11.0.0-SNAPSHOT</version>
+        <version>17.0.0-SNAPSHOT</version>
     </parent>
     <properties>
-        <kernelVersion>[11.0.0-SNAPSHOT,11.1.0-SNAPSHOT)</kernelVersion>
+        <kernelVersion>[17.0.0-SNAPSHOT,17.1.0-SNAPSHOT)</kernelVersion>
         <!-- correct encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -111,7 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.7.0</version>
                 <configuration>
                     <goalPrefix>efaps</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -124,7 +124,7 @@
                             <goal>descriptor</goal>
                         </goals>
                         <configuration>
-                        
+
                         </configuration>
                     </execution>
                     <!-- if you want to generate help goal -->
@@ -222,24 +222,26 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
-            <version>2.2.1</version>
+            <version>3.0-alpha-2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>3.6.1</version>
+            <version>4.0.0-alpha-2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.6.0</version>
+            <version>3.7.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- generated help mojo has a dependency to plexus-utils -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.2.1</version>
+            <version>3.5.0</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -264,6 +266,18 @@
                     <artifactId>httpcore</artifactId>
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.xmlgraphics</groupId>
+                    <artifactId>batik-bridge</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-vfs2</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -271,12 +285,14 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.11.0</version>
         </dependency>
+
+
 
         <!-- For Java6 xalan and xerces must be defined (otherwise Java uses
             the new DOM Api which currently does not work together with used and required
-            maven version) -->
+            maven version)
         <dependency>
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
@@ -285,8 +301,8 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.12.0</version>
-        </dependency>
+            <version>2.12.2</version>
+        </dependency> -->
 
         <!--  Needed for namespace binding JNDI -->
         <dependency>
@@ -342,7 +358,7 @@
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.10.1</version>
+            <version>1.10.9</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
