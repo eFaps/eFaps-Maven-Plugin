@@ -188,9 +188,7 @@ public class GenerateJmsClassMojo
             final Object item = digester.parse(source);
             stream.close();
             if (item != null) {
-                if (item instanceof TypeCI) {
-                    final TypeCI typeItem = (TypeCI) item;
-
+                if (item instanceof final TypeCI typeItem) {
                     final String packageName = typeItem.getPackageName(jmsPackageRegex,
                                     jmsPackageReplacement);
                     final String className = typeItem.getClassName(jmsClassNameRegex,
@@ -221,13 +219,13 @@ public class GenerateJmsClassMojo
 
 
         ret.append("package org.efaps.esjp.jms.").append(packageName).append(";\n\n")
-        .append("import javax.xml.bind.annotation.XmlAccessType;\n")
-        .append("import javax.xml.bind.annotation.XmlAccessorType;\n")
-        .append("import javax.xml.bind.annotation.XmlElement;\n")
-        .append("import javax.xml.bind.annotation.XmlElementWrapper;\n")
-        .append("import javax.xml.bind.annotation.XmlElements;\n")
-        .append("import javax.xml.bind.annotation.XmlRootElement;\n")
-        .append("import javax.xml.bind.annotation.XmlType;\n")
+        .append("import jakarta.xml.bind.annotation.XmlAccessType;\n")
+        .append("import jakarta.xml.bind.annotation.XmlAccessorType;\n")
+        .append("import jakarta.xml.bind.annotation.XmlElement;\n")
+        .append("import jakarta.xml.bind.annotation.XmlElementWrapper;\n")
+        .append("import jakarta.xml.bind.annotation.XmlElements;\n")
+        .append("import jakarta.xml.bind.annotation.XmlRootElement;\n")
+        .append("import jakarta.xml.bind.annotation.XmlType;\n")
         .append("import org.efaps.esjp.jms.AbstractObject;\n")
         .append("import org.efaps.esjp.jms.AbstractClassificationObject;\n")
         .append("import org.efaps.esjp.jms.annotation.*;\n")
