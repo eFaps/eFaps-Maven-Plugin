@@ -17,10 +17,6 @@
 
 package org.efaps.maven.plugin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,6 +54,7 @@ import org.efaps.maven.plugin.install.digester.IRelatedFiles;
 import org.efaps.maven.plugin.install.digester.ImageCI;
 import org.efaps.maven.plugin.install.digester.JasperImageCI;
 import org.efaps.maven.plugin.install.digester.MenuCI;
+import org.efaps.maven.plugin.install.digester.ModuleCI;
 import org.efaps.maven.plugin.install.digester.MsgPhraseCI;
 import org.efaps.maven.plugin.install.digester.NumGenCI;
 import org.efaps.maven.plugin.install.digester.RoleCI;
@@ -76,8 +73,14 @@ import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.update.version.Dependency;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 /**
  *
@@ -87,7 +90,7 @@ import org.xml.sax.SAXException;
 public class GenerateUpdatePackMojo
     extends AbstractEFapsInstallMojo
 {
-
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateUpdatePackMojo.class);
     /**
      * The Enum UpdateGroup.
      *
@@ -128,7 +131,6 @@ public class GenerateUpdatePackMojo
     private boolean compress;
 
     @Override
-    @SuppressWarnings("checkstyle:illegalcatch")
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -166,6 +168,7 @@ public class GenerateUpdatePackMojo
                             bindRulesFrom(TableCI.class);
                             bindRulesFrom(CommandCI.class);
                             bindRulesFrom(MenuCI.class);
+                            bindRulesFrom(ModuleCI.class);
                             bindRulesFrom(SearchCI.class);
                             bindRulesFrom(DBPropertiesCI.class);
                             bindRulesFrom(ImageCI.class);
@@ -181,6 +184,7 @@ public class GenerateUpdatePackMojo
                             bindRulesFrom(NumGenCI.class);
                             bindRulesFrom(CommandCI.class);
                             bindRulesFrom(MenuCI.class);
+                            bindRulesFrom(ModuleCI.class);
                             bindRulesFrom(SearchCI.class);
                             bindRulesFrom(SQLTableCI.class);
                             bindRulesFrom(RoleCI.class);
@@ -249,7 +253,7 @@ public class GenerateUpdatePackMojo
         final Map<String, RevItem> ret = new HashMap<>();
         for (final InstallFile file : files) {
             if (file.getType() == null) {
-                getLog().error("File without FileType: " + file);
+                LOG.error("File without FileType: {}", file);
             } else {
                 switch (file.getType()) {
                     case XML:
@@ -294,7 +298,7 @@ public class GenerateUpdatePackMojo
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
-                                            identifier.replaceAll("\\.", "/") + ".java");
+                                            identifier.replace('.', '/') + ".java");
                             entry.setSize(content.length);
                             _tarOut.putArchiveEntry(entry);
                             _tarOut.write(content);
@@ -310,7 +314,7 @@ public class GenerateUpdatePackMojo
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
-                                            StringUtils.removeEnd(identifier, ".css").replaceAll("\\.", "/") + ".css");
+                                            StringUtils.removeEnd(identifier, ".css").replace('.', '/') + ".css");
                             entry.setSize(content.length);
                             _tarOut.putArchiveEntry(entry);
                             _tarOut.write(content);
@@ -326,7 +330,7 @@ public class GenerateUpdatePackMojo
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
-                                            StringUtils.removeEnd(identifier, ".js").replaceAll("\\.", "/") + ".js");
+                                            StringUtils.removeEnd(identifier, ".js").replace('.', '/') + ".js");
                             entry.setSize(content.length);
                             _tarOut.putArchiveEntry(entry);
                             _tarOut.write(content);
@@ -349,7 +353,7 @@ public class GenerateUpdatePackMojo
                         }
                         break;
                     default:
-                        getLog().debug("Ignoring: " + file);
+                        LOG.debug("Ignoring: {}", file);
                         break;
                 }
             }

@@ -18,10 +18,10 @@
 package org.efaps.maven.plugin.install;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,6 +64,8 @@ import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -76,6 +78,8 @@ public class GenerateCIClassMojo
     extends AbstractEFapsInstallMojo
     implements ContextEnabled
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateCIClassMojo.class);
 
     /**
      * Definitions for a CI UserInterface object.
@@ -101,7 +105,7 @@ public class GenerateCIClassMojo
          * @param _extendClass Class that is extended
          * @param _classNamePrefix prefix for the class Name
          */
-        private CIDef4UI(final String _extendClass,
+        CIDef4UI(final String _extendClass,
                          final String _classNamePrefix)
         {
             extendClass = _extendClass;
@@ -242,9 +246,7 @@ public class GenerateCIClassMojo
 
             final List<InstallFile> files = appl.getInstall().getFiles();
             for (final InstallFile file : files) {
-                if (getLog().isDebugEnabled()) {
-                    getLog().debug("reading file:" + file);
-                }
+                LOG.debug("reading file: {}", file);
                 if (file.getType().equals(FileType.XML)) {
                     final Digester digester = loader.newDigester();
                     final URLConnection connection = file.getUrl().openConnection();
@@ -272,18 +274,9 @@ public class GenerateCIClassMojo
             buildCIMsgPhrase(appl.getApplication());
             buildCINumGen(appl.getApplication());
             project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
-        } catch (final SAXException e) {
-            getLog().error("MojoExecutionException", e);
+        } catch (final SAXException | IOException  | InstallationException e) {
+            LOG.error("Catched", e);
             throw new MojoExecutionException("SAXException");
-        } catch (final FileNotFoundException e) {
-            getLog().error("FileNotFoundException", e);
-            throw new MojoExecutionException("SAXException");
-        } catch (final IOException e) {
-            getLog().error("IOException", e);
-            throw new MojoExecutionException("SAXException");
-        } catch (final InstallationException e) {
-            getLog().error("InstallationException", e);
-            throw new MojoExecutionException("InstallationException");
         }
     }
 
@@ -375,7 +368,7 @@ public class GenerateCIClassMojo
 
         final File javaFile = new File(srcFolder, _ciDef.classNamePrefix + ciName + ".java");
 
-        FileUtils.writeStringToFile(javaFile, java.toString());
+        FileUtils.writeStringToFile(javaFile, java.toString(), StandardCharsets.UTF_8);
     }
 
     /**
@@ -473,20 +466,18 @@ public class GenerateCIClassMojo
                         java.append(", \"").append(profile).append("\"");
                     }
                     java.append(");\n");
-                } else {
-                    if (!"Type".equals(attrEntry.getKey())
-                                    && !"OID".equals(attrEntry.getKey()) && !"ID".equals(attrEntry.getKey())) {
-                        // check if the attribute name can be used in java, if not
-                        // extend the name
-                        final String identifier = NameUtil.isValidJavaIdentifier(attrEntry.getKey())
-                                        ? attrEntry.getKey() : attrEntry.getKey() + "_ci";
-                        java.append("        public final CIAttribute ").append(identifier)
-                                .append(" = new CIAttribute(this, \"").append(attrEntry.getKey()).append("\"");
-                        for (final String profile : attrEntry.getValue()) {
-                            java.append(", \"").append(profile).append("\"");
-                        }
-                        java.append(");\n");
+                } else if (!"Type".equals(attrEntry.getKey())
+                                && !"OID".equals(attrEntry.getKey()) && !"ID".equals(attrEntry.getKey())) {
+                    // check if the attribute name can be used in java, if not
+                    // extend the name
+                    final String identifier = NameUtil.isValidJavaIdentifier(attrEntry.getKey())
+                                    ? attrEntry.getKey() : attrEntry.getKey() + "_ci";
+                    java.append("        public final CIAttribute ").append(identifier)
+                            .append(" = new CIAttribute(this, \"").append(attrEntry.getKey()).append("\"");
+                    for (final String profile : attrEntry.getValue()) {
+                        java.append(", \"").append(profile).append("\"");
                     }
+                    java.append(");\n");
                 }
             }
             java.append("    }\n\n");
@@ -501,7 +492,7 @@ public class GenerateCIClassMojo
 
         final File javaFile = new File(srcFolder, "CI" + ciName + ".java");
 
-        FileUtils.writeStringToFile(javaFile, java.toString());
+        FileUtils.writeStringToFile(javaFile, java.toString(), StandardCharsets.UTF_8);
     }
 
     private StringBuilder getClassComment()
@@ -562,7 +553,7 @@ public class GenerateCIClassMojo
 
         final File javaFile = new File(srcFolder, "CIMsg" + ciName + ".java");
 
-        FileUtils.writeStringToFile(javaFile, java.toString());
+        FileUtils.writeStringToFile(javaFile, java.toString(), StandardCharsets.UTF_8);
     }
 
 
@@ -608,6 +599,6 @@ public class GenerateCIClassMojo
 
         final File javaFile = new File(srcFolder, "CINumGen" + ciName + ".java");
 
-        FileUtils.writeStringToFile(javaFile, java.toString());
+        FileUtils.writeStringToFile(javaFile, java.toString(), StandardCharsets.UTF_8);
     }
 }
