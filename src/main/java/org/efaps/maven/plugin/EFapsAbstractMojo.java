@@ -63,6 +63,8 @@ import org.efaps.maven.plugin.install.digester.JasperImageCI;
 import org.efaps.util.EFapsException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -73,6 +75,8 @@ import org.xml.sax.SAXException;
 public abstract class EFapsAbstractMojo
     extends AbstractMojo
 {
+    private static final Logger LOG = LoggerFactory.getLogger(EFapsAbstractMojo.class);
+
     /**
      * Class name of the SQL database factory (implementing interface
      * {@link #javax.sql.DataSource}).
@@ -163,7 +167,7 @@ public abstract class EFapsAbstractMojo
     {
         try {
             if (_startupDB) {
-                AppAccessHandler.init(null, new HashSet<UUID>());
+                AppAccessHandler.init(null, new HashSet<>());
                 StartupDatabaseConnection.startup(type,
                                                   factory,
                                                   connection,
@@ -416,7 +420,7 @@ public abstract class EFapsAbstractMojo
                 stream.close();
             }
         } catch (final IOException | SAXException e) {
-            getLog().error(e);
+            LOG.error("Catched error in : "+  _file, e);
         }
     }
 
