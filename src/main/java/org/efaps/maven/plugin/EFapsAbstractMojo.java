@@ -314,7 +314,7 @@ public abstract class EFapsAbstractMojo
                         final var dateTime = new DateTime(authorDate.getTime(),
                                         DateTimeZone.forTimeZone(authorTimeZone));
                         ret.put(file, new FileInfo().setDate(dateTime).setRev(commit.getId().getName()));
-                        LOG.info("Added: {}", file);
+                        LOG.info("Added: {} - {}", file, commit.getId().getName());
                     } else {
                         LOG.warn("Could not find any commit for: {}", file);
                         ret.put(file, new FileInfo().setDate(new DateTime()).setRev("-"));
