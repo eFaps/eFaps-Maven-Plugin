@@ -89,7 +89,7 @@ public abstract class EFapsAbstractMojo
      *
      * @see #login
      */
-    @Parameter(required = true)
+    @Parameter(required = true,  defaultValue = "-")
     private String userName;
 
     /**
@@ -97,7 +97,7 @@ public abstract class EFapsAbstractMojo
      *
      * @see #login
      */
-    @Parameter(required = true)
+    @Parameter(required = true, defaultValue = "-")
     private String passWord;
 
     /**
