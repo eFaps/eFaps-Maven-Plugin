@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2019 The eFaps Team
+ * Copyright © 2003 - 2024 The eFaps Team (-)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.efaps.maven.plugin;
 
 import java.io.File;
@@ -31,7 +29,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import org.apache.commons.digester3.Digester;
 import org.apache.commons.digester3.annotations.FromAnnotationsRuleModule;
@@ -176,7 +173,7 @@ public abstract class EFapsAbstractMojo
                                                   configProps);
             }
         } catch (final StartupException e) {
-            getLog().error("Initialize Database Connection failed: " + e.toString());
+            LOG.error("Initialize Database Connection failed: " + e.toString());
         }
     }
 
@@ -269,8 +266,8 @@ public abstract class EFapsAbstractMojo
         FileInfo ret = null;
         try {
             ret = new FileInfo();
-            if (getLog().isDebugEnabled()) {
-                getLog().debug("Searching FileInfo for: " + _file);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Searching FileInfo for: " + _file);
             }
             final Repository repository = getRepository(_file);
             final Git git = new Git(repository);
@@ -291,7 +288,7 @@ public abstract class EFapsAbstractMojo
                 }
             }
         } catch (final GitAPIException | IOException e) {
-            getLog().error(e);
+            LOG.error("Catched", e);
         }
         return ret;
     }
@@ -375,7 +372,7 @@ public abstract class EFapsAbstractMojo
                 }
             }
         } catch (final Exception e) {
-            getLog().error(e);
+            LOG.error("Catched", e);
         }
         return ret;
     }

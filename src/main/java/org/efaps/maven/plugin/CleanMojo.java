@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2019 The eFaps Team
+ * Copyright © 2003 - 2024 The eFaps Team (-)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.efaps.maven.plugin;
 
 import java.sql.Connection;
@@ -22,6 +20,8 @@ import java.sql.Connection;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.efaps.db.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -35,6 +35,7 @@ import org.efaps.db.Context;
 public class CleanMojo
     extends EFapsAbstractMojo
 {
+    private static final Logger LOG = LoggerFactory.getLogger(CompileMojo.class);
 
     /**
      * Initializes the database connection, starts a connection, deletes all
@@ -50,7 +51,7 @@ public class CleanMojo
     {
         init(true);
         try {
-            getLog().info("Delete Old Data and Data Model");
+            LOG.info("Delete Old Data and Data Model");
             Context.begin();
             final Connection conn = Context.getThreadContext().getConnection();
             Context.getDbType().deleteAll(conn);

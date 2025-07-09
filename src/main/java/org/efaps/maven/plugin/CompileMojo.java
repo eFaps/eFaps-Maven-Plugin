@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2019 The eFaps Team
+ * Copyright © 2003 - 2024 The eFaps Team (-)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.efaps.maven.plugin;
 
 import org.apache.maven.plugins.annotations.Mojo;
@@ -28,6 +26,8 @@ import org.efaps.update.schema.program.staticsource.WikiCompiler;
 import org.efaps.update.util.InstallationException;
 import org.efaps.update.version.Application;
 import org.efaps.util.EFapsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Compiles all ESPJ's and Cascade Style Sheets within eFaps.
@@ -39,6 +39,7 @@ public final class CompileMojo
     extends EFapsAbstractMojo
 {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CompileMojo.class);
     /**
      * Number of UUID's to generate.
      */
@@ -55,43 +56,43 @@ public final class CompileMojo
         boolean abort = true;
         try {
             if ("all".equalsIgnoreCase(target)) {
-                getLog().info("==Compiling all Elements==");
+                LOG.info("==Compiling all Elements==");
                 Application.compileAll(getUserName(), getClasspathElements(), true);
             } else {
                 reloadCache();
                 startTransaction();
                 if ("java".equalsIgnoreCase(target)) {
-                    getLog().info("==Compiling Java==");
+                    LOG.info("==Compiling Java==");
                     new ESJPCompiler(getClasspathElements()).compile(null, true);
                 } else if ("css".equalsIgnoreCase(target)) {
-                    getLog().info("==Compiling CSS==");
+                    LOG.info("==Compiling CSS==");
                     new CSSCompiler().compile();
                 } else if ("js".equalsIgnoreCase(target)) {
-                    getLog().info("==Compiling Javascript==");
+                    LOG.info("==Compiling Javascript==");
                     new JavaScriptCompiler().compile();
                 } else if ("wiki".equalsIgnoreCase(target)) {
-                    getLog().info("==Compiling Wiki==");
+                    LOG.info("==Compiling Wiki==");
                     new WikiCompiler().compile();
                 } else if ("jasper".equalsIgnoreCase(target)) {
-                    getLog().info("==Compiling JasperReports==");
+                    LOG.info("==Compiling JasperReports==");
                     new JasperReportCompiler(getClasspathElements()).compile();
                 } else {
-                    getLog().error("target: " + target + "' not found");
+                    LOG.error("target: " + target + "' not found");
                 }
                 commitTransaction();
             }
             abort = false;
         } catch (final InstallationException e) {
-            getLog().error(e);
+            LOG.error("Catched", e);
         } catch (final EFapsException e) {
-            getLog().error(e);
+            LOG.error("Catched", e);
         } finally {
             try {
                 if (abort) {
                     abortTransaction();
                 }
             } catch (final EFapsException e) {
-                getLog().error(e);
+                LOG.error("Catched", e);
             }
         }
     }

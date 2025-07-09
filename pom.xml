@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
- Copyright 2003 - 2019 The eFaps Team
+    Copyright © 2003 - 2024 The eFaps Team (-)
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -36,7 +36,7 @@
         eFaps Maven Plug-In to install / deploy eFaps applications and create CI/Jms Classes.
     </description>
     <prerequisites>
-        <maven>3.0.0</maven>
+        <maven>3.7.0</maven>
     </prerequisites>
     <url>http://maven-efaps-plugin.efaps.org</url>
     <licenses>
@@ -73,26 +73,12 @@
         <name>The eFaps Team</name>
         <url>http://www.efaps.org</url>
     </organization>
-
-    <!-- Issues -->
-    <issueManagement>
-        <system>eFaps Issues on Google Code</system>
-        <url>http://issues.efaps.org</url>
-    </issueManagement>
-
-    <!-- SubVersion Repository -->
-     <scm>
-        <connection>scm:git:git://github.com/eFaps/eFaps-Maven-Plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:eFaps/eFaps-Maven-Plugin.git</developerConnection>
-        <url>https://github.com/eFaps/eFaps-Maven-Plugin/</url>
-        <tag>HEAD</tag>
-    </scm>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>4.0.0-beta-1</version>
                 <configuration>
                     <goalPrefix>efaps</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
@@ -144,7 +130,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.1.2</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -159,7 +144,6 @@
                         <inherited>true</inherited>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.8.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -174,7 +158,6 @@
                         <inherited>true</inherited>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-deploy-plugin</artifactId>
-                        <version>2.7</version>
                         <configuration>
                             <updateReleaseInfo>true</updateReleaseInfo>
                         </configuration>
@@ -183,7 +166,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.4</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -209,20 +191,20 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>4.0.0-alpha-2</version>
+            <version>4.0.0-rc-4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.7.0</version>
+            <version>4.0.0-beta-1</version>
             <scope>provided</scope>
         </dependency>
         <!-- generated help mojo has a dependency to plexus-utils -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.5.0</version>
+            <version>4.0.2</version>
         </dependency>
 
         <!-- eFaps kernel -->
@@ -266,7 +248,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+            <version>2.19.0</version>
         </dependency>
 
 
@@ -337,14 +319,9 @@
             <version>2.6.0</version>
         </dependency>
         <dependency>
-            <groupId>org.tmatesoft.svnkit</groupId>
-            <artifactId>svnkit</artifactId>
-            <version>1.10.9</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.4.0.201906121030-r</version>
+            <version>7.3.0.202506031305-r</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpcore</artifactId>

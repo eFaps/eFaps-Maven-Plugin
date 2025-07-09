@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2019 The eFaps Team
+ * Copyright © 2003 - 2024 The eFaps Team (-)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.efaps.maven.plugin;
 
 import java.util.UUID;
@@ -23,6 +21,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A new universally unique identifier (UUID) is created and printed out.<br>
@@ -37,6 +37,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 public final class GenerateUUIDMojo
     extends AbstractMojo
 {
+    private static final Logger LOG = LoggerFactory.getLogger(CompileMojo.class);
     /**
      * Number of UUID's to generate.
      */
@@ -55,7 +56,7 @@ public final class GenerateUUIDMojo
     {
         for (int i = 0; i < count; i++)  {
             final UUID uuid = UUID.randomUUID();
-            getLog().info("UUID[" + (i + 1) + "] = " + uuid.toString());
+            LOG.info("UUID[" + (i + 1) + "] = " + uuid.toString());
         }
     }
 }
