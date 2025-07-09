@@ -20,12 +20,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -38,16 +36,10 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.db.Context;
 import org.efaps.init.StartupDatabaseConnection;
@@ -72,6 +64,7 @@ import org.xml.sax.SAXException;
 public abstract class EFapsAbstractMojo
     extends AbstractMojo
 {
+
     private static final Logger LOG = LoggerFactory.getLogger(EFapsAbstractMojo.class);
 
     /**
@@ -123,17 +116,13 @@ public abstract class EFapsAbstractMojo
     /**
      * Name of the class for the transaction manager.
      */
-    @Parameter(property = "org.efaps.transaction.manager",
-                    defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple",
-                    required = true)
+    @Parameter(property = "org.efaps.transaction.manager", defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple", required = true)
     private String transactionManager;
 
     /**
      * Name of the class for the transaction Synchronization Registry.
      */
-    @Parameter(property = "org.efaps.transaction.synchronizationRegistry",
-           defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple",
-                    required = true)
+    @Parameter(property = "org.efaps.transaction.synchronizationRegistry", defaultValue = "com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple", required = true)
     private String transactionSynchronizationRegistry;
 
     /**
@@ -149,7 +138,7 @@ public abstract class EFapsAbstractMojo
     {
     }
 
-     /**
+    /**
      * @todo better way instead of catching class not found exception (needed
      *       for the shell!)
      * @param _startupDB start up the Database
@@ -166,11 +155,11 @@ public abstract class EFapsAbstractMojo
             if (_startupDB) {
                 AppAccessHandler.init(null, new HashSet<>());
                 StartupDatabaseConnection.startup(type,
-                                                  factory,
-                                                  connection,
-                                                  transactionManager,
-                                                  transactionSynchronizationRegistry,
-                                                  configProps);
+                                factory,
+                                connection,
+                                transactionManager,
+                                transactionSynchronizationRegistry,
+                                configProps);
             }
         } catch (final StartupException e) {
             LOG.error("Initialize Database Connection failed: " + e.toString());
@@ -179,6 +168,7 @@ public abstract class EFapsAbstractMojo
 
     /**
      * Reloads the internal eFaps cache.
+     *
      * @throws EFapsException on error
      */
     protected void reloadCache()
@@ -192,6 +182,7 @@ public abstract class EFapsAbstractMojo
 
     /**
      * Start the transaction.
+     *
      * @throws EFapsException on error
      */
     protected void startTransaction()
@@ -202,6 +193,7 @@ public abstract class EFapsAbstractMojo
 
     /**
      * Abort the transaction.
+     *
      * @throws EFapsException on error
      */
     protected void abortTransaction()
@@ -212,6 +204,7 @@ public abstract class EFapsAbstractMojo
 
     /**
      * Commit the Transaction.
+     *
      * @throws EFapsException on error
      */
     protected void commitTransaction()
@@ -281,11 +274,7 @@ public abstract class EFapsAbstractMojo
                 final Date authorDate = authorIdent.getWhen();
                 final TimeZone authorTimeZone = authorIdent.getTimeZone();
                 final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(authorTimeZone));
-                ret.setDate(dateTime)
-                 .setRev(commit.getId().getName());
-                if (_evalRelated) {
-                    evalRelated(ret, _file);
-                }
+                ret.setDate(dateTime).setRev(commit.getId().getName());
             }
         } catch (final GitAPIException | IOException e) {
             LOG.error("Catched", e);
@@ -301,78 +290,41 @@ public abstract class EFapsAbstractMojo
      * @param _evalRel the eval rel
      * @return the file informations
      */
-    protected Map<String, FileInfo> getFileInformations(final File _file,
-                                                        final Set<String> _filesSet,
-                                                        final boolean _evalRelated)
+    protected Map<String, FileInfo> getFileInformations(final File baseDir,
+                                                        final File efapsDir,
+                                                        final Set<String> filesSet)
     {
         final Map<String, FileInfo> ret = new TreeMap<>();
-
         try {
-            final Repository repository = getRepository(_file);
-            final String relPath = _file.getPath().replaceFirst(repository.getDirectory().getParent() + "/", "");
-            final Map<String, String> fileMap = new HashMap<>();
-            for (final String file : _filesSet) {
-                fileMap.put(relPath + "/" + file, file);
-            }
-            final Git git = new Git(repository);
-            ObjectId previous = repository.resolve("HEAD^{tree}");
-            RevCommit prevCommit = null;
-            for (final RevCommit commit : git.log().call()) {
+            final var relativePath = baseDir.toPath().relativize(efapsDir.toPath());
 
-                final ObjectId older = commit.getTree();
-                // prepare the two iterators to compute the diff between
-                final ObjectReader reader = repository.newObjectReader();
-                final CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-                oldTreeIter.reset(reader, older);
-                final CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-                newTreeIter.reset(reader, previous);
-
-                // finally get the list of changed files
-                final List<DiffEntry> diffs = new Git(repository).diff().setNewTree(newTreeIter).setOldTree(oldTreeIter)
-                                .call();
-                for (final DiffEntry entry : diffs) {
-                    if (fileMap.containsKey(entry.getNewPath())) {
-                        final FileInfo info = new FileInfo();
-                        final PersonIdent authorIdent = prevCommit.getAuthorIdent();
-                        final Date authorDate = authorIdent.getWhen();
-                        final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                        final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
-                                        authorTimeZone));
-                        info.setDate(dateTime)
-                            .setRev(prevCommit.getId().getName());
-                        final String path = fileMap.get(entry.getNewPath());
-
-                        ret.put(path, info);
-                        fileMap.remove(entry.getNewPath());
-                        if (_evalRelated) {
-                            evalRelated(info, new File(_file, path));
-                        }
-                    }
-                    if (fileMap.isEmpty()) {
-                        break;
+            final Repository repository = getRepository(baseDir);
+            try (var git = new Git(repository)) {
+                for (final var file : filesSet) {
+                    final var gitLogs = git.log()
+                                    .addPath(relativePath.toString() + "/" + file)
+                                    .setMaxCount(1)
+                                    .call()
+                                    .iterator();
+                    if (gitLogs.hasNext()) {
+                        final var commit = gitLogs.next();
+                        final var authorIdent = commit.getAuthorIdent();
+                        final var authorDate = authorIdent.getWhen();
+                        final var authorTimeZone = authorIdent.getTimeZone();
+                        final var dateTime = new DateTime(authorDate.getTime(),
+                                        DateTimeZone.forTimeZone(authorTimeZone));
+                        ret.put(file, new FileInfo().setDate(dateTime).setRev(commit.getId().getName()));
+                        LOG.info("Added: {}", file);
+                    } else {
+                        LOG.warn("Could not find any commit for: {}", file);
+                        ret.put(file, new FileInfo().setDate(new DateTime()).setRev("-"));
                     }
                 }
-                previous = commit.getTree();
-                prevCommit = commit;
-                if (fileMap.isEmpty()) {
-                    break;
-                }
+            } catch (final GitAPIException e) {
+
             }
-            if (!fileMap.isEmpty()) {
-                final RevWalk revWalk = new RevWalk(repository);
-                final ObjectId headObjectId = repository.resolve(Constants.HEAD);
-                final RevCommit commit = revWalk.parseCommit(headObjectId);
-                final PersonIdent authorIdent = commit.getAuthorIdent();
-                final Date authorDate = authorIdent.getWhen();
-                final TimeZone authorTimeZone = authorIdent.getTimeZone();
-                final DateTime dateTime = new DateTime(authorDate.getTime(), DateTimeZone.forTimeZone(
-                                authorTimeZone));
-                for (final Entry<String, String> entry : fileMap.entrySet()) {
-                    ret.put(entry.getValue(), new FileInfo().setDate(dateTime).setRev("-"));
-                }
-            }
-        } catch (final Exception e) {
-            LOG.error("Catched", e);
+        } catch (final IOException e) {
+            LOG.error("Catched IOException on accesssing repository", e);
         }
         return ret;
     }
@@ -390,6 +342,7 @@ public abstract class EFapsAbstractMojo
             if (_file.exists() && FilenameUtils.isExtension(_file.getName(), "xml")) {
                 final DigesterLoader loader = DigesterLoader.newLoader(new FromAnnotationsRuleModule()
                 {
+
                     @Override
                     protected void configureRules()
                     {
@@ -417,7 +370,7 @@ public abstract class EFapsAbstractMojo
                 stream.close();
             }
         } catch (final IOException | SAXException e) {
-            LOG.error("Catched error in : "+  _file, e);
+            LOG.error("Catched error in : " + _file, e);
         }
     }
 
@@ -428,11 +381,11 @@ public abstract class EFapsAbstractMojo
      * @return the repository
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected Repository getRepository(final File _file)
+    protected Repository getRepository(final File file)
         throws IOException
     {
         final RepositoryBuilder builder = new RepositoryBuilder();
-        return builder.setWorkTree(_file).readEnvironment().findGitDir(_file).build();
+        return builder.setWorkTree(file).readEnvironment().findGitDir().build();
     }
 
     /**
@@ -442,6 +395,7 @@ public abstract class EFapsAbstractMojo
      */
     public static class FileInfo
     {
+
         /** The rev. */
         private String rev;
 

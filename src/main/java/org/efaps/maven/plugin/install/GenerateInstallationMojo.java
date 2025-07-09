@@ -251,7 +251,7 @@ public class GenerateInstallationMojo
             // alphabetical)
             final Set<String> filesSet = new TreeSet<>(getFiles());
 
-            final Map<String, FileInfo> filemap = getFileInformations(getEFapsDir(), filesSet, true);
+            final Map<String, FileInfo> filemap = getFileInformations(project.getBasedir(), getEFapsDir(), filesSet);
 
             for (final Entry<String, FileInfo> entry : filemap.entrySet()) {
                 final String fileName = entry.getKey();
