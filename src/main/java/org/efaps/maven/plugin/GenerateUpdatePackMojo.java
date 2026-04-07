@@ -23,9 +23,11 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -64,7 +66,6 @@ import org.efaps.maven.plugin.install.digester.TypeCI;
 import org.efaps.update.FileType;
 import org.efaps.update.Install.InstallFile;
 import org.efaps.update.schema.program.esjp.ESJPImporter;
-import org.efaps.update.schema.program.jasperreport.JasperReportImporter;
 import org.efaps.update.schema.program.staticsource.CSSImporter;
 import org.efaps.update.schema.program.staticsource.JavaScriptImporter;
 import org.efaps.update.util.InstallationException;
@@ -337,8 +338,12 @@ public class GenerateUpdatePackMojo
                         break;
                     case JRXML:
                         if (UpdateGroup.ALL.equals(group) || UpdateGroup.PROGRAM.equals(group)) {
-                            final JasperReportImporter importer = new JasperReportImporter(file);
-                            final String identifier = importer.getEFapsUUID().toString();
+                            final var strContent = IOUtils.toString(file.getUrl(), StandardCharsets.UTF_8);
+                            final var pattern = Pattern.compile("uuid=\"([0-9abcdef-]*)\"");
+                            final var matcher = pattern.matcher(strContent);
+                            matcher.find();
+
+                            final String identifier = matcher.group(1);
 
                             ret.put(identifier, new RevItem(FileType.JRXML, identifier, _app.getApplication(),
                                             file.getRevision(), file.getDate()));
