@@ -234,21 +234,21 @@ public class GenerateUpdatePackMojo
     /**
      * Adds the items.
      *
-     * @param _app the app
-     * @param _tarOut the tar out
-     * @param _loader the loader
+     * @param app the app
+     * @param tarOut the tar out
+     * @param loader the loader
      * @return the map
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws SAXException the SAX exception
      * @throws URISyntaxException the URI syntax exception
      * @throws InstallationException the installation exception
      */
-    private Map<String, RevItem> addItems(final Application _app,
-                                          final TarArchiveOutputStream _tarOut,
-                                          final DigesterLoader _loader)
+    private Map<String, RevItem> addItems(final Application app,
+                                          final TarArchiveOutputStream tarOut,
+                                          final DigesterLoader loader)
         throws IOException, SAXException, URISyntaxException, InstallationException
     {
-        final List<InstallFile> files = _app.getInstall().getFiles();
+        final List<InstallFile> files = app.getInstall().getFiles();
         final Map<String, RevItem> ret = new HashMap<>();
         for (final InstallFile file : files) {
             if (file.getType() == null) {
@@ -256,7 +256,7 @@ public class GenerateUpdatePackMojo
             } else {
                 switch (file.getType()) {
                     case XML:
-                        final Digester digester = _loader.newDigester();
+                        final Digester digester = loader.newDigester();
                         final URLConnection connection = file.getUrl().openConnection();
                         connection.setUseCaches(false);
                         final InputStream stream = connection.getInputStream();
@@ -264,14 +264,14 @@ public class GenerateUpdatePackMojo
                         final IBaseCI item = digester.parse(source);
                         stream.close();
                         if (item != null && item.getUuid() != null) {
-                            ret.put(item.getUuid(), new RevItem(FileType.XML, item.getUuid(), _app.getApplication(),
+                            ret.put(item.getUuid(), new RevItem(FileType.XML, item.getUuid(), app.getApplication(),
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(item.getUuid());
                             entry.setSize(content.length);
-                            _tarOut.putArchiveEntry(entry);
-                            _tarOut.write(content);
-                            _tarOut.closeArchiveEntry();
+                            tarOut.putArchiveEntry(entry);
+                            tarOut.write(content);
+                            tarOut.closeArchiveEntry();
                             if (item instanceof IRelatedFiles) {
                                 for (final String tmpFile : ((IRelatedFiles) item).getFiles()) {
                                     final String urlStr = file.getUrl().toString();
@@ -281,9 +281,9 @@ public class GenerateUpdatePackMojo
                                     final byte[] relContent = IOUtils.toByteArray(relCon.getInputStream());
                                     final TarArchiveEntry relEntry = new TarArchiveEntry(tmpFile);
                                     relEntry.setSize(relContent.length);
-                                    _tarOut.putArchiveEntry(relEntry);
-                                    _tarOut.write(relContent);
-                                    _tarOut.closeArchiveEntry();
+                                    tarOut.putArchiveEntry(relEntry);
+                                    tarOut.write(relContent);
+                                    tarOut.closeArchiveEntry();
                                 }
                             }
                         }
@@ -293,15 +293,15 @@ public class GenerateUpdatePackMojo
                             final ESJPImporter importer = new ESJPImporter(file);
                             final String identifier = importer.getProgramName();
 
-                            ret.put(identifier, new RevItem(FileType.JAVA, identifier, _app.getApplication(),
+                            ret.put(identifier, new RevItem(FileType.JAVA, identifier, app.getApplication(),
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
                                             identifier.replace('.', '/') + ".java");
                             entry.setSize(content.length);
-                            _tarOut.putArchiveEntry(entry);
-                            _tarOut.write(content);
-                            _tarOut.closeArchiveEntry();
+                            tarOut.putArchiveEntry(entry);
+                            tarOut.write(content);
+                            tarOut.closeArchiveEntry();
                         }
                         break;
                     case CSS:
@@ -309,15 +309,15 @@ public class GenerateUpdatePackMojo
                             final CSSImporter importer = new CSSImporter(file);
                             final String identifier = importer.getProgramName();
 
-                            ret.put(identifier, new RevItem(FileType.CSS, identifier, _app.getApplication(),
+                            ret.put(identifier, new RevItem(FileType.CSS, identifier, app.getApplication(),
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
                                             StringUtils.removeEnd(identifier, ".css").replace('.', '/') + ".css");
                             entry.setSize(content.length);
-                            _tarOut.putArchiveEntry(entry);
-                            _tarOut.write(content);
-                            _tarOut.closeArchiveEntry();
+                            tarOut.putArchiveEntry(entry);
+                            tarOut.write(content);
+                            tarOut.closeArchiveEntry();
                         }
                         break;
                     case JS:
@@ -325,15 +325,15 @@ public class GenerateUpdatePackMojo
                             final JavaScriptImporter importer = new JavaScriptImporter(file);
                             final String identifier = importer.getProgramName();
 
-                            ret.put(identifier, new RevItem(FileType.JS, identifier, _app.getApplication(),
+                            ret.put(identifier, new RevItem(FileType.JS, identifier, app.getApplication(),
                                             file.getRevision(), file.getDate()));
                             final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
                             final TarArchiveEntry entry = new TarArchiveEntry(
                                             StringUtils.removeEnd(identifier, ".js").replace('.', '/') + ".js");
                             entry.setSize(content.length);
-                            _tarOut.putArchiveEntry(entry);
-                            _tarOut.write(content);
-                            _tarOut.closeArchiveEntry();
+                            tarOut.putArchiveEntry(entry);
+                            tarOut.write(content);
+                            tarOut.closeArchiveEntry();
                         }
                         break;
                     case JRXML:
@@ -341,18 +341,19 @@ public class GenerateUpdatePackMojo
                             final var strContent = IOUtils.toString(file.getUrl(), StandardCharsets.UTF_8);
                             final var pattern = Pattern.compile("uuid=\"([0-9abcdef-]*)\"");
                             final var matcher = pattern.matcher(strContent);
-                            matcher.find();
+                            if (matcher.find()) {
 
-                            final String identifier = matcher.group(1);
+                                final String identifier = matcher.group(1);
 
-                            ret.put(identifier, new RevItem(FileType.JRXML, identifier, _app.getApplication(),
-                                            file.getRevision(), file.getDate()));
-                            final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
-                            final TarArchiveEntry entry = new TarArchiveEntry(identifier + ".jrxml");
-                            entry.setSize(content.length);
-                            _tarOut.putArchiveEntry(entry);
-                            _tarOut.write(content);
-                            _tarOut.closeArchiveEntry();
+                                ret.put(identifier, new RevItem(FileType.JRXML, identifier, app.getApplication(),
+                                                file.getRevision(), file.getDate()));
+                                final byte[] content = IOUtils.toByteArray(file.getUrl().openConnection().getInputStream());
+                                final TarArchiveEntry entry = new TarArchiveEntry(identifier + ".jrxml");
+                                entry.setSize(content.length);
+                                tarOut.putArchiveEntry(entry);
+                                tarOut.write(content);
+                                tarOut.closeArchiveEntry();
+                            }
                         }
                         break;
                     default:
