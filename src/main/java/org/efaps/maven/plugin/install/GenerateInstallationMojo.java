@@ -44,6 +44,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -58,6 +60,7 @@ public class GenerateInstallationMojo
     extends AbstractEFapsInstallMojo
 {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateInstallationMojo.class);
     /**
      * Tag name of the application.
      */
@@ -159,6 +162,12 @@ public class GenerateInstallationMojo
     private boolean compile;
 
     /**
+     * Must the ESJP's compiled and included in the generated jar file?
+     */
+    @Parameter(property = "skipInstallFile", defaultValue = "false")
+    private boolean skipInstallFile;
+
+    /**
      * Generates the installation XML file and copies all eFaps definition
      * installation files.
      *
@@ -236,77 +245,81 @@ public class GenerateInstallationMojo
             // prepare root package name
             final String rootPackageTmp = rootPackage.replaceAll("/*$", "").replaceAll("^/*", "")
                 + "/" + application + "/";
-            // store the root package name in to the file
-            final Node rootPackageName = doc.createElement("rootPackage");
-            installNode.appendChild(rootPackageName);
-            final Attr packAttr = doc.createAttribute("name");
-            packAttr.setValue(rootPackageTmp);
-            rootPackageName.getAttributes().setNamedItem(packAttr);
 
-            // create files node and append to install node
-            final Node files = doc.createElement("files");
-            installNode.appendChild(files);
+            LOG.info("skipInstallFile: {}", skipInstallFile);
 
-            // append all file name and the type to files node (sorted
-            // alphabetical)
-            final Set<String> filesSet = new TreeSet<>(getFiles());
+            if (!skipInstallFile) {
+                // store the root package name in to the file
+                final Node rootPackageName = doc.createElement("rootPackage");
+                installNode.appendChild(rootPackageName);
+                final Attr packAttr = doc.createAttribute("name");
+                packAttr.setValue(rootPackageTmp);
+                rootPackageName.getAttributes().setNamedItem(packAttr);
 
-            final Map<String, FileInfo> filemap = getFileInformations(project.getBasedir(), getEFapsDir(), filesSet);
+                // create files node and append to install node
+                final Node files = doc.createElement("files");
+                installNode.appendChild(files);
 
-            for (final Entry<String, FileInfo> entry : filemap.entrySet()) {
-                final String fileName = entry.getKey();
-                final Node file = doc.createElement("file");
+                // append all file name and the type to files node (sorted
+                // alphabetical)
+                final Set<String> filesSet = new TreeSet<>(getFiles());
 
-                final Attr typeAttr = doc.createAttribute("type");
+                final Map<String, FileInfo> filemap = getFileInformations(project.getBasedir(), getEFapsDir(), filesSet);
 
-                final String type = getTypeMapping().get(fileName.substring(fileName.lastIndexOf(".") + 1));
-                if (type == null) {
-                    typeAttr.setValue("unknown");
-                } else {
-                    typeAttr.setValue(type);
+                for (final Entry<String, FileInfo> entry : filemap.entrySet()) {
+                    final String fileName = entry.getKey();
+                    final Node file = doc.createElement("file");
+
+                    final Attr typeAttr = doc.createAttribute("type");
+
+                    final String type = getTypeMapping().get(fileName.substring(fileName.lastIndexOf(".") + 1));
+                    if (type == null) {
+                        typeAttr.setValue("unknown");
+                    } else {
+                        typeAttr.setValue(type);
+                    }
+                    file.getAttributes().setNamedItem(typeAttr);
+
+                    final Attr fileAttr = doc.createAttribute("name");
+                    fileAttr.setValue(rootPackageTmp + fileName);
+                    file.getAttributes().setNamedItem(fileAttr);
+
+                    final FileInfo fileInfo = entry.getValue();
+
+                    final Attr revAttr = doc.createAttribute("revision");
+                    revAttr.setValue(fileInfo.getRev());
+                    file.getAttributes().setNamedItem(revAttr);
+
+                    final Attr dateAttr = doc.createAttribute("date");
+                    dateAttr.setValue(fileInfo.getDate().toString());
+                    file.getAttributes().setNamedItem(dateAttr);
+
+                    files.appendChild(file);
                 }
-                file.getAttributes().setNamedItem(typeAttr);
 
-                final Attr fileAttr = doc.createAttribute("name");
-                fileAttr.setValue(rootPackageTmp + fileName);
-                file.getAttributes().setNamedItem(fileAttr);
+                // prepare file install of the target install file
+                final File targetInstallFileTmp = new File(targetDirectory, targetInstallFile);
 
-                final FileInfo fileInfo = entry.getValue();
+                // get parent directory of target installation file
+                // and create directories (if needed)
+                final File parentDir = targetInstallFileTmp.getParentFile();
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
 
-                final Attr revAttr = doc.createAttribute("revision");
-                revAttr.setValue(fileInfo.getRev());
-                file.getAttributes().setNamedItem(revAttr);
+                // open transformer (to convert XML in memory to a stream).
+                final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-                final Attr dateAttr = doc.createAttribute("date");
-                dateAttr.setValue(fileInfo.getDate().toString());
-                file.getAttributes().setNamedItem(dateAttr);
-
-                files.appendChild(file);
-            }
-
-            // prepare file install of the target install file
-            final File targetInstallFileTmp = new File(targetDirectory, targetInstallFile);
-
-            // get parent directory of target installation file
-            // and create directories (if needed)
-            final File parentDir = targetInstallFileTmp.getParentFile();
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-
-            // open transformer (to convert XML in memory to a stream).
-            final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-            // initialize StreamResult with File object to save to file
-            // flush output stream and write to file (and close file)
-            final OutputStream os = new FileOutputStream(targetInstallFileTmp);
-            final StreamResult result = new StreamResult(new OutputStreamWriter(os, targetEncoding));
-            final DOMSource source = new DOMSource(doc);
-            transformer.transform(source, result);
-            os.flush();
-            os.close();
-
+                // initialize StreamResult with File object to save to file
+                // flush output stream and write to file (and close file)
+                final OutputStream os = new FileOutputStream(targetInstallFileTmp);
+                final StreamResult result = new StreamResult(new OutputStreamWriter(os, targetEncoding));
+                final DOMSource source = new DOMSource(doc);
+                transformer.transform(source, result);
+                os.flush();
+                os.close();
+                }
             return rootPackageTmp;
         } catch (final MojoFailureException e) {
             throw e;
